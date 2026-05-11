@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLV | KARATE UTE - Hệ thống quản lý cao cấp</title>
+    
+    <!-- Bootstrap + FontAwesome + Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #C0392B;
+            --primary-light: #E65C4A;
+            --gold: #F7DC6F;
+            --bg-dark: #0A0A0A;
+            --sidebar-bg: #111111;
+            --card-bg: #1A1A1A;
+            --border: #2C2C2C;
+            --text-primary: #FFFFFF;
+            --text-secondary: #E0E0E0;
+            --text-muted: #BBBBBB;
+            --text-dark-muted: #AAAAAA;
+            --sidebar-width: 260px;
+            --topbar-height: 58px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            position: fixed;
+            top: 0; left: 0;
+            border-right: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 24px 20px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo-circle {
+            width: 58px; height: 58px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1.6rem;
+            box-shadow: 0 0 0 4px rgba(192,57,43,.3);
+            border: 2px solid white;
+        }
+        .sidebar-header h4 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.15rem;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+        }
+        .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 0; }
+        .nav-link {
+            color: #CCCCCC;
+            padding: 12px 25px;
+            font-weight: 500;
+            font-size: .85rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            transition: 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(192,57,43,0.15);
+            border-left-color: var(--primary);
+        }
+        /* Topbar */
+        .topbar {
+            position: fixed;
+            top: 0; left: var(--sidebar-width); right: 0;
+            height: var(--topbar-height);
+            background: #0F0F0F;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            z-index: 999;
+        }
+        .topbar-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+        .topbar-title span { color: var(--primary); font-weight: bold; }
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #EEEEEE;
+            padding: 6px 16px;
+            border-radius: 40px;
+            transition: 0.2s;
+        }
+        .logout-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: calc(var(--topbar-height) + 25px) 28px 40px;
+            min-height: 100vh;
+        }
+        .page-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.7rem;
+            border-left: 5px solid var(--primary);
+            padding-left: 14px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .card h5, .card h4, .card h3 { color: var(--text-primary); font-weight: 600; }
+        .card p, .card .text-secondary { color: #DDDDDD !important; }
+        /* Tìm đoạn này và sửa lại màu text */
+.table td {
+    color: #333333 !important; /* Đổi từ trắng sang xám đậm/đen để nhìn rõ trên nền trắng */
+    border-color: #dee2e6;    /* Màu viền chuẩn của Bootstrap */
+}
+
+/* Nếu bạn muốn giữ style tối (Dark Mode) cho bảng */
+.table {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.table thead th {
+    background: #252525 !important;
+    color: #FFD966 !important;
+    border-bottom: 2px solid var(--primary);
+}
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary:hover { background: var(--primary-light); }
+        .form-control, .form-select {
+            background: #121212;
+            border: 1px solid #3A3A3A;
+            color: #FFFFFF;
+        }
+        .form-control:focus, .form-select:focus {
+            background: #1A1A1A;
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(192,57,43,0.25);
+        }
+        .form-control::placeholder { color: #888888; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: #1E1E1E; border: 1px solid var(--border); border-radius: 12px;
+            width: 90%; max-width: 650px;
+        }
+        .class-badge {
+            background: rgba(247, 220, 111, 0.2);
+            color: #F7DC6F;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .text-warning { color: var(--gold) !important; }
+        .text-primary { color: var(--primary) !important; }
+        .text-info { color: #5BC0DE !important; }
+        .small, small { color: #CCCCCC !important; }
+        .alert-dark {
+            background-color: #2C2C2C;
+            color: #F0F0F0;
+            border-color: #444;
+        }
+        /* Màu cho các nút trong bảng để nổi bật trên nền trắng */
+.table .btn-outline-primary {
+    color: #007bff !important; /* Màu xanh nước biển cho nút Sửa */
+    border-color: #007bff !important;
+}
+.table .btn-outline-primary:hover {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.table .btn-outline-danger {
+    color: #dc3545 !important; /* Màu đỏ cho nút Xóa */
+    border-color: #dc3545 !important;
+}
+.table .btn-outline-danger:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.table .btn-outline-info {
+    color: #17a2b8 !important; /* Màu xanh lam cho các thao tác khác */
+    border-color: #17a2b8 !important;
+}
+
+/* Đảm bảo icon bên trong nút cũng có màu */
+.btn i {
+    pointer-events: none;
+}
+        canvas { max-height: 250px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-circle"><i class="fas fa-hand-fist"></i></div>
+        <h4>KARATE UTE</h4>
+        <small style="color: #AAA;">HLV PRO DASHBOARD</small>
+    </div>
+    <div class="sidebar-nav">
+        <div class="nav-link active" onclick="showSection('dashboard')"><i class="fas fa-chart-line"></i> Tổng quan nâng cao</div>
+        <div class="nav-link" onclick="showSection('classes')"><i class="fas fa-users"></i> Quản lý lớp</div>
+        <div class="nav-link" onclick="showSection('students')"><i class="fas fa-user-graduate"></i> Học viên (CRUD)</div>
+        <div class="nav-link" onclick="showSection('attendance')"><i class="fas fa-calendar-check"></i> Điểm danh + lịch sử</div>
+        <div class="nav-link" onclick="showSection('exams')"><i class="fas fa-medal"></i> Kỳ thi & kết quả</div>
+        <div class="nav-link" onclick="showSection('events')"><i class="fas fa-calendar-alt"></i> Sự kiện</div>
+        <div class="nav-link" onclick="showSection('profile')"><i class="fas fa-user-cog"></i> Hồ sơ cá nhân</div>
+    </div>
+</div>
+
+<div class="topbar">
+    <div class="topbar-title">HỆ THỐNG QUẢN LÝ TOÀN DIỆN / <span id="section-title">TỔNG QUAN</span></div>
+    <div>
+        <button class="logout-btn" id="logoutGlobalBtn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+        <span class="ms-3" style="color:#DDD;"><i class="fas fa-bell"></i> <span id="notifCount">5</span> thông báo</span>
+    </div>
+</div>
+
+<div class="main-content">
+    <!-- Dashboard nâng cao với biểu đồ -->
+    <div id="dashboard" class="section active">
+        <h1 class="page-title">BẢNG ĐIỀU KHIỂN</h1>
+        <div class="row">
+            <div class="col-md-3"><div class="card text-center"><h3 class="text-primary">04</h3><p>Lớp đang dạy</p></div></div>
+            <div class="col-md-3"><div class="card text-center"><h3 class="text-warning">52</h3><p>Học viên</p></div></div>
+            <div class="col-md-3"><div class="card text-center"><h3 class="text-success">86%</h3><p>Tỷ lệ chuyên cần</p></div></div>
+            <div class="col-md-3"><div class="card text-center"><h3 class="text-info">3</h3><p>Kỳ thi sắp tới</p></div></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6"><div class="card"><h5><i class="fas fa-chart-simple"></i> Thống kê điểm danh tháng</h5><canvas id="attChart" width="400" height="200"></canvas></div></div>
+            <div class="col-md-6"><div class="card"><h5><i class="fas fa-clock"></i> Hoạt động gần đây</h5><ul id="recentActivities" class="list-unstyled small"></ul></div></div>
+        </div>
+        <div class="card"><h5>📢 Thông báo hệ thống</h5><div id="sysNotifications" class="alert alert-dark">Đang tải...</div></div>
+    </div>
+
+    <!-- Quản lý lớp (CRUD) -->
+    <div id="classes" class="section">
+        <h1 class="page-title">LỚP HỌC</h1>
+        <div class="card">
+            <div class="d-flex justify-content-between mb-3"><h5>Danh sách lớp</h5><button class="btn btn-primary btn-sm" onclick="openClassModal()"><i class="fas fa-plus"></i> Thêm lớp</button></div>
+            <table class="table"><thead><tr><th>Mã lớp</th><th>Tên lớp</th><th>Lịch học</th><th>Phòng</th><th>Si số</th><th>Thao tác</th></tr></thead><tbody id="classListBody"></tbody></table>
+        </div>
+    </div>
+
+    <!-- HỌC VIÊN (CRUD + lọc) -->
+    <div id="students" class="section">
+        <h1 class="page-title">HỌC VIÊN</h1>
+        <div class="card">
+            <div class="filter-bar"><input type="text" id="searchStudent" class="form-control" placeholder="Tìm theo tên" style="width:200px;"><select id="filterClass" class="form-select" style="width:180px;"><option value="">Tất cả lớp</option></select><button class="btn btn-primary btn-sm" onclick="openStudentModal()"><i class="fas fa-plus"></i> Thêm HV</button></div>
+            <table class="table"><thead><tr><th>Mã HV</th><th>Họ tên</th><th>Email</th><th>Cấp đai</th><th>Lớp</th><th>Thao tác</th></tr></thead><tbody id="studentTableBody"></tbody></table>
+        </div>
+    </div>
+
+    <!-- ĐIỂM DANH chi tiết -->
+    <div id="attendance" class="section">
+        <h1 class="page-title">ĐIỂM DANH & LỊCH SỬ</h1>
+        <div class="card">
+            <div class="row"><div class="col-md-4"><select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()"><option value="">Chọn lớp</option></select></div><div class="col-md-3"><input type="date" id="attDate" class="form-control" value="2026-05-10"></div><div class="col-md-3"><button class="btn btn-primary" onclick="saveAttendance()">Lưu điểm danh</button></div></div>
+            <div class="mt-3" id="attendanceSheet"></div>
+            <hr><h6>Lịch sử điểm danh gần đây</h6><div id="attHistory"></div>
+        </div>
+    </div>
+
+    <!-- KỲ THI & KẾT QUẢ -->
+    <div id="exams" class="section">
+        <h1 class="page-title">KỲ THI & KẾT QUẢ</h1>
+        <div class="card"><div class="d-flex justify-content-between"><h5>Danh sách kỳ thi</h5><button class="btn btn-primary btn-sm" onclick="openExamModal()">+ Tạo kỳ thi</button></div><table class="table mt-2"><thead><tr><th>Kỳ thi</th><th>Ngày</th><th>Lớp</th><th>Thao tác</th></tr></thead><tbody id="examListBody"></tbody></table></div>
+        <div class="card mt-3"><h5>Nhập kết quả thi</h5><select id="examSelect" class="form-select mb-2" onchange="loadExamStudents()"><option>Chọn kỳ thi</option></select><div id="examResultPanel"></div><button class="btn btn-success mt-2" onclick="saveExamResults()">Lưu kết quả</button></div>
+    </div>
+
+    <!-- SỰ KIỆN -->
+    <div id="events" class="section">
+        <h1 class="page-title">SỰ KIỆN & THÔNG BÁO</h1>
+        <div class="card"><div class="d-flex justify-content-between"><h5>Sự kiện sắp tới</h5><button class="btn btn-primary btn-sm" onclick="openEventModal()">+ Thêm sự kiện</button></div><div id="eventList"></div></div>
+    </div>
+
+    <!-- CÁ NHÂN -->
+    <div id="profile" class="section">
+        <h1 class="page-title">HỒ SƠ</h1>
+        <div class="card"><h5>Thông tin HLV</h5><input class="form-control mb-2" id="profileName" value="Nguyễn Văn Anh"><input class="form-control mb-2" id="profileEmail" value="hlv.anh@karateute.edu.vn"><hr><h6>Đổi mật khẩu</h6><input type="password" class="form-control mb-2" placeholder="Mật khẩu cũ"><input type="password" class="form-control mb-2" placeholder="Mật khẩu mới"><input type="password" class="form-control mb-2" placeholder="Xác nhận"><button class="btn btn-primary" onclick="alert('Cập nhật hồ sơ demo!')">Cập nhật</button></div>
+    </div>
+</div>
+
+<!-- MODAL CHUNG -->
+<div id="genericModal" class="modal-overlay"><div class="modal-box"><div class="modal-hdr p-3 border-bottom"><h5 id="modalTitle" class="text-primary">Modal</h5><button class="btn-close btn-close-white" onclick="closeModal()"></button></div><div id="modalBody" class="p-3"></div><div class="modal-ftr p-3 text-end"><button class="btn btn-secondary" onclick="closeModal()">Hủy</button><button class="btn btn-primary" id="modalSaveBtn">Lưu</button></div></div></div>
+
+<script>
+    // ---------- DATA ----------
+    let classes = [
+        { id: "CL01", name: "Taekwondo A1", schedule: "T2-T4-T6", room: "102" },
+        { id: "CL02", name: "Karate B2", schedule: "T3-T5-T7", room: "Sân chính" },
+        { id: "CL03", name: "Karate B3", schedule: "Chủ Nhật", room: "Sân trường" }
+    ];
+    let students = [
+        { id: "HV001", name: "Trần Văn Bình", email: "binh@example.com", belt: "Trắng", classId: "CL01" },
+        { id: "HV002", name: "Lê Thị Hoa", email: "hoa@example.com", belt: "Vàng", classId: "CL02" },
+        { id: "HV003", name: "Nguyễn Hoàng Nam", email: "nam@example.com", belt: "Xanh lá", classId: "CL02" },
+        { id: "HV004", name: "Phạm Minh Đức", email: "duc@example.com", belt: "Đỏ", classId: "CL03" },
+        { id: "HV005", name: "Vũ Thị Lan", email: "lan@example.com", belt: "Đen", classId: "CL01" }
+    ];
+    let attendanceRecords = [];
+    let exams = [{ id:"EX01", name:"Thi thăng đai tháng 6", date:"2026-06-10", classId:"CL02", results:[] }];
+    let events = [{ id:"EV1", title:"Giải vô địch TP", date:"2026-05-20", desc:"Đăng ký đội tuyển" }];
+
+    function getClassById(id) { return classes.find(c=>c.id===id); }
+    function renderAll() { renderClassList(); renderStudentTable(); renderClassSelects(); renderExamList(); renderEventList(); updateRecentActivities(); updateChart(); if(document.getElementById("attendanceSheet")) loadAttendanceSheet(); }
+    
+    // CLASS CRUD
+    function renderClassList() {
+        let html = ""; classes.forEach(c=>{ html+=`<tr><td>${c.id}</td><td>${c.name}</td><td>${c.schedule}</td><td>${c.room}</td><td>${students.filter(s=>s.classId===c.id).length}</td><td><button class="btn btn-sm btn-outline-primary me-1" onclick="editClass('${c.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-outline-danger" onclick="deleteClass('${c.id}')"><i class="fas fa-trash"></i></button></td></tr>`; });
+        document.getElementById("classListBody").innerHTML = html;
+    }
+    let currentModalCallback = null;
+    function openModal(title, bodyHtml, onSave) { document.getElementById("modalTitle").innerHTML = title; document.getElementById("modalBody").innerHTML = bodyHtml; document.getElementById("genericModal").classList.add("show"); currentModalCallback = onSave; }
+    function closeModal() { document.getElementById("genericModal").classList.remove("show"); currentModalCallback = null; }
+    document.getElementById("modalSaveBtn").onclick = () => { if(currentModalCallback) currentModalCallback(); closeModal(); };
+    function openClassModal(classData=null) { let isEdit=!!classData; let html=`<input id="className" class="form-control mb-2" placeholder="Tên lớp" value="${classData?classData.name:''}"><input id="classSchedule" class="form-control mb-2" placeholder="Lịch học" value="${classData?classData.schedule:''}"><input id="classRoom" class="form-control mb-2" placeholder="Phòng" value="${classData?classData.room:''}">`; openModal(isEdit?"Sửa lớp":"Thêm lớp", html, ()=>{ let name=document.getElementById("className").value; if(!name) return alert("Vui lòng nhập tên lớp"); if(isEdit){ classData.name=name; classData.schedule=document.getElementById("classSchedule").value; classData.room=document.getElementById("classRoom").value; } else { let newId="CL"+ (classes.length+10); classes.push({id:newId,name:name,schedule:document.getElementById("classSchedule").value,room:document.getElementById("classRoom").value}); } renderAll(); }); }
+    function editClass(id){ let c=classes.find(c=>c.id===id); if(c) openClassModal(c); }
+    function deleteClass(id){ if(confirm("Xóa lớp sẽ ảnh hưởng học viên? Chuyển học viên về null?")){ students.forEach(s=>{if(s.classId===id) s.classId=null;}); classes=classes.filter(c=>c.id!==id); renderAll(); }}
+    
+    // STUDENT CRUD
+    function renderStudentTable(){ let search=document.getElementById("searchStudent")?.value.toLowerCase()||""; let filterClass=document.getElementById("filterClass")?.value||""; let filtered=students.filter(s=> (s.name.toLowerCase().includes(search)||s.email.toLowerCase().includes(search)) && (filterClass===""||s.classId===filterClass)); let html=""; filtered.forEach(s=>{ let className=getClassById(s.classId)?.name||"Chưa xếp"; html+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.email}</td><td>${s.belt}</td><td><span class="class-badge">${className}</span></td><td><button class="btn btn-sm btn-outline-info" onclick="editStudent('${s.id}')"><i class="fas fa-pen"></i></button><button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}')"><i class="fas fa-trash"></i></button></td></tr>`; }); document.getElementById("studentTableBody").innerHTML=html; }
+    function openStudentModal(student=null){ let isEdit=!!student; let classOptions=classes.map(c=>`<option value="${c.id}" ${student && student.classId===c.id ? "selected":""}>${c.name}</option>`).join(""); let html=`<input id="studentName" class="form-control mb-2" placeholder="Họ tên" value="${student?student.name:''}"><input id="studentEmail" class="form-control mb-2" placeholder="Email" value="${student?student.email:''}"><select id="studentBelt" class="form-select mb-2"><option>Trắng</option><option>Vàng</option><option>Xanh lá</option><option>Đỏ</option><option>Đen</option></select><select id="studentClass" class="form-select mb-2">${classOptions}</select>`; openModal(isEdit?"Sửa học viên":"Thêm học viên", html, ()=>{ let name=document.getElementById("studentName").value; if(!name) return; if(isEdit){ student.name=name; student.email=document.getElementById("studentEmail").value; student.belt=document.getElementById("studentBelt").value; student.classId=document.getElementById("studentClass").value; } else { let newId="HV"+ String(students.length+101).padStart(3,'0'); students.push({id:newId,name:name,email:document.getElementById("studentEmail").value,belt:document.getElementById("studentBelt").value,classId:document.getElementById("studentClass").value}); } renderAll(); }); }
+    function editStudent(id){ let s=students.find(s=>s.id===id); if(s) openStudentModal(s); }
+    function deleteStudent(id){ if(confirm("Xóa học viên?")){ students=students.filter(s=>s.id!==id); renderAll(); }}
+    
+    // ATTENDANCE
+    function renderClassSelects(){ let opts="<option value=''>Chọn lớp</option>"; classes.forEach(c=>opts+=`<option value="${c.id}">${c.name}</option>`); document.getElementById("attClassSelect").innerHTML=opts; let filterSelect=document.getElementById("filterClass"); if(filterSelect){ filterSelect.innerHTML="<option value=''>Tất cả lớp</option>"+classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join(""); } let examSelect=document.getElementById("examSelect"); if(examSelect){ examSelect.innerHTML="<option value=''>Chọn kỳ thi</option>"+exams.map(e=>`<option value="${e.id}">${e.name} (${e.date})</option>`).join("");} }
+    function loadAttendanceSheet(){ let classId=document.getElementById("attClassSelect").value; if(!classId) {document.getElementById("attendanceSheet").innerHTML=""; return;} let studentList=students.filter(s=>s.classId===classId); let date=document.getElementById("attDate").value; let existing=attendanceRecords.find(rec=>rec.classId===classId && rec.date===date); let mapStatus={}; if(existing) existing.records.forEach(r=>mapStatus[r.studentId]=r.status); let html=`<table class="table"><thead><tr><th>Học viên</th><th>Có mặt</th><th>Vắng</th><th>Muộn</th></tr></thead><tbody>`; studentList.forEach(s=>{ let status=mapStatus[s.id]||"present"; html+=`<tr><td>${s.name}</td><td><input type="radio" name="att_${s.id}" value="present" ${status==="present"?"checked":""}></td><td><input type="radio" name="att_${s.id}" value="absent" ${status==="absent"?"checked":""}></td><td><input type="radio" name="att_${s.id}" value="late" ${status==="late"?"checked":""}></td></tr>`; }); html+=`</tbody></table>`; document.getElementById("attendanceSheet").innerHTML=html; let hist=attendanceRecords.filter(r=>r.classId===classId).slice(-5).reverse(); document.getElementById("attHistory").innerHTML=hist.map(h=>`<div class="small text-secondary">${h.date}: ${h.records.length} học viên - ${h.records.filter(r=>r.status==='present').length} có mặt</div>`).join("")||"Chưa có dữ liệu"; }
+    function saveAttendance(){ let classId=document.getElementById("attClassSelect").value; if(!classId) return alert("Chọn lớp"); let date=document.getElementById("attDate").value; let studentList=students.filter(s=>s.classId===classId); let records=[]; studentList.forEach(s=>{ let status=document.querySelector(`input[name="att_${s.id}"]:checked`)?.value; if(status) records.push({studentId:s.id,status}); }); let existingIndex=attendanceRecords.findIndex(r=>r.classId===classId && r.date===date); if(existingIndex>=0) attendanceRecords[existingIndex].records=records; else attendanceRecords.push({classId,date,records}); alert("Đã lưu điểm danh"); loadAttendanceSheet(); updateRecentActivities(); updateChart(); }
+    
+    // EXAMS
+    function renderExamList(){ let html=""; exams.forEach(ex=>{ html+=`<tr><td>${ex.name}</td><td>${ex.date}</td><td>${getClassById(ex.classId)?.name||""}</td><td><button class="btn btn-sm btn-outline-danger" onclick="deleteExam('${ex.id}')">Xóa</button></td></tr>`; }); document.getElementById("examListBody").innerHTML=html; }
+    function openExamModal(exam=null){ let classOptions=classes.map(c=>`<option value="${c.id}" ${exam&&exam.classId===c.id?"selected":""}>${c.name}</option>`).join(""); let html=`<input id="examName" class="form-control mb-2" placeholder="Tên kỳ thi" value="${exam?exam.name:''}"><input id="examDate" type="date" class="form-control mb-2" value="${exam?exam.date:'2026-06-15'}"><select id="examClass" class="form-select mb-2">${classOptions}</select>`; openModal(exam?"Sửa kỳ thi":"Thêm kỳ thi", html, ()=>{ let name=document.getElementById("examName").value; if(!name) return; if(exam){ exam.name=name; exam.date=document.getElementById("examDate").value; exam.classId=document.getElementById("examClass").value; } else { exams.push({id:"EX"+ (exams.length+10), name:name, date:document.getElementById("examDate").value, classId:document.getElementById("examClass").value, results:[]}); } renderAll(); }); }
+    function deleteExam(id){ exams=exams.filter(e=>e.id!==id); renderAll(); }
+    function loadExamStudents(){ let examId=document.getElementById("examSelect").value; let exam=exams.find(e=>e.id===examId); if(!exam) {document.getElementById("examResultPanel").innerHTML=""; return;} let studentsInClass=students.filter(s=>s.classId===exam.classId); let resultMap={}; exam.results.forEach(r=>resultMap[r.studentId]=r.result); let html=`<table class="table"><thead><tr><th>Học viên</th><th>Đai hiện tại</th><th>Kết quả</th></tr></thead><tbody>`; studentsInClass.forEach(s=>{ html+=`<tr><td>${s.name}</td><td>${s.belt}</td><td><select data-id="${s.id}" class="examResultSelect form-select form-select-sm"><option value="Đạt" ${resultMap[s.id]==="Đạt"?"selected":""}>Đạt</option><option value="Không đạt" ${resultMap[s.id]==="Không đạt"?"selected":""}>Không đạt</option></select></td></tr>`; }); html+=`</tbody></table>`; document.getElementById("examResultPanel").innerHTML=html; window.currentExamId=examId; }
+    function saveExamResults(){ if(!window.currentExamId) return; let exam=exams.find(e=>e.id===window.currentExamId); if(!exam) return; let selects=document.querySelectorAll(".examResultSelect"); let results=[]; selects.forEach(sel=>{ let studentId=sel.getAttribute("data-id"); results.push({studentId, result:sel.value}); }); exam.results=results; alert("Lưu kết quả thi thành công!"); renderAll(); }
+    
+    // EVENTS
+    function renderEventList(){ let html=""; events.forEach(ev=>{ html+=`<div class="border-bottom p-2 mb-2"><h6>${ev.title}</h6><small>${ev.date}</small><p class="small">${ev.desc}</p><button class="btn btn-sm btn-outline-warning me-1" onclick="editEvent('${ev.id}')">Sửa</button><button class="btn btn-sm btn-outline-danger" onclick="deleteEvent('${ev.id}')">Xóa</button></div>`; }); document.getElementById("eventList").innerHTML=html||"Chưa có sự kiện"; }
+    function openEventModal(eventData=null){ let html=`<input id="eventTitle" class="form-control mb-2" placeholder="Tiêu đề" value="${eventData?eventData.title:''}"><input id="eventDate" type="date" class="form-control mb-2" value="${eventData?eventData.date:'2026-05-20'}"><textarea id="eventDesc" class="form-control mb-2" placeholder="Mô tả">${eventData?eventData.desc:''}</textarea>`; openModal(eventData?"Sửa sự kiện":"Thêm sự kiện", html, ()=>{ let title=document.getElementById("eventTitle").value; if(!title) return; if(eventData){ eventData.title=title; eventData.date=document.getElementById("eventDate").value; eventData.desc=document.getElementById("eventDesc").value; } else { events.push({id:"EV"+ (events.length+10), title:title, date:document.getElementById("eventDate").value, desc:document.getElementById("eventDesc").value}); } renderAll(); }); }
+    function editEvent(id){ let ev=events.find(e=>e.id===id); if(ev) openEventModal(ev); }
+    function deleteEvent(id){ events=events.filter(e=>e.id!==id); renderAll(); }
+    
+    // Dashboard Chart & Recent
+    let chart;
+    function updateChart(){ let ctx=document.getElementById("attChart").getContext("2d"); let lastWeek=["10/5","11/5","12/5","13/5","14/5","15/5","16/5"]; let rates=[82,85,79,88,90,85,87]; if(chart) chart.destroy(); chart=new Chart(ctx,{type:'line',data:{labels:lastWeek,datasets:[{label:'Tỉ lệ chuyên cần %',data:rates,borderColor:'#C0392B',backgroundColor:'rgba(192,57,43,0.1)',tension:0.2,fill:true}]}}); }
+    function updateRecentActivities(){ let acts=["📌 Điểm danh lớp Karate B2 ngày 10/05","📌 Thêm học viên mới: Phạm Minh Đức","📌 Cập nhật kết quả thi thăng đai","📌 Sự kiện: Giải vô địch TP sắp diễn ra"]; document.getElementById("recentActivities").innerHTML=acts.map(a=>`<li class="mb-2">🔹 ${a}</li>`).join(""); document.getElementById("sysNotifications").innerHTML=`<i class="fas fa-bullhorn text-warning"></i> Nhắc nhở: Hạn cuối đăng ký thi là 20/05. Liên hệ ban huấn luyện.`; document.getElementById("notifCount").innerText=exams.length+events.length; }
+
+    function showSection(id){
+    // 1. Ẩn/Hiện các section
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById(id);
+    if(target) target.classList.add('active');
+
+    // 2. Cập nhật Sidebar Active
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    const activeLink = document.querySelector(`.nav-link[onclick="showSection('${id}')"]`);
+    if(activeLink) activeLink.classList.add('active');
+
+    // 3. Cập nhật tiêu đề Topbar
+    if(activeLink) {
+        document.getElementById('section-title').innerHTML = activeLink.innerText.toUpperCase();
+    }
+
+    // 4. Kích hoạt render lại dữ liệu cụ thể cho từng trang
+    renderAll(); 
+    if(id === "dashboard") {
+        updateChart();
+        updateRecentActivities();
+    }
+    if(id === "students") renderStudentTable();
+    if(id === "attendance") loadAttendanceSheet();
+    if(id === "exams") {
+        renderClassSelects();
+        loadExamStudents();
+    }
+}
+window.onload = () => {
+    // Khởi tạo toàn bộ dữ liệu vào bộ nhớ
+    renderAll(); 
+    
+    // Mặc định hiển thị dashboard và vẽ biểu đồ ngay lập tức
+    updateChart(); 
+    updateRecentActivities();
+
+    // Thiết lập nút đăng xuất
+    const logoutBtn = document.getElementById("logoutGlobalBtn");
+    if(logoutBtn) {
+        logoutBtn.onclick = () => {
+            if(confirm("Thoát khỏi hệ thống?")) alert("Đã đăng xuất (demo)");
+        };
+    }
+};
+</script>
+</body>
+</html>

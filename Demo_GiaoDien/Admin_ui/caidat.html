@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cài đặt hệ thống | Karate UTE Admin</title>
+
+  <!-- ── DEPENDENCIES ── -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary:        #C0392B; --primary-dark:   #922B21; --primary-mid:    #E74C3C; --primary-light:  #FADBD8;
+      --gold:           #D4AC0D; --gold-dark:      #9A7D0A; --gold-light:     #FEF9E7; --gold-muted:     #F0E68C;
+      --bg-dark:        #111111; --sidebar-bg:     #1A1A1A; --surface-dark:   #2C2C2C; --card-bg:        #1E1E1E;
+      --border:         #333333; --border-light:   #444444;
+      --text-primary:   #FFFFFF; --text-secondary: #AAAAAA; --text-muted:     #666666;
+      --success:        #1E8449; --danger:         #C0392B;
+      --sidebar-width:  260px;   --topbar-height:  58px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg-dark); color: var(--text-primary); font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
+
+    /* ============================================================ SIDEBAR */
+    .sidebar { width: var(--sidebar-width); height: 100vh; background: var(--sidebar-bg); position: fixed; top: 0; left: 0; border-right: 1px solid var(--border); z-index: 1000; display: flex; flex-direction: column; transition: transform .3s ease; }
+    .sidebar-header { padding: 24px 20px 20px; text-align: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .logo-circle { width: 58px; height: 58px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.6rem; color: #fff; box-shadow: 0 0 0 4px rgba(192,57,43,.25); }
+    .sidebar-header h4 { font-family: 'Oswald', sans-serif; font-size: 1.15rem; letter-spacing: 2px; color: var(--text-primary); margin: 0 0 2px; }
+    .sidebar-header small { color: var(--text-secondary); font-size: .7rem; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 0; }
+    .sidebar-nav::-webkit-scrollbar { width: 4px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .nav-section-label { font-size: .62rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); padding: 14px 25px 5px; font-weight: 700; }
+    .nav-link { color: var(--text-secondary); padding: 11px 25px; font-weight: 500; font-size: .84rem; display: flex; align-items: center; gap: 11px; transition: all .25s; border-left: 4px solid transparent; text-decoration: none; }
+    .nav-link i { width: 20px; font-size: 1rem; text-align: center; flex-shrink: 0; }
+    .nav-link:hover { color: var(--text-primary); background: rgba(192,57,43,.08); border-left-color: rgba(192,57,43,.4); }
+    .nav-link.active { color: var(--text-primary); background: rgba(192,57,43,.13); border-left-color: var(--primary); }
+    .nav-link.active i { color: var(--primary); }
+    .nav-badge { margin-left: auto; background: var(--primary); color: #fff; font-size: .62rem; padding: 2px 7px; border-radius: 10px; font-weight: 700; flex-shrink: 0; }
+    .sidebar-footer { border-top: 1px solid var(--border); padding: 8px 0; flex-shrink: 0; }
+    .sidebar-divider { height: 1px; background: var(--border); margin: 4px 0; }
+    .logout-link { color: #e74c3c; padding: 11px 25px; font-weight: 500; font-size: .84rem; display: flex; align-items: center; gap: 11px; cursor: pointer; border-left: 4px solid transparent; transition: all .25s; user-select: none; }
+    .logout-link:hover { background: rgba(231,76,60,.1); border-left-color: #e74c3c; }
+    .logout-link i { width: 20px; text-align: center; }
+
+    /* ============================================================ TOPBAR */
+    .topbar { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--topbar-height); background: var(--sidebar-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; z-index: 999; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-toggle { display: none; width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 7px; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; background: none; transition: all .2s; }
+    .topbar-toggle:hover { border-color: var(--primary); color: var(--primary); }
+    .topbar-title { font-family: 'Oswald', sans-serif; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+    .topbar-title .page-name { color: var(--primary); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-date { font-size: .75rem; color: var(--text-secondary); }
+    .topbar-icon { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 7px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; position: relative; transition: all .2s; background: none; }
+    .topbar-icon:hover { border-color: var(--primary); color: var(--primary); }
+    .topbar-icon .notif-dot { position: absolute; top: 6px; right: 7px; width: 7px; height: 7px; background: var(--primary); border-radius: 50%; border: 1.5px solid var(--sidebar-bg); }
+    .admin-chip { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; transition: border-color .2s; }
+    .admin-chip:hover { border-color: var(--primary); }
+    .admin-avatar { width: 26px; height: 26px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700; }
+    .admin-name { font-size: .75rem; font-weight: 600; color: var(--text-secondary); }
+
+    /* ============================================================ MAIN */
+    .main-content { margin-left: var(--sidebar-width); padding: calc(var(--topbar-height) + 20px) 28px 40px; min-height: 100vh; }
+    .page-header { margin-bottom: 24px; }
+    .page-title { font-family: 'Oswald', sans-serif; font-size: 1.7rem; text-transform: uppercase; border-left: 5px solid var(--primary); padding-left: 14px; line-height: 1.1; margin-bottom: 6px; }
+    .page-subtitle { font-size: .75rem; color: var(--text-secondary); margin-left: 19px; }
+    .page-subtitle a { color: var(--text-secondary); text-decoration: none; }
+    .page-subtitle a:hover { color: var(--primary); }
+
+    /* ============================================================ SETTINGS LAYOUT */
+    .settings-layout { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
+
+    /* Settings sidebar (tabs) */
+    .settings-nav { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: sticky; top: calc(var(--topbar-height) + 20px); }
+    .settings-nav-title { padding: 14px 16px; border-bottom: 1px solid var(--border); font-family: 'Oswald', sans-serif; font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); }
+    .settings-nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 16px; font-size: .82rem; color: var(--text-secondary); cursor: pointer; border-left: 3px solid transparent; transition: all .2s; user-select: none; }
+    .settings-nav-item i { width: 16px; text-align: center; font-size: .9rem; }
+    .settings-nav-item:hover { background: rgba(192,57,43,.06); color: var(--text-primary); border-left-color: rgba(192,57,43,.3); }
+    .settings-nav-item.active { background: rgba(192,57,43,.12); color: var(--text-primary); border-left-color: var(--primary); font-weight: 600; }
+    .settings-nav-item.active i { color: var(--primary); }
+
+    /* Settings panels */
+    .settings-panel { display: none; }
+    .settings-panel.active { display: block; }
+
+    /* Card box */
+    .card-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+    .card-box:last-child { margin-bottom: 0; }
+    .card-box-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .card-box-title { font-family: 'Oswald', sans-serif; font-size: .95rem; text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; gap: 8px; }
+    .card-box-title i { color: var(--primary); }
+    .card-box-body { padding: 20px; }
+
+    /* Form controls */
+    .form-label { font-size: .78rem; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+    .form-label span.req { color: var(--primary); }
+    .form-control, .form-select {
+      background: #111; border: 1px solid #333; color: #fff; border-radius: 7px;
+      font-size: .84rem; padding: 9px 13px; font-family: 'Montserrat', sans-serif; width: 100%;
+    }
+    .form-control:focus, .form-select:focus { background: #111; border-color: var(--primary); color: #fff; box-shadow: 0 0 0 3px rgba(192,57,43,.15); outline: none; }
+    .form-control::placeholder { color: #555; }
+    .form-control[readonly] { color: #888; cursor: default; background: #0d0d0d; }
+    .form-select option { background: #1e1e1e; }
+    textarea.form-control { resize: vertical; min-height: 80px; }
+    .form-hint { font-size: .69rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* Toggle switch */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid #252525; }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info { flex: 1; }
+    .toggle-label { font-size: .84rem; font-weight: 500; color: #ddd; margin-bottom: 2px; }
+    .toggle-desc  { font-size: .72rem; color: var(--text-muted); }
+    .toggle-switch { position: relative; width: 42px; height: 22px; flex-shrink: 0; margin-left: 16px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: #333; border-radius: 22px; cursor: pointer; transition: .3s;
+    }
+    .toggle-slider:before { content:''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #666; border-radius: 50%; transition: .3s; }
+    .toggle-switch input:checked + .toggle-slider { background: var(--primary); }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); background: #fff; }
+
+    /* Belt config row */
+    .belt-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #252525; }
+    .belt-row:last-child { border-bottom: none; }
+    .belt-swatch { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(255,255,255,.12); }
+    .belt-name { flex: 1; font-size: .83rem; font-weight: 500; color: #ddd; }
+    .belt-input { width: 70px; background: #111; border: 1px solid #333; color: #fff; border-radius: 6px; padding: 5px 8px; font-size: .78rem; font-family: 'Montserrat', sans-serif; text-align: center; }
+    .belt-input:focus { border-color: var(--primary); outline: none; }
+    .belt-unit { font-size: .72rem; color: var(--text-muted); flex-shrink: 0; }
+
+    /* Buttons */
+    .btn-red { background: var(--primary); color: #fff; border: none; border-radius: 7px; padding: 9px 20px; font-size: .83rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: background .2s; font-family: 'Montserrat', sans-serif; }
+    .btn-red:hover { background: var(--primary-dark); }
+    .btn-outline { background: transparent; border: 1px solid var(--border-light); color: #aaa; border-radius: 7px; padding: 9px 18px; font-size: .83rem; cursor: pointer; transition: all .2s; font-family: 'Montserrat', sans-serif; display: inline-flex; align-items: center; gap: 7px; }
+    .btn-outline:hover { border-color: #666; color: #fff; }
+    .btn-danger { background: #c0392b; color: #fff; border: none; border-radius: 7px; padding: 9px 20px; font-size: .83rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: background .2s; font-family: 'Montserrat', sans-serif; }
+    .btn-danger:hover { background: #a93226; }
+    .btn-success { background: #1e8449; color: #fff; border: none; border-radius: 7px; padding: 9px 20px; font-size: .83rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: background .2s; font-family: 'Montserrat', sans-serif; }
+    .btn-success:hover { background: #196f3d; }
+    .btn-sm { padding: 6px 14px; font-size: .76rem; }
+
+    /* Profile avatar upload */
+    .avatar-upload { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+    .avatar-circle { width: 72px; height: 72px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Oswald'; font-size: 1.8rem; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 0 0 4px rgba(192,57,43,.25); }
+    .avatar-upload-info { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* Info value readonly */
+    .info-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(192,57,43,.12); border: 1px solid rgba(192,57,43,.25); border-radius: 6px; font-size: .78rem; font-weight: 600; color: #e74c3c; }
+
+    /* Section divider */
+    .form-section-title { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+    /* Notification */
+    .notif-panel { position: absolute; top: calc(100% + 10px); right: 0; width: 300px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.5); z-index: 1100; display: none; }
+    .notif-panel.show { display: block; animation: fadeUp .18s ease; }
+    .notif-header { padding: 12px 16px; border-bottom: 1px solid var(--border); font-family: 'Oswald', sans-serif; font-size: .85rem; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+    .notif-item { display: flex; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #252525; cursor: pointer; transition: background .15s; }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: rgba(255,255,255,.03); }
+    .notif-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; margin-top: 1px; }
+    .notif-text { font-size: .78rem; color: #ccc; line-height: 1.4; }
+    .notif-time { font-size: .65rem; color: var(--text-muted); margin-top: 3px; }
+    .si-red    { background: rgba(192,57,43,.2);  color: #e74c3c; }
+    .si-orange { background: rgba(230,126,34,.2); color: #e67e22; }
+    .si-green  { background: rgba(46,204,113,.2); color: #2ecc71; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.78); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: var(--card-bg); border: 1px solid #3a3a3a; border-radius: 10px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; animation: fadeUp .22s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    .modal-confirm { padding: 32px 28px; text-align: center; }
+    .confirm-icon { width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.6rem; }
+    .ci-logout  { background: rgba(255,107,107,.12); color: #ff6b6b; }
+    .ci-danger  { background: rgba(231,76,60,.15);  color: #e74c3c; }
+    .confirm-title { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 1.2rem; margin-bottom: 10px; }
+    .confirm-desc  { color: var(--text-secondary); font-size: .82rem; line-height: 1.6; margin-bottom: 24px; }
+    .confirm-btns  { display: flex; gap: 10px; justify-content: center; }
+
+    /* Saved indicator */
+    .save-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; color: #2ecc71; opacity: 0; transition: opacity .3s; }
+    .save-indicator.show { opacity: 1; }
+
+    /* Color picker row */
+    .color-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .color-row label { flex: 1; font-size: .8rem; color: #ccc; }
+    .color-picker { width: 40px; height: 32px; border: 1px solid #444; border-radius: 6px; cursor: pointer; padding: 2px; background: #111; }
+
+    /* ============================================================ RESPONSIVE */
+    @media (max-width: 992px) { .sidebar { transform: translateX(-260px); } .sidebar.open { transform: translateX(0); } .topbar { left: 0; } .main-content { margin-left: 0; } .topbar-toggle { display: flex; } .topbar-date { display: none; } }
+    @media (max-width: 768px) { .settings-layout { grid-template-columns: 1fr; } .settings-nav { position: static; } }
+    @media (max-width: 576px) { .main-content { padding: calc(var(--topbar-height) + 16px) 16px 32px; } }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================ SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-circle"><i class="fas fa-hand-fist"></i></div>
+    <h4>KARATE UTE</h4>
+    <small>Hệ thống quản lý CLB</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Chính</div>
+    <a href="dashboard.html" class="nav-link" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+    <div class="nav-section-label">Quản lý</div>
+    <a href="hocvien.html" class="nav-link" data-page="hocvien"><i class="fas fa-user-graduate"></i><span>Quản lý Học viên</span><span class="nav-badge">128</span></a>
+    <a href="huanluyenvien.html" class="nav-link" data-page="huanluyenvien"><i class="fas fa-user-tie"></i><span>Huấn luyện viên</span></a>
+    <a href="lophoc.html" class="nav-link" data-page="lophoc"><i class="fas fa-chalkboard"></i><span>Khóa học &amp; Lớp</span></a>
+    <a href="diemdanh.html" class="nav-link" data-page="diemdanh"><i class="fas fa-clipboard-check"></i><span>Điểm danh</span></a>
+    <div class="nav-section-label">Tài chính &amp; Thi đua</div>
+    <a href="hocphi.html" class="nav-link" data-page="hocphi"><i class="fas fa-wallet"></i><span>Học phí &amp; Thu chi</span><span class="nav-badge">3</span></a>
+    <a href="thangdai.html" class="nav-link" data-page="thangdai"><i class="fas fa-trophy"></i><span>Kỳ thi thăng đai</span></a>
+    <a href="sukien.html" class="nav-link" data-page="sukien"><i class="fas fa-bullhorn"></i><span>Thông báo &amp; Sự kiện</span></a>
+    <div class="nav-section-label">Hệ thống</div>
+    <a href="taikhoan.html" class="nav-link" data-page="taikhoan"><i class="fas fa-users-cog"></i><span>Tài khoản Admin</span></a>
+    <a href="caidat.html" class="nav-link active" data-page="caidat"><i class="fas fa-cog"></i><span>Cài đặt hệ thống</span></a>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="padding:10px 25px 4px;display:flex;align-items:center;gap:10px;">
+      <div style="width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;">A</div>
+      <div>
+        <div style="font-size:.78rem;font-weight:600;color:#ddd;">Admin</div>
+        <div style="font-size:.65rem;color:var(--text-muted);">admin@karateute.edu.vn</div>
+      </div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="logout-link" onclick="showModal('logoutModal')"><i class="fas fa-sign-out-alt"></i><a href="landingpage.html"><span>Đăng xuất</span></div>
+  </div>
+</div>
+<div id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;" onclick="closeSidebar()"></div>
+
+<!-- ================================================================ TOPBAR -->
+<header class="topbar" id="topbar">
+  <div class="topbar-left">
+    <button class="topbar-toggle" onclick="toggleSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+    <div class="topbar-title">
+      <span class="page-name" id="topbarPageName">Cài đặt</span> &rsaquo;
+      <span id="topbarBreadcrumb">Cài đặt hệ thống</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-date"><i class="far fa-calendar-alt me-1"></i><span id="topbarDate">Đang tải...</span></span>
+    <div style="position:relative;">
+      <div class="topbar-icon" title="Thông báo" onclick="toggleNotif(event)">
+        <i class="fas fa-bell"></i><span class="notif-dot"></span>
+      </div>
+      <div class="notif-panel" id="notifPanel">
+        <div class="notif-header"><span>Thông báo</span><span style="font-size:.7rem;color:var(--text-muted);font-family:Montserrat;text-transform:none;font-weight:400;">3 mới</span></div>
+        <div class="notif-item"><div class="notif-icon si-red"><i class="fas fa-trophy"></i></div><div><div class="notif-text">Kỳ thi thăng đai Q2 sắp diễn ra vào 25/05/2026</div><div class="notif-time">5 phút trước</div></div></div>
+        <div class="notif-item"><div class="notif-icon si-orange"><i class="fas fa-wallet"></i></div><div><div class="notif-text">3 học viên chưa đóng học phí tháng 5</div><div class="notif-time">1 giờ trước</div></div></div>
+        <div class="notif-item"><div class="notif-icon si-green"><i class="fas fa-user-plus"></i></div><div><div class="notif-text">Học viên mới <strong>Lê Văn Hùng</strong> vừa đăng ký</div><div class="notif-time">3 giờ trước</div></div></div>
+      </div>
+    </div>
+    <div class="topbar-icon" title="Đăng xuất" onclick="showModal('logoutModal')"><i class="fas fa-power-off" style="color:#e74c3c;"></i></div>
+    <div class="admin-chip" onclick="showModal('logoutModal')"><div class="admin-avatar">A</div><span class="admin-name">Admin</span></div>
+  </div>
+</header>
+
+<!-- ================================================================ MAIN CONTENT -->
+<main class="main-content">
+
+  <!-- PAGE CONTENT START -->
+  <div class="page-header">
+    <h2 class="page-title">Cài đặt hệ thống</h2>
+    <p class="page-subtitle">
+      <a href="dashboard.html"><i class="fas fa-home me-1"></i>Trang chủ</a>
+      &rsaquo; Hệ thống &rsaquo; Cài đặt
+    </p>
+  </div>
+
+  <div class="settings-layout">
+
+    <!-- Settings Nav (Tab) -->
+    <div class="settings-nav">
+      <div class="settings-nav-title"><i class="fas fa-sliders-h me-2"></i>Danh mục</div>
+      <div class="settings-nav-item active" onclick="switchTab('club')" id="tab-club">
+        <i class="fas fa-hand-fist"></i> Thông tin CLB
+      </div>
+      <div class="settings-nav-item" onclick="switchTab('belt')" id="tab-belt">
+        <i class="fas fa-ribbon"></i> Cấu hình đai
+      </div>
+      <div class="settings-nav-item" onclick="switchTab('fee')" id="tab-fee">
+        <i class="fas fa-wallet"></i> Học phí
+      </div>
+      <div class="settings-nav-item" onclick="switchTab('notify')" id="tab-notify">
+        <i class="fas fa-bell"></i> Thông báo
+      </div>
+      <div class="settings-nav-item" onclick="switchTab('security')" id="tab-security">
+        <i class="fas fa-shield-alt"></i> Bảo mật
+      </div>
+      <div class="settings-nav-item" onclick="switchTab('profile')" id="tab-profile">
+        <i class="fas fa-user-circle"></i> Hồ sơ Admin
+      </div>
+    </div>
+
+    <!-- Settings Content -->
+    <div>
+
+      <!-- ===== TAB: THÔNG TIN CLB ===== -->
+      <div class="settings-panel active" id="panel-club">
+        <div class="card-box">
+          <div class="card-box-header">
+            <div class="card-box-title"><i class="fas fa-hand-fist"></i> Thông tin câu lạc bộ</div>
+            <span class="save-indicator" id="si-club"><i class="fas fa-check-circle"></i> Đã lưu</span>
+          </div>
+          <div class="card-box-body">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Tên CLB <span class="req">*</span></label>
+                <input type="text" class="form-control" id="clubName" value="Karate UTE">
+                <div class="form-hint">Tên hiển thị trên toàn bộ hệ thống</div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Môn võ</label>
+                <input type="text" class="form-control" id="clubMon" value="Karate-Do">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Email liên hệ</label>
+                <input type="email" class="form-control" id="clubEmail" value="admin@karateute.edu.vn">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Số điện thoại</label>
+                <input type="text" class="form-control" id="clubPhone" value="0901 234 567">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Địa chỉ</label>
+                <input type="text" class="form-control" id="clubAddress" value="Trường Đại học Sư phạm Kỹ thuật TP.HCM, 01 Võ Văn Ngân, Thủ Đức">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Mô tả ngắn</label>
+                <textarea class="form-control" id="clubDesc" rows="3">CLB Karate UTE – nơi rèn luyện thể chất và tinh thần võ sĩ đạo cho sinh viên UTE.</textarea>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Năm thành lập</label>
+                <input type="number" class="form-control" id="clubYear" value="2018" min="1900" max="2099">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Website</label>
+                <input type="url" class="form-control" id="clubWebsite" value="https://karateute.edu.vn" placeholder="https://...">
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+            <button class="btn-outline" onclick="resetClub()"><i class="fas fa-undo"></i> Đặt lại</button>
+            <button class="btn-red" onclick="saveClub()"><i class="fas fa-save"></i> Lưu thay đổi</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: CẤU HÌNH ĐAI ===== -->
+      <div class="settings-panel" id="panel-belt">
+        <div class="card-box">
+          <div class="card-box-header">
+            <div class="card-box-title"><i class="fas fa-ribbon"></i> Cấu hình cấp đai</div>
+            <span class="save-indicator" id="si-belt"><i class="fas fa-check-circle"></i> Đã lưu</span>
+          </div>
+          <div class="card-box-body">
+            <div style="font-size:.77rem;color:var(--text-muted);margin-bottom:16px;">
+              <i class="fas fa-info-circle me-1"></i>
+              Thiết lập thời gian tối thiểu (tháng) học viên phải đạt trước khi được phép thi thăng đai lên cấp tiếp theo. Tương ứng cột <code style="color:var(--gold);">ThoiGianToiThieuThang</code> trong bảng <code style="color:var(--gold);">CapDai</code>.
+            </div>
+            <div id="beltConfigList">
+              <!-- Render bởi JS -->
+            </div>
+          </div>
+          <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+            <button class="btn-outline" onclick="resetBelt()"><i class="fas fa-undo"></i> Đặt lại</button>
+            <button class="btn-red" onclick="saveBelt()"><i class="fas fa-save"></i> Lưu thay đổi</button>
+          </div>
+        </div>
+
+        <div class="card-box">
+          <div class="card-box-header">
+            <div class="card-box-title"><i class="fas fa-calendar-check"></i> Quy định kỳ thi</div>
+          </div>
+          <div class="card-box-body">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Điểm chuyên cần tối thiểu (%)</label>
+                <input type="number" class="form-control" id="examMinAttend" value="80" min="0" max="100">
+                <div class="form-hint">Học viên phải đạt tỉ lệ điểm danh tối thiểu để đủ điều kiện dự thi</div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Số lần thi lại tối đa</label>
+                <input type="number" class="form-control" id="examMaxRetry" value="2" min="0" max="10">
+                <div class="form-hint">Số lần được phép thi lại nếu trượt (0 = không cho thi lại)</div>
+              </div>
+              <div class="col-12">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Tự động tạo kỳ thi theo lịch</div>
+                    <div class="toggle-desc">Hệ thống tự động tạo kỳ thi thăng đai theo chu kỳ định sẵn</div>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="autoExam" checked><span class="toggle-slider"></span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+            <button class="btn-red" onclick="saveExamConfig()"><i class="fas fa-save"></i> Lưu</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: HỌC PHÍ ===== -->
+      <div class="settings-panel" id="panel-fee">
+        <div class="card-box">
+          <div class="card-box-header">
+            <div class="card-box-title"><i class="fas fa-wallet"></i> Cấu hình học phí</div>
+            <span class="save-indicator" id="si-fee"><i class="fas fa-check-circle"></i> Đã lưu</span>
+          </div>
+          <div class="card-box-body">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Học phí mặc định / khóa (VNĐ) <span class="req">*</span></label>
+                <input type="number" class="form-control" id="feeDefault" value="1200000" step="50000">
+                <div class="form-hint">Dùng cho các khóa mới nếu không nhập riêng</div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Phí thi thăng đai (VNĐ)</label>
+                <input type="number" class="form-control" id="feeExam" value="200000" step="10000">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Ngày đóng học phí hàng tháng</label>
+                <select class="form-select" id="feeDay">
+                  <option value="1">Ngày 01 hàng tháng</option>
+                  <option value="5" selected>Ngày 05 hàng tháng</option>
+                  <option value="10">Ngày 10 hàng tháng</option>
+                  <option value="15">Ngày 15 hàng tháng</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Số ngày gia hạn sau hạn</label>
+                <input type="number" class="form-control" id="feeGrace" value="7" min="0" max="30">
+                <div class="form-hint">Thời gian gia hạn trước khi gửi cảnh báo</div>
+              </div>
+              <div class="col-12">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Nhắc nhở học phí tự động</div>
+                    <div class="toggle-desc">Gửi thông báo tự động cho học viên chưa đóng học phí</div>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="feeAutoRemind" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Cho phép giảm học phí</div>
+                    <div class="toggle-desc">Admin có thể áp dụng giảm giá cho từng học viên</div>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="feeDiscount" checked><span class="toggle-slider"></span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+            <button class="btn-red" onclick="saveFee()"><i class="fas fa-save"></i> Lưu thay đổi</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: THÔNG BÁO ===== -->
+      <div class="settings-panel" id="panel-notify">
+        <div class="card-box">
+          <div class="card-box-header">
+            <div class="card-box-title"><i class="fas fa-bell"></i> Cài đặt thông báo</div>
+          </div>
+          <div class="card-box-body">
+            <div class="form-section-title">Thông báo hệ thống</div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Học viên mới đăng ký</div>
+                <div class="toggle-desc">Nhận thông báo khi có học viên đăng ký tài khoản mới</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="notifNewStudent" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Học phí quá hạn</div>
+                <div class="toggle-desc">Cảnh báo khi có học viên chưa đóng học phí quá hạn</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="notifOverdueFee" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Kỳ thi thăng đai sắp diễn ra</div>
+                <div class="toggle-desc">Nhắc nhở trước 7 ngày khi có kỳ thi</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="notifExam" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Đăng nhập từ thiết bị lạ</div>
+                <div class="toggle-desc">Cảnh báo khi tài khoản Admin đăng nhập từ thiết bị/IP mới</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="notifNewLogin" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Báo cáo hàng tuần</div>
+                <div class="toggle-desc">Gửi tóm tắt hoạt động CLB mỗi thứ Hai đầu tuần</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="notifWeekly"><span class="toggle-slider"></span></label>
+            </div>
+
+            <div class="form-section-title" style="margin-top:20px;">Kênh nhận thông báo</div>
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Email nhận thông báo</label>
+                <input type="email" class="form-control" id="notifEmail" value="admin@karateute.edu.vn">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Số điện thoại (SMS)</label>
+                <input type="text" class="form-control" id="notifPhone" placeholder="0901 234 567">
+                <div class="form-hint">Để trống nếu không dùng SMS</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+            <button class="btn-red" onclick="saveNotify()"><i class="fas fa-save"></i> Lưu thay đổi</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: BẢO MẬT ===== -->
+      <div class="settings-panel" id="panel-security">
+        <div class="card-box">
+          <div class="card-box-header">
+            <div class="card-box-title"><i class="fas fa-shield-alt"></i> Bảo mật đăng nhập</div>
+          </div>
+          <div class="card-box-body">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Xác thực 2 bước (2FA)</div>
+                <div class="toggle-desc">Bắt buộc OTP khi đăng nhập cho tài khoản QuanTriVien</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="sec2FA"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Khóa sau đăng nhập thất bại</div>
+                <div class="toggle-desc">Tự động khóa tài khoản sau 5 lần nhập sai mật khẩu</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="secLockFail" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Tự động đăng xuất khi không hoạt động</div>
+                <div class="toggle-desc">Đăng xuất sau khoảng thời gian không có tương tác</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="secAutoLogout" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="row g-3" style="margin-top:8px;">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Thời gian tự động đăng xuất (phút)</label>
+                <select class="form-select" id="secTimeout">
+                  <option value="15">15 phút</option>
+                  <option value="30" selected>30 phút</option>
+                  <option value="60">60 phút</option>
+                  <option value="120">2 giờ</option>
+                  <option value="0">Không giới hạn</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Số lần thất bại cho phép</label>
+                <input type="number" class="form-control" id="secMaxFail" value="5" min="1" max="20">
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+            <button class="btn-red" onclick="saveSecurity()"><i class="fas fa-save"></i> Lưu thay đổi</button>
+          </div>
+        </div>
+
+        <div class="card-box">
+          <div class="card-box-header">
+            <div class="card-box-title"><i class="fas fa-database"></i> Sao lưu &amp; Phục hồi</div>
+          </div>
+          <div class="card-box-body">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Sao lưu tự động</label>
+                <select class="form-select" id="backupFreq">
+                  <option value="daily" selected>Hàng ngày</option>
+                  <option value="weekly">Hàng tuần</option>
+                  <option value="monthly">Hàng tháng</option>
+                  <option value="off">Tắt</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Giữ lại (bản sao lưu)</label>
+                <input type="number" class="form-control" id="backupKeep" value="7" min="1" max="365">
+                <div class="form-hint">Số bản sao lưu tối đa giữ lại</div>
+              </div>
+              <div class="col-12">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                  <button class="btn-success btn-sm" onclick="doBackup()"><i class="fas fa-download"></i> Sao lưu ngay</button>
+                  <button class="btn-outline btn-sm" onclick="doRestore()"><i class="fas fa-upload"></i> Phục hồi từ file</button>
+                  <button class="btn-danger btn-sm" onclick="showModal('resetModal')"><i class="fas fa-exclamation-triangle"></i> Xóa toàn bộ dữ liệu demo</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: HỒ SƠ ADMIN ===== -->
+      <div class="settings-panel" id="panel-profile">
+        <div class="card-box">
+          <div class="card-box-header">
+            <div class="card-box-title"><i class="fas fa-user-circle"></i> Hồ sơ của tôi</div>
+            <span class="save-indicator" id="si-profile"><i class="fas fa-check-circle"></i> Đã lưu</span>
+          </div>
+          <div class="card-box-body">
+            <div class="avatar-upload">
+              <div class="avatar-circle" id="profileAvatar">A</div>
+              <div>
+                <div style="font-size:.84rem;font-weight:600;color:#ddd;" id="profileDisplayName">Nguyễn Văn Admin</div>
+                <div class="info-badge" style="margin-top:6px;"><i class="fas fa-user-shield"></i> Quản trị viên</div>
+                <div class="avatar-upload-info" style="margin-top:8px;"><i class="fas fa-info-circle me-1"></i>Ảnh đại diện chưa được hỗ trợ trong phiên bản này</div>
+              </div>
+            </div>
+
+            <div class="form-section-title">Thông tin cơ bản</div>
+            <div class="row g-3 mb-4">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Họ và tên</label>
+                <input type="text" class="form-control" id="profileName" value="Nguyễn Văn Admin">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" id="profileEmail" value="admin@karateute.edu.vn">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Số điện thoại</label>
+                <input type="text" class="form-control" id="profilePhone" value="0901 234 567">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Vai trò</label>
+                <input type="text" class="form-control" value="Quản trị viên" readonly>
+              </div>
+            </div>
+
+            <div class="form-section-title">Đổi mật khẩu</div>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Mật khẩu hiện tại</label>
+                <input type="password" class="form-control" id="pwdCurrent" placeholder="Nhập mật khẩu hiện tại">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Mật khẩu mới</label>
+                <input type="password" class="form-control" id="pwdNew" placeholder="Tối thiểu 8 ký tự" oninput="checkNewPwd()">
+                <div class="pwd-strength" id="newPwdBar" style="display:none;"></div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Xác nhận mật khẩu mới</label>
+                <input type="password" class="form-control" id="pwdNewConfirm" placeholder="Nhập lại mật khẩu mới">
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+            <button class="btn-red" onclick="saveProfile()"><i class="fas fa-save"></i> Lưu thay đổi</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end settings content -->
+  </div><!-- end settings-layout -->
+
+  <!-- PAGE CONTENT END -->
+</main>
+
+
+<!-- ================================================================ MODAL ĐĂNG XUẤT -->
+<div class="modal-overlay" id="logoutModal" onclick="backdropClose(event,'logoutModal')">
+  <div class="modal-box" style="max-width:340px;">
+    <div class="modal-confirm">
+      <div class="confirm-icon ci-logout"><i class="fas fa-sign-out-alt"></i></div>
+      <div class="confirm-title">Đăng xuất?</div>
+      <p class="confirm-desc">Bạn có chắc muốn thoát khỏi hệ thống quản lý <strong style="color:#fff;">Karate UTE</strong>?<br>Mọi thay đổi chưa lưu sẽ bị mất.</p>
+      <div class="confirm-btns">
+        <button class="btn-outline" onclick="hideModal('logoutModal')"><i class="fas fa-arrow-left"></i> Ở lại</button>
+        <button class="btn-danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ MODAL RESET DATA -->
+<div class="modal-overlay" id="resetModal" onclick="backdropClose(event,'resetModal')">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-confirm">
+      <div class="confirm-icon ci-danger"><i class="fas fa-exclamation-triangle"></i></div>
+      <div class="confirm-title">Xóa dữ liệu demo?</div>
+      <p class="confirm-desc">Toàn bộ dữ liệu demo sẽ bị xóa vĩnh viễn. Hành động này <strong style="color:#e74c3c;">không thể hoàn tác</strong>.</p>
+      <div class="confirm-btns">
+        <button class="btn-outline" onclick="hideModal('resetModal')"><i class="fas fa-times"></i> Hủy</button>
+        <button class="btn-danger" onclick="doResetData()"><i class="fas fa-trash"></i> Xóa ngay</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================================ SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  /* ============================================================ PAGE CONFIG */
+  const PAGE_KEY        = 'caidat';
+  const PAGE_NAME       = 'Cài đặt';
+  const PAGE_BREADCRUMB = 'Cài đặt hệ thống';
+
+  /* ============================================================ BELT CONFIG DATA (từ SQL CapDai) */
+  const beltDefaults = [
+    { id:1, ten:'Đai Trắng',       mau:'#E0E0E0', thuTu:1, thoiGian:3  },
+    { id:2, ten:'Đai Vàng',        mau:'#FFD700', thuTu:2, thoiGian:3  },
+    { id:3, ten:'Đai Cam',         mau:'#F5A623', thuTu:3, thoiGian:3  },
+    { id:4, ten:'Đai Xanh lá',     mau:'#27AE60', thuTu:4, thoiGian:4  },
+    { id:5, ten:'Đai Xanh dương',  mau:'#2980B9', thuTu:5, thoiGian:4  },
+    { id:6, ten:'Đai Đỏ',         mau:'#C0392B', thuTu:6, thoiGian:6  },
+    { id:7, ten:'Đai Đen',        mau:'#1A1A1A', thuTu:7, thoiGian:0  },
+  ];
+  let beltData = JSON.parse(JSON.stringify(beltDefaults));
+
+  function renderBeltConfig() {
+    document.getElementById('beltConfigList').innerHTML = beltData.map((b,i) => `
+      <div class="belt-row">
+        <div class="belt-swatch" style="background:${b.mau};${b.id===7?'border:2px solid #555;':''}" title="${b.ten}"></div>
+        <div class="belt-name">${b.ten}</div>
+        <input type="number" class="belt-input" value="${b.thoiGian}" min="0" max="36"
+          onchange="beltData[${i}].thoiGian=parseInt(this.value)||0"
+          ${b.id===7 ? 'disabled title="Đai Đen – không cần thi tiếp"' : ''}>
+        <span class="belt-unit">${b.id===7 ? '—' : 'tháng'}</span>
+      </div>
+    `).join('');
+  }
+  function resetBelt() {
+    beltData = JSON.parse(JSON.stringify(beltDefaults));
+    renderBeltConfig();
+    toast('Đã đặt lại cấu hình đai về mặc định','info');
+  }
+  function saveBelt() { showSaveIndicator('belt'); toast('Lưu cấu hình đai thành công!','success'); }
+  function saveExamConfig() { toast('Lưu quy định kỳ thi thành công!','success'); }
+
+  /* ============================================================ TAB SWITCHING */
+  function switchTab(name) {
+    document.querySelectorAll('.settings-nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.settings-panel').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    document.getElementById('panel-'+name).classList.add('active');
+  }
+
+  /* ============================================================ SAVE ACTIONS */
+  function showSaveIndicator(key) {
+    const el = document.getElementById('si-'+key);
+    if (!el) return;
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'), 3000);
+  }
+
+  const clubDefaults = { name:'Karate UTE', mon:'Karate-Do', email:'admin@karateute.edu.vn', phone:'0901 234 567', address:'Trường Đại học Sư phạm Kỹ thuật TP.HCM, 01 Võ Văn Ngân, Thủ Đức', desc:'CLB Karate UTE – nơi rèn luyện thể chất và tinh thần võ sĩ đạo cho sinh viên UTE.', year:'2018', website:'https://karateute.edu.vn' };
+
+  function saveClub() { showSaveIndicator('club'); toast('Lưu thông tin CLB thành công!','success'); }
+  function resetClub() {
+    document.getElementById('clubName').value    = clubDefaults.name;
+    document.getElementById('clubMon').value     = clubDefaults.mon;
+    document.getElementById('clubEmail').value   = clubDefaults.email;
+    document.getElementById('clubPhone').value   = clubDefaults.phone;
+    document.getElementById('clubAddress').value = clubDefaults.address;
+    document.getElementById('clubDesc').value    = clubDefaults.desc;
+    document.getElementById('clubYear').value    = clubDefaults.year;
+    document.getElementById('clubWebsite').value = clubDefaults.website;
+    toast('Đã đặt lại về giá trị mặc định','info');
+  }
+
+  function saveFee()      { showSaveIndicator('fee');  toast('Lưu cấu hình học phí thành công!','success'); }
+  function saveNotify()   { toast('Lưu cài đặt thông báo thành công!','success'); }
+  function saveSecurity() { toast('Lưu cài đặt bảo mật thành công!','success'); }
+
+  function saveProfile() {
+    const name = document.getElementById('profileName').value.trim();
+    const pwd  = document.getElementById('pwdNew').value;
+    const pwdC = document.getElementById('pwdNewConfirm').value;
+    if (!name) { toast('Vui lòng nhập họ và tên!','error'); return; }
+    if (pwd && pwd !== pwdC) { toast('Mật khẩu xác nhận không khớp!','error'); return; }
+    if (pwd && pwd.length < 8) { toast('Mật khẩu mới tối thiểu 8 ký tự!','error'); return; }
+    if (pwd && !document.getElementById('pwdCurrent').value) { toast('Vui lòng nhập mật khẩu hiện tại!','error'); return; }
+    document.getElementById('profileDisplayName').textContent = name;
+    document.getElementById('profileAvatar').textContent = name.split(' ').map(w=>w[0]).slice(-2).join('').toUpperCase();
+    document.getElementById('pwdCurrent').value=''; document.getElementById('pwdNew').value=''; document.getElementById('pwdNewConfirm').value='';
+    document.getElementById('newPwdBar').style.display='none';
+    showSaveIndicator('profile');
+    toast('Cập nhật hồ sơ thành công!','success');
+  }
+
+  function checkNewPwd() {
+    const val = document.getElementById('pwdNew').value;
+    const bar = document.getElementById('newPwdBar');
+    if (!val) { bar.style.display='none'; return; }
+    bar.style.display='block';
+    if (val.length < 6) bar.className='pwd-strength pwd-weak';
+    else if (val.length < 10 || !/[A-Z]/.test(val) || !/[0-9]/.test(val)) bar.className='pwd-strength pwd-medium';
+    else bar.className='pwd-strength pwd-strong';
+  }
+
+  function doBackup()  { toast('Đang tạo bản sao lưu... (Demo)','info'); }
+  function doRestore() { toast('Tính năng phục hồi đang phát triển.','info'); }
+  function doResetData() { hideModal('resetModal'); toast('Đã xóa toàn bộ dữ liệu demo!','success'); }
+
+  /* ============================================================ MODAL HELPERS */
+  function showModal(id) { const el=document.getElementById(id); if(el) el.classList.add('show'); }
+  function hideModal(id) { const el=document.getElementById(id); if(el) el.classList.remove('show'); }
+  function backdropClose(e,id) { if(e.target.id===id) hideModal(id); }
+  function doLogout() { hideModal('logoutModal'); alert('Đã đăng xuất!\n(Demo: thay bằng redirect thực tế)'); }
+
+  /* ============================================================ SIDEBAR / NOTIF */
+  function toggleSidebar() {
+    const s=document.getElementById('sidebar'),o=document.getElementById('sidebarOverlay');
+    if(s.classList.contains('open')){s.classList.remove('open');o.style.display='none';}
+    else{s.classList.add('open');o.style.display='block';}
+  }
+  function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display='none'; }
+  function toggleNotif(e) { e.stopPropagation(); document.getElementById('notifPanel').classList.toggle('show'); }
+  document.addEventListener('click',()=>{ const p=document.getElementById('notifPanel'); if(p) p.classList.remove('show'); });
+
+  /* ============================================================ TOAST */
+  function toast(msg,type='success'){
+    const colors={success:'#1e8449',error:'#c0392b',warning:'#9a7d0a',info:'#2980b9'};
+    const icons={success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle',info:'fa-info-circle'};
+    const el=document.createElement('div');
+    el.style.cssText=`position:fixed;bottom:24px;right:24px;background:${colors[type]||colors.info};color:#fff;padding:12px 18px;border-radius:8px;font-size:.82rem;font-weight:600;font-family:Montserrat,sans-serif;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:9999;animation:fadeUp .2s ease;max-width:320px;`;
+    el.innerHTML=`<i class="fas ${icons[type]||icons.info}"></i> ${msg}`;
+    document.body.appendChild(el);
+    setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300);},3000);
+  }
+
+  /* ============================================================ INIT */
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.querySelectorAll('.nav-link[data-page]').forEach(l=>{
+      l.classList.remove('active');
+      if(l.dataset.page===PAGE_KEY) l.classList.add('active');
+    });
+    const nameEl=document.getElementById('topbarPageName'), bcEl=document.getElementById('topbarBreadcrumb');
+    if(nameEl) nameEl.textContent=PAGE_NAME;
+    if(bcEl)   bcEl.textContent=PAGE_BREADCRUMB;
+    const dateEl=document.getElementById('topbarDate');
+    if(dateEl){
+      const now=new Date(), days=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+      dateEl.textContent=days[now.getDay()]+', '+String(now.getDate()).padStart(2,'0')+'/'+ String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
+    }
+    renderBeltConfig();
+  });
+</script>
+
+<!-- CSS for pwd-strength (dùng lại từ taikhoan) -->
+<style>
+  .pwd-strength { height: 4px; border-radius: 2px; margin-top: 6px; transition: all .3s; }
+  .pwd-weak   { background: #e74c3c; width: 33%; }
+  .pwd-medium { background: #f39c12; width: 66%; }
+  .pwd-strong { background: #2ecc71; width: 100%; }
+</style>
+</body>
+</html>

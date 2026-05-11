@@ -1,0 +1,586 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KARATE-DO UTE | ĐH Sư Phạm Kỹ Thuật - ĐHĐN</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+    <style>
+        :root {
+            --primary: #e63946;
+            --dark: #0f0f0f;
+            --gray-dark: #1a1a1a;
+            --text-light: #ffffff;
+            --accent: #ffb703;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, .nav-logo { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+
+        /* --- LOGO CSS --- */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-circle {
+            width: 45px;
+            height: 45px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 0 15px rgba(230, 57, 70, 0.5);
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            padding: 15px 0;
+            transition: 0.5s;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+        }
+        .navbar.scrolled { padding: 10px 0; background: var(--dark); border-bottom: 2px solid var(--primary); }
+        
+        .nav-link {
+            color: #ccc !important;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+        .nav-link.active { color: var(--primary) !important; }
+
+        /* --- HERO SECTION (Fix Laptop Screen) --- */
+        .hero {
+            height: 100vh; /* Vừa khít màn hình */
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.4)), 
+                        url('https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=2072');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .hero-content {
+            text-shadow: 2px 4px 10px rgba(0,0,0,0.8); /* Chống mờ chữ */
+        }
+
+        .text-outline {
+            -webkit-text-stroke: 1.5px white;
+            color: transparent;
+            font-size: 1.2em;
+        }
+
+        /* --- SECTION STYLING --- */
+        section { padding: 80px 0; }
+        .section-title {
+            font-size: 3rem;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px; left: 0; width: 80px; height: 5px; background: var(--primary);
+        }
+
+        /* --- CARDS & INFO --- */
+        .card-custom {
+            background: var(--gray-dark);
+            border: 1px solid #333;
+            padding: 30px;
+            height: 100%;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-custom:hover {
+            border-color: var(--primary);
+            transform: translateY(-10px);
+        }
+        .card-custom i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* --- TIMELINE --- */
+        .step-box {
+            border-left: 2px solid var(--primary);
+            padding-left: 30px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .step-box::before {
+            content: '';
+            position: absolute;
+            left: -10px; top: 0; width: 18px; height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        /* --- FOOTER --- */
+        footer { background: #050505; border-top: 5px solid var(--primary); padding: 60px 0 20px; }
+
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            padding: 12px 35px;
+            font-weight: 700;
+            border-radius: 0;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-action:hover { background: white; color: var(--primary); transform: scale(1.05); }
+
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#mainNav" data-bs-offset="100">
+
+    <nav class="navbar navbar-expand-lg fixed-top shadow-lg" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand text-white d-flex align-items-center" href="#home">
+                <div class="logo-container">
+                    <div class="logo-circle">
+                        <i class="fas fa-hand-fist text-white"></i>
+                    </div>
+                    <div class="lh-1">
+                        <span class="d-block fw-bold fs-4">KARATE UTE</span>
+                        <small style="font-size: 10px; letter-spacing: 1px;">SINCE 2012</small>
+                    </div>
+                </div>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars text-white"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#home">TRANG CHỦ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">GIỚI THIỆU</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#belt-roadmap">ĐÀO TẠO</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#process">ĐĂNG KÝ</a></li>
+                    <li class="nav-item ms-lg-4">
+                        <a href="dangnhap.html" class="btn btn-action btn-sm">VÀO DASHBOARD</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 hero-content" data-aos="fade-up">
+                    <h5 class="text-primary fw-bold mb-3" style="letter-spacing: 5px;">HỘI VÕ THUẬT ĐẠI HỌC ĐÀ NẴNG</h5>
+                    <h1 class="display-1 fw-bold mb-0">CHINH PHỤC</h1>
+                    <h1 class="display-1 fw-bold text-outline mb-4">GIỚI HẠN BẢN THÂN</h1>
+                    <p class="lead mb-5 w-75 text-light shadow-sm p-2 rounded" style="background: rgba(0,0,0,0.3);">
+                        Câu lạc bộ Karate-do Trường ĐH Sư phạm Kỹ thuật là nơi hội tụ tinh thần võ đạo, 
+                        giúp sinh viên rèn luyện sức khỏe, kỷ luật và khả năng tự vệ thực chiến.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#process" class="btn btn-action">THAM GIA NGAY</a>
+                        <a href="#about" class="btn btn-outline-light btn-action bg-transparent">TÌM HIỂU THÊM</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h2 class="section-title">VỀ CHÚNG TÔI</h2>
+                    <p class="text-secondary mb-4">Trải qua hơn 10 năm hoạt động, CLB Karate-do UTE không chỉ là nơi học võ mà còn là ngôi nhà chung của những sinh viên đam mê sự mạnh mẽ và đạo đức võ học.</p>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card-custom">
+                                <i class="fas fa-users-rays"></i>
+                                <h4>+200 Võ sinh</h4>
+                                <p class="small text-muted">Đang sinh hoạt và tập luyện mỗi kỳ.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-custom">
+                                <i class="fas fa-trophy"></i>
+                                <h4>Giải thưởng</h4>
+                                <p class="small text-muted">Nhiều huy chương tại Giải Võ thuật Sinh viên ĐHĐN.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-5 mt-lg-0 px-lg-5" data-aos="fade-left">
+                    <div class="position-relative">
+                        <img src="https://images.unsplash.com/photo-1552072092-7f9b8d63efcb?q=80&w=2070" class="img-fluid border-start border-5 border-primary shadow-lg" alt="Karate UTE">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id=""belt-roadmap" class="py-5""></section>
+    
+    
+       
+    
+  <!-- =====================================
+     LỘ TRÌNH 7 CẤP ĐAI - FULL SECTION
+===================================== -->
+
+<section id="belt-roadmap" class="py-5">
+
+    <div class="container">
+
+        <!-- TITLE -->
+        <div class="mb-5">
+
+            <h2 class="display-4 fw-bold text-uppercase">
+                LỘ TRÌNH 7 CẤP ĐAI
+            </h2>
+
+            <div 
+                style="
+                    width: 80px;
+                    height: 5px;
+                    background: #ff0033;
+                    margin-top: 15px;
+                ">
+            </div>
+
+        </div>
+
+        <!-- NOTE -->
+        <p class="text-secondary mb-5">
+            <i class="fas fa-arrow-pointer me-2"></i>
+            Vuốt sang ngang để xem chi tiết
+        </p>
+
+        <!-- BELT LIST -->
+        <div class="belt-scroll d-flex gap-4 overflow-auto pb-4">
+
+            <!-- ĐAI TRẮNG -->
+            <div class="belt-card">
+
+                <span class="belt-number">01</span>
+
+                <h3 class="belt-title text-white">
+                    <span class="belt-dot bg-white"></span>
+                    ĐAI TRẮNG
+                </h3>
+
+                <p>
+                    Cấp độ nhập môn. Làm quen với các thế tấn cơ bản
+                    và đòn đấm thẳng.
+                </p>
+
+            </div>
+
+            <!-- ĐAI VÀNG -->
+            <div class="belt-card">
+
+                <span class="belt-number">02</span>
+
+                <h3 class="belt-title" style="color:#ffcc00;">
+                    <span class="belt-dot" style="background:#ffcc00;"></span>
+                    ĐAI VÀNG
+                </h3>
+
+                <p>
+                    Bắt đầu học các bài quyền (Kata) khởi đầu
+                    và kỹ thuật đá cơ bản.
+                </p>
+
+            </div>
+
+            <!-- ĐAI XANH LÁ -->
+            <div class="belt-card">
+
+                <span class="belt-number">03</span>
+
+                <h3 class="belt-title" style="color:#16a34a;">
+                    <span class="belt-dot" style="background:#16a34a;"></span>
+                    ĐAI XANH LÁ
+                </h3>
+
+                <p>
+                    Phát triển khả năng thăng bằng và phối hợp
+                    các đòn tay chân linh hoạt.
+                </p>
+
+            </div>
+
+            <!-- ĐAI XANH DƯƠNG -->
+            <div class="belt-card">
+
+                <span class="belt-number">04</span>
+
+                <h3 class="belt-title" style="color:#38bdf8;">
+                    <span class="belt-dot" style="background:#38bdf8;"></span>
+                    ĐAI XANH DƯƠNG
+                </h3>
+
+                <p>
+                    Nâng cao kỹ thuật đối kháng và các bài quyền
+                    có độ phức tạp trung bình.
+                </p>
+
+            </div>
+
+            <!-- ĐAI TÍM -->
+            <div class="belt-card">
+
+                <span class="belt-number">05</span>
+
+                <h3 class="belt-title" style="color:#dc2626;">
+                    <span class="belt-dot" style="background:#dc2626;"></span>
+                    ĐAI TÍM
+                </h3>
+
+                <p>
+                    Giai đoạn rèn luyện nâng cao sự chuẩn xác
+                    trong từng chuyển động.
+                </p>
+
+            </div>
+
+            <!-- ĐAI NÂU -->
+            <div class="belt-card">
+
+                <span class="belt-number">06</span>
+
+                <h3 class="belt-title" style="color:#92400e;">
+                    <span class="belt-dot" style="background:#92400e;"></span>
+                    ĐAI NÂU
+                </h3>
+
+                <p>
+                    Làm chủ phản xạ chiến đấu và kỹ thuật
+                    thực chiến nâng cao.
+                </p>
+
+            </div>
+
+            <!-- ĐAI ĐEN -->
+            <div class="belt-card">
+
+                <span class="belt-number">07</span>
+
+                <h3 class="belt-title" style="color:#f5f5f5;">
+                    <span class="belt-dot" style="background:#f5f5f5;"></span>
+                    ĐAI ĐEN
+                </h3>
+
+                <p>
+                    Hoàn thiện tinh thần võ đạo và đủ khả năng
+                    hướng dẫn thế hệ võ sinh mới.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================
+     CSS - LỘ TRÌNH ĐAI
+===================================== -->
+
+<style>
+
+#belt-roadmap{
+    background:#050505;
+}
+
+.belt-scroll::-webkit-scrollbar{
+    height:8px;
+}
+
+.belt-scroll::-webkit-scrollbar-thumb{
+    background:#ff0033;
+}
+
+.belt-card{
+    min-width:320px;
+    background:#141414;
+    padding:35px 30px;
+    position:relative;
+    border-bottom:4px solid #ff0033;
+    transition:0.4s;
+    overflow:hidden;
+}
+
+.belt-card:hover{
+    transform:translateY(-10px);
+    border-color:white;
+}
+
+.belt-title{
+    font-size:2rem;
+    font-weight:700;
+    margin-bottom:25px;
+    position:relative;
+    z-index:2;
+}
+
+.belt-card p{
+    color:#9ca3af;
+    font-size:1.05rem;
+    line-height:1.8;
+}
+
+.belt-number{
+    position:absolute;
+    top:10px;
+    right:20px;
+    font-size:5rem;
+    font-weight:800;
+    color:rgba(255,255,255,0.06);
+}
+
+.belt-dot{
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    display:inline-block;
+    margin-right:12px;
+}
+
+@media(max-width:768px){
+
+    .belt-card{
+        min-width:280px;
+    }
+
+    .belt-title{
+        font-size:1.6rem;
+    }
+
+}
+
+</style>  
+    
+
+    <section id="process">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6" data-aos="fade-up">
+                    <h2 class="section-title">QUY TRÌNH THAM GIA</h2>
+                    <div class="step-box">
+                        <h4>Bước 1: Đăng ký thông tin</h4>
+                        <p class="text-secondary text-sm">Đăng ký trực tiếp tại võ đường hoặc qua trang quản lý của CLB.</p>
+                    </div>
+                    <div class="step-box">
+                        <h4>Bước 2: Phỏng vấn & Thử sân</h4>
+                        <p class="text-secondary">HLV sẽ kiểm tra sơ bộ thể lực và niềm đam mê của bạn qua 1 buổi tập thử.</p>
+                    </div>
+                    <div class="step-box" style="border: none;">
+                        <h4>Bước 3: Nhận Võ phục</h4>
+                        <p class="text-secondary">Chính thức trở thành thành viên và bắt đầu hành trình chinh phục đai đen.</p>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="bg-primary p-5 shadow-lg">
+                        <h3 class="fw-bold mb-4">LỊCH TẬP LUYỆN</h3>
+                        <ul class="list-unstyled fs-5">
+                            <li class="mb-3 border-bottom pb-2"><b>Thứ 2:</b> 17:30 - 19:30 (Sân khu A)</li>
+                            <li class="mb-3 border-bottom pb-2"><b>Thứ 4:</b> 17:30 - 19:30 (Sân khu A)</li>
+                            <li class="mb-3"><b>Thứ 6:</b> 17:30 - 19:30 (Kỹ thuật nâng cao)</li>
+                        </ul>
+                        <p class="mt-4"><i class="fas fa-location-dot me-2"></i> Nhà thi đấu trường ĐH Sư phạm Kỹ thuật</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-lg-5">
+                    <div class="logo-container mb-4">
+                        <div class="logo-circle"><i class="fas fa-hand-fist text-white"></i></div>
+                        <h4 class="mb-0 fw-bold">KARATE-DO UTE</h4>
+                    </div>
+                    <p class="text-secondary">CLB Karate-do Trường ĐH Sư Phạm Kỹ Thuật - ĐH Đà Nẵng.<br>Nơi bản lĩnh và đạo đức song hành.</p>
+                    <div class="d-flex gap-3 mt-4">
+                        <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 offset-lg-1">
+                    <h5 class="fw-bold mb-4 text-primary">LIÊN KẾT NHANH</h5>
+                    <ul class="list-unstyled text-secondary">
+                        <li class="mb-2"><a href="#about" class="text-decoration-none text-secondary">Về CLB</a></li>
+                        <li class="mb-2"><a href="#training" class="text-decoration-none text-secondary">Chương trình tập</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Vào Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3">
+                    <h5 class="fw-bold mb-4 text-primary">LIÊN HỆ</h5>
+                    <p class="text-secondary small"><i class="fas fa-map-marker-alt me-2"></i> 48 Cao Thắng, TP. Đà Nẵng</p>
+                    <p class="text-secondary small"><i class="fas fa-phone me-2"></i> 09xx.xxx.xxx (HLV Trưởng)</p>
+                    <p class="text-secondary small"><i class="fas fa-envelope me-2"></i> karate-ute@gmail.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-5 pt-4 border-top border-secondary opacity-50 small">
+                &copy; 2024 Karate-do UTE - University of Technology and Education. Designed for Warriors.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        // Khởi tạo Animation
+        AOS.init({ duration: 1000, once: true });
+
+        // Hiệu ứng Navbar khi cuộn
+        window.addEventListener('scroll', function() {
+            var nav = document.getElementById('mainNav');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+    </script>
+    
+ 
+    
+    
+    
+    
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
