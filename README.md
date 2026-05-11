@@ -48,6 +48,20 @@ Hệ thống hỗ trợ quản lý học viên, huấn luyện viên, khóa họ
 - **Microsoft SQL Server**
 - **14 bảng chính** với quan hệ hoàn chỉnh
 
+## 🔗 Liên Kết Quan Trọng
+
+### 📁 GitHub Repository
+- **Link**: https://github.com/nguyendinhvan-dev/MartialArtsClubManagement
+- **Mục đích**: Source code, documentation, releases
+
+### 📋 Trello Board
+- **Link**: https://trello.com/invite/b/6a01473f30e300725dae401e/ATTIdcdd577c2cc1573a9ab154c18a5a32ee884E492A/clb-vo-thuật-nhom-7
+- **Mục đích**: Task management, progress tracking
+
+### 📄 Google Docs
+- **Link**: https://docs.google.com/document/d/1okyj081sd7XhCre5gg9EUSa7EIM6R31uq8g6e1nnseY/edit?tab=t.0
+- **Mục đích**: Meeting notes, requirements, documentation
+
 ---
 
 **Nhóm 7 - Lớp 225LTC** | [GitHub Repository](https://github.com/nguyendinhvan-dev/MartialArtsClubManagement)
