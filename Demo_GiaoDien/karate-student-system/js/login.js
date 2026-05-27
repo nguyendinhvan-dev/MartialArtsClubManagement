@@ -1,105 +1,30 @@
-const form =
-document.getElementById(
-"loginForm"
-);
+const form = document.getElementById("loginForm");
 
-/* =========================
-   DEMO ACCOUNT
-========================= */
-
-const demoUser = {
-
-    username: "hoang",
-
-    password: "123456",
-
-    name: "Trần Nhật Hoàng",
-
-    belt: "Đai Trắng",
-
-    email: "hoang@gmail.com",
-
-    phone: "0123456789",
-
-    attendance: [],
-
-    exams: [],
-
-    notifications: [
-
-        {
-
-            title: "Chào mừng",
-
-            content:
-            "Chào mừng bạn đến với Karate UTE"
-
-        }
-
-    ]
-
-};
-
-/* SAVE DEMO */
-
-localStorage.setItem(
-"studentUser",
-JSON.stringify(demoUser)
-);
-
-/* LOGIN */
-
-form.addEventListener(
-"submit",
-function(e){
-
+form.addEventListener("submit", async function(e){
     e.preventDefault();
 
-    const username =
-    document.getElementById(
-    "username"
-    ).value;
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
 
-    const password =
-    document.getElementById(
-    "password"
-    ).value;
+    const btn = form.querySelector("button[type='submit']");
+    const oldText = btn.innerText;
+    btn.innerText = "Đang đăng nhập...";
+    btn.disabled = true;
 
-    const user =
-    JSON.parse(
-    localStorage.getItem(
-    "studentUser"
-    )
-    );
+    try {
+        const response = await window.API.AuthService.login(username, password);
 
-    if(
-
-        username === user.username &&
-
-        password === user.password
-
-    ){
-
-        localStorage.setItem(
-        "isLogin",
-        "true"
-        );
-
-        alert(
-        "Đăng nhập thành công"
-        );
-
-        window.location.href =
-        "dashboard.html";
-
+        if(response.success){
+            localStorage.setItem("jwtToken", response.data.token);
+            alert("Đăng nhập thành công");
+            window.location.href = "dashboard.html";
+        } else {
+            alert(response.message || "Sai tài khoản hoặc mật khẩu");
+        }
+    } catch (error) {
+        alert("Lỗi kết nối đến máy chủ: " + error.message);
+    } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
     }
-
-    else{
-
-        alert(
-        "Sai tài khoản hoặc mật khẩu"
-        );
-
-    }
-
 });
