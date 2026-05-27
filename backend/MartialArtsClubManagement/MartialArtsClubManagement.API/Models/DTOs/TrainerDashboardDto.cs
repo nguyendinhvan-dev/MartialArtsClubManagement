@@ -162,5 +162,36 @@ namespace MartialArtsClubManagement.API.Models.DTOs
         public int MaHocVien { get; set; }
         public int? MaCapDaiMoi { get; set; }
         public decimal? DiemSo { get; set; }
+        public bool DaDat { get; set; }
+    }
+
+    public class CreateTrainerHocVienDto
+    {
+        public string TenHocVien { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string? SoDienThoai { get; set; }
+        public int? MaCapDaiHienTai { get; set; }
+        public int MaLop { get; set; }
+    }
+
+    public class UpdateTrainerHocVienDto
+    {
+        public string TenHocVien { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string? SoDienThoai { get; set; }
+        public int? MaCapDaiHienTai { get; set; }
+        public int MaLop { get; set; }
+    }
+
+    public class TrainerExamResultDetailDto
+    {
+        public int MaHocVien { get; set; }
+        public string? TenHocVien { get; set; }
+        public int? MaCapDaiHienTai { get; set; }
+        public string? TenCapDaiHienTai { get; set; }
+        public int? MaCapDaiMoi { get; set; }
+        public string? TenCapDaiMoi { get; set; }
+        public decimal? DiemSo { get; set; }
+        public bool? DaDat { get; set; }
     }
 }

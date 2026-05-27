@@ -22,13 +22,28 @@ namespace MartialArtsClubManagement.API.Controllers
             _context = context;
         }
 
+        private async Task<int> GetCurrentHlvIdAsync()
+        {
+            var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
+            var userIdClaim = claimsIdentity?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int maTaiKhoan))
+            {
+                var hlv = await _context.HuanLuyenViens.FirstOrDefaultAsync(h => h.MaTaiKhoan == maTaiKhoan);
+                if (hlv != null)
+                {
+                    return hlv.MaHlv;
+                }
+            }
+            return 1; // Fallback default for demo/local testing when authorization is not configured or bypassed
+        }
+
         // GET: api/trainer/dashboard
         [HttpGet("dashboard")]
         public async Task<IActionResult> GetDashboard()
         {
             // TODO: Get current trainer ID from JWT token
             // For now, using a hardcoded ID for demo
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             // Get classes taught by this trainer
             var soLopDangDay = await _context.LopHocs
@@ -90,7 +105,7 @@ namespace MartialArtsClubManagement.API.Controllers
         public async Task<IActionResult> GetClasses()
         {
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var lops = await _context.LopHocs
                 .Where(l => l.MaHlv == currentHlvId)
@@ -123,7 +138,7 @@ namespace MartialArtsClubManagement.API.Controllers
         public async Task<IActionResult> GetClassById(int id)
         {
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var l = await _context.LopHocs
                 .Include(l => l.MaKhoaHocNavigation)
@@ -170,7 +185,7 @@ namespace MartialArtsClubManagement.API.Controllers
             }
 
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var khoaHocExists = await _context.KhoaHocs.AnyAsync(k => k.MaKhoaHoc == dto.MaKhoaHoc);
             if (!khoaHocExists)
@@ -209,7 +224,7 @@ namespace MartialArtsClubManagement.API.Controllers
             }
 
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var lopHoc = await _context.LopHocs
                 .FirstOrDefaultAsync(l => l.MaLop == id && l.MaHlv == currentHlvId);
@@ -240,7 +255,7 @@ namespace MartialArtsClubManagement.API.Controllers
         public async Task<IActionResult> DeleteClass(int id)
         {
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var lopHoc = await _context.LopHocs
                 .FirstOrDefaultAsync(l => l.MaLop == id && l.MaHlv == currentHlvId);
@@ -265,7 +280,7 @@ namespace MartialArtsClubManagement.API.Controllers
         public async Task<IActionResult> GetStudents([FromQuery] int? maLop = null)
         {
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var lopIds = await _context.LopHocs
                 .Where(l => l.MaHlv == currentHlvId)
@@ -313,7 +328,7 @@ namespace MartialArtsClubManagement.API.Controllers
         public async Task<IActionResult> GetStudentById(int id)
         {
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var lopIds = await _context.LopHocs
                 .Where(l => l.MaHlv == currentHlvId)
@@ -362,7 +377,7 @@ namespace MartialArtsClubManagement.API.Controllers
         public async Task<IActionResult> GetAttendance([FromQuery] int? maLop = null, [FromQuery] DateOnly? ngayHoc = null)
         {
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var lopIds = await _context.LopHocs
                 .Where(l => l.MaHlv == currentHlvId)
@@ -417,7 +432,7 @@ namespace MartialArtsClubManagement.API.Controllers
             }
 
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var lopIds = await _context.LopHocs
                 .Where(l => l.MaHlv == currentHlvId)
@@ -479,7 +494,7 @@ namespace MartialArtsClubManagement.API.Controllers
         public async Task<IActionResult> GetExams()
         {
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var lopIds = await _context.LopHocs
                 .Where(l => l.MaHlv == currentHlvId)
@@ -498,7 +513,7 @@ namespace MartialArtsClubManagement.API.Controllers
                 .Select(k => new TrainerKyThiDto
                 {
                     MaKyThi = k.MaKyThi,
-                    TenKyThi = k.TenKyThi,
+                    TenKyThi = k.MoTa ?? ("Kỳ thi khóa " + (k.MaKhoaHocNavigation != null ? k.MaKhoaHocNavigation.TenKhoaHoc : k.MaKhoaHoc.ToString())),
                     NgayThi = k.NgayThi,
                     MaKhoaHoc = k.MaKhoaHoc,
                     TenKhoaHoc = k.MaKhoaHocNavigation != null ? k.MaKhoaHocNavigation.TenKhoaHoc : null,
@@ -526,7 +541,7 @@ namespace MartialArtsClubManagement.API.Controllers
             }
 
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             // Verify the course belongs to trainer's classes
             var khoaHocIds = await _context.LopHocs
@@ -542,11 +557,10 @@ namespace MartialArtsClubManagement.API.Controllers
 
             var newKyThi = new KyThiThangDai
             {
-                TenKyThi = dto.TenKyThi,
                 NgayThi = dto.NgayThi,
                 MaKhoaHoc = dto.MaKhoaHoc,
                 TrangThai = "SapDienRa",
-                MoTa = dto.MoTa
+                MoTa = dto.MoTa ?? dto.TenKyThi
             };
 
             _context.KyThiThangDais.Add(newKyThi);
@@ -570,7 +584,7 @@ namespace MartialArtsClubManagement.API.Controllers
             }
 
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var khoaHocIds = await _context.LopHocs
                 .Where(l => l.MaHlv == currentHlvId)
@@ -586,11 +600,10 @@ namespace MartialArtsClubManagement.API.Controllers
                 return NotFound(new ApiResponse<object> { Success = false, Message = "Không tìm thấy kỳ thi" });
             }
 
-            kyThi.TenKyThi = dto.TenKyThi;
             kyThi.NgayThi = dto.NgayThi;
             kyThi.MaKhoaHoc = dto.MaKhoaHoc;
             kyThi.TrangThai = dto.TrangThai;
-            kyThi.MoTa = dto.MoTa;
+            kyThi.MoTa = dto.MoTa ?? dto.TenKyThi;
 
             _context.KyThiThangDais.Update(kyThi);
             await _context.SaveChangesAsync();
@@ -607,7 +620,7 @@ namespace MartialArtsClubManagement.API.Controllers
         public async Task<IActionResult> DeleteExam(int id)
         {
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var khoaHocIds = await _context.LopHocs
                 .Where(l => l.MaHlv == currentHlvId)
@@ -642,8 +655,7 @@ namespace MartialArtsClubManagement.API.Controllers
                 return BadRequest(new ApiResponse<object> { Success = false, Message = "Danh sách kết quả trống" });
             }
 
-            // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var khoaHocIds = await _context.LopHocs
                 .Where(l => l.MaHlv == currentHlvId)
@@ -665,6 +677,17 @@ namespace MartialArtsClubManagement.API.Controllers
 
             foreach (var item in dto.Results)
             {
+                // Tự động thăng đai cho học viên nếu đạt và có cấp đai mới
+                if (item.DaDat && item.MaCapDaiMoi.HasValue)
+                {
+                    var hocVien = await _context.HocViens.FindAsync(item.MaHocVien);
+                    if (hocVien != null)
+                    {
+                        hocVien.MaCapDaiHienTai = item.MaCapDaiMoi.Value;
+                        _context.HocViens.Update(hocVien);
+                    }
+                }
+
                 var isDuplicated = await _context.KetQuaThis
                     .AnyAsync(kq => kq.MaKyThi == dto.MaKyThi && kq.MaHocVien == item.MaHocVien);
                 
@@ -676,7 +699,8 @@ namespace MartialArtsClubManagement.API.Controllers
                     if (existing != null)
                     {
                         existing.MaCapDaiMoi = item.MaCapDaiMoi;
-                        existing.DiemSo = item.DiemSo;
+                        existing.DiemSo = item.DiemSo ?? 0;
+                        existing.DaDat = item.DaDat;
                         _context.KetQuaThis.Update(existing);
                         updatedCount++;
                     }
@@ -688,7 +712,8 @@ namespace MartialArtsClubManagement.API.Controllers
                     MaKyThi = dto.MaKyThi,
                     MaHocVien = item.MaHocVien,
                     MaCapDaiMoi = item.MaCapDaiMoi,
-                    DiemSo = item.DiemSo
+                    DiemSo = item.DiemSo ?? 0,
+                    DaDat = item.DaDat
                 };
 
                 _context.KetQuaThis.Add(newKetQua);
@@ -740,7 +765,7 @@ namespace MartialArtsClubManagement.API.Controllers
             }
 
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var taiKhoan = await _context.HuanLuyenViens
                 .Include(h => h.MaTaiKhoanNavigation)
@@ -776,7 +801,7 @@ namespace MartialArtsClubManagement.API.Controllers
         public async Task<IActionResult> GetProfile()
         {
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var hlv = await _context.HuanLuyenViens
                 .Include(h => h.MaTaiKhoanNavigation)
@@ -820,7 +845,7 @@ namespace MartialArtsClubManagement.API.Controllers
             }
 
             // TODO: Get current trainer ID from JWT token
-            int currentHlvId = 1;
+            int currentHlvId = await GetCurrentHlvIdAsync();
 
             var hlv = await _context.HuanLuyenViens
                 .FirstOrDefaultAsync(h => h.MaHlv == currentHlvId);
@@ -840,6 +865,294 @@ namespace MartialArtsClubManagement.API.Controllers
             {
                 Success = true,
                 Message = "Cập nhật hồ sơ HLV thành công"
+            });
+        }
+
+        // POST: api/trainer/students
+        [HttpPost("students")]
+        public async Task<IActionResult> CreateStudent([FromBody] CreateTrainerHocVienDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Dữ liệu không hợp lệ" });
+            }
+
+            int currentHlvId = await GetCurrentHlvIdAsync();
+
+            // Kiểm tra xem lớp học có do HLV này phụ trách không
+            var lopHoc = await _context.LopHocs.FirstOrDefaultAsync(l => l.MaLop == dto.MaLop && l.MaHlv == currentHlvId);
+            if (lopHoc == null)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Lớp học không thuộc quyền quản lý của bạn" });
+            }
+
+            // Kiểm tra email trùng
+            var emailExists = await _context.TaiKhoans.AnyAsync(t => t.Email == dto.Email);
+            if (emailExists)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Email đã được sử dụng" });
+            }
+
+            // Tạo tài khoản mới
+            var newTaiKhoan = new TaiKhoan
+            {
+                HoTen = dto.TenHocVien,
+                Email = dto.Email,
+                MatKhauHash = BCrypt.Net.BCrypt.HashPassword("123456"), // Mật khẩu mặc định
+                VaiTro = "HocVien",
+                DangHoatDong = true,
+                NgayTao = DateTime.Now
+            };
+
+            _context.TaiKhoans.Add(newTaiKhoan);
+            await _context.SaveChangesAsync();
+
+            // Xác định cấp đai ban đầu
+            int? capDaiId = dto.MaCapDaiHienTai;
+            if (!capDaiId.HasValue || capDaiId == 0)
+            {
+                // Mặc định đai đầu tiên (sắp xếp theo ThuTu nhỏ nhất)
+                var firstCapDai = await _context.CapDais.OrderBy(c => c.ThuTu).FirstOrDefaultAsync();
+                capDaiId = firstCapDai?.MaCapDai ?? 1;
+            }
+
+            // Tạo học viên mới
+            var newHocVien = new HocVien
+            {
+                MaTaiKhoan = newTaiKhoan.MaTaiKhoan,
+                SoDienThoai = dto.SoDienThoai,
+                NgayGiaNhap = DateOnly.FromDateTime(DateTime.Now),
+                MaCapDaiHienTai = capDaiId
+            };
+
+            _context.HocViens.Add(newHocVien);
+            await _context.SaveChangesAsync();
+
+            // Đăng ký lớp học
+            var newDangKyLop = new DangKyLop
+            {
+                MaHocVien = newHocVien.MaHocVien,
+                MaLop = dto.MaLop,
+                NgayDangKy = DateOnly.FromDateTime(DateTime.Now),
+                TrangThaiThanhToan = "ChuaThanhToan"
+            };
+
+            _context.DangKyLops.Add(newDangKyLop);
+            await _context.SaveChangesAsync();
+
+            return Ok(new ApiResponse<int>
+            {
+                Success = true,
+                Message = "Thêm học viên và đăng ký lớp thành công",
+                Data = newHocVien.MaHocVien
+            });
+        }
+
+        // PUT: api/trainer/students/{id}
+        [HttpPut("students/{id}")]
+        public async Task<IActionResult> UpdateStudent(int id, [FromBody] UpdateTrainerHocVienDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Dữ liệu không hợp lệ" });
+            }
+
+            int currentHlvId = await GetCurrentHlvIdAsync();
+
+            // Kiểm tra xem học viên có thuộc lớp nào của HLV này không
+            var lopIds = await _context.LopHocs
+                .Where(l => l.MaHlv == currentHlvId)
+                .Select(l => l.MaLop)
+                .ToListAsync();
+
+            var userRegistered = await _context.DangKyLops.AnyAsync(dk => dk.MaHocVien == id && lopIds.Contains(dk.MaLop));
+            if (!userRegistered)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Học viên không thuộc quyền quản lý của bạn" });
+            }
+
+            // Kiểm tra lớp mới có thuộc HLV quản lý không
+            var newLopHoc = await _context.LopHocs.FirstOrDefaultAsync(l => l.MaLop == dto.MaLop && l.MaHlv == currentHlvId);
+            if (newLopHoc == null)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Lớp học mới không thuộc quyền quản lý của bạn" });
+            }
+
+            var hocVien = await _context.HocViens
+                .Include(hv => hv.MaTaiKhoanNavigation)
+                .FirstOrDefaultAsync(hv => hv.MaHocVien == id);
+
+            if (hocVien == null)
+            {
+                return NotFound(new ApiResponse<object> { Success = false, Message = "Không tìm thấy thông tin học viên" });
+            }
+
+            // Kiểm tra trùng email (loại trừ tài khoản hiện tại)
+            var emailExists = await _context.TaiKhoans.AnyAsync(t => t.Email == dto.Email && t.MaTaiKhoan != hocVien.MaTaiKhoan);
+            if (emailExists)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Email đã được sử dụng bởi tài khoản khác" });
+            }
+
+            // Cập nhật thông tin tài khoản
+            hocVien.MaTaiKhoanNavigation.HoTen = dto.TenHocVien;
+            hocVien.MaTaiKhoanNavigation.Email = dto.Email;
+
+            // Cập nhật học viên
+            hocVien.SoDienThoai = dto.SoDienThoai;
+            hocVien.MaCapDaiHienTai = dto.MaCapDaiHienTai;
+
+            _context.HocViens.Update(hocVien);
+
+            // Cập nhật hoặc thêm mới đăng ký lớp
+            var dangKyLop = await _context.DangKyLops.FirstOrDefaultAsync(dk => dk.MaHocVien == id && lopIds.Contains(dk.MaLop));
+            if (dangKyLop != null)
+            {
+                if (dangKyLop.MaLop != dto.MaLop)
+                {
+                    // Chuyển lớp
+                    _context.DangKyLops.Remove(dangKyLop);
+                    await _context.SaveChangesAsync();
+
+                    var newDangKyLop = new DangKyLop
+                    {
+                        MaHocVien = id,
+                        MaLop = dto.MaLop,
+                        NgayDangKy = DateOnly.FromDateTime(DateTime.Now),
+                        TrangThaiThanhToan = "ChuaThanhToan"
+                    };
+                    _context.DangKyLops.Add(newDangKyLop);
+                }
+            }
+            else
+            {
+                var newDangKyLop = new DangKyLop
+                {
+                    MaHocVien = id,
+                    MaLop = dto.MaLop,
+                    NgayDangKy = DateOnly.FromDateTime(DateTime.Now),
+                    TrangThaiThanhToan = "ChuaThanhToan"
+                };
+                _context.DangKyLops.Add(newDangKyLop);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Cập nhật học viên thành công"
+            });
+        }
+
+        // DELETE: api/trainer/students/{id}
+        [HttpDelete("students/{id}")]
+        public async Task<IActionResult> DeleteStudentFromClass(int id)
+        {
+            int currentHlvId = await GetCurrentHlvIdAsync();
+
+            var lopIds = await _context.LopHocs
+                .Where(l => l.MaHlv == currentHlvId)
+                .Select(l => l.MaLop)
+                .ToListAsync();
+
+            // Tìm đăng ký lớp của học viên này thuộc các lớp của HLV
+            var dangKyLop = await _context.DangKyLops
+                .FirstOrDefaultAsync(dk => dk.MaHocVien == id && lopIds.Contains(dk.MaLop));
+
+            if (dangKyLop == null)
+            {
+                return NotFound(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Không tìm thấy học viên trong các lớp do bạn giảng dạy"
+                });
+            }
+
+            // Hủy đăng ký lớp
+            _context.DangKyLops.Remove(dangKyLop);
+            await _context.SaveChangesAsync();
+
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Hủy đăng ký lớp của học viên thành công"
+            });
+        }
+
+        // GET: api/trainer/exams/{examId}/results
+        [HttpGet("exams/{examId}/results")]
+        public async Task<IActionResult> GetExamResults(int examId)
+        {
+            int currentHlvId = await GetCurrentHlvIdAsync();
+
+            // Lấy danh sách khóa học của HLV dạy
+            var khoaHocIds = await _context.LopHocs
+                .Where(l => l.MaHlv == currentHlvId)
+                .Select(l => l.MaKhoaHoc)
+                .Distinct()
+                .ToListAsync();
+
+            // Đảm bảo kỳ thi thuộc khóa học của HLV
+            var kyThi = await _context.KyThiThangDais
+                .FirstOrDefaultAsync(k => k.MaKyThi == examId && khoaHocIds.Contains(k.MaKhoaHoc));
+
+            if (kyThi == null)
+            {
+                return NotFound(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Không tìm thấy kỳ thi hoặc kỳ thi không thuộc quyền quản lý của bạn"
+                });
+            }
+
+            // Lấy danh sách lớp học do HLV dạy thuộc khóa học đó
+            var lopIds = await _context.LopHocs
+                .Where(l => l.MaHlv == currentHlvId && l.MaKhoaHoc == kyThi.MaKhoaHoc)
+                .Select(l => l.MaLop)
+                .ToListAsync();
+
+            // Lấy danh sách học viên trong các lớp này
+            var hocVienIds = await _context.DangKyLops
+                .Where(dk => lopIds.Contains(dk.MaLop))
+                .Select(dk => dk.MaHocVien)
+                .Distinct()
+                .ToListAsync();
+
+            // Lấy thông tin học viên kèm kết quả thi nếu có
+            var results = await _context.HocViens
+                .Where(hv => hocVienIds.Contains(hv.MaHocVien))
+                .Include(hv => hv.MaTaiKhoanNavigation)
+                .Include(hv => hv.MaCapDaiHienTaiNavigation)
+                .Select(hv => new TrainerExamResultDetailDto
+                {
+                    MaHocVien = hv.MaHocVien,
+                    TenHocVien = hv.MaTaiKhoanNavigation != null ? hv.MaTaiKhoanNavigation.HoTen : null,
+                    MaCapDaiHienTai = hv.MaCapDaiHienTai,
+                    TenCapDaiHienTai = hv.MaCapDaiHienTaiNavigation != null ? hv.MaCapDaiHienTaiNavigation.TenCapDai : null,
+                    
+                    DiemSo = _context.KetQuaThis.FirstOrDefault(kq => kq.MaKyThi == examId && kq.MaHocVien == hv.MaHocVien) != null 
+                        ? _context.KetQuaThis.FirstOrDefault(kq => kq.MaKyThi == examId && kq.MaHocVien == hv.MaHocVien).DiemSo : null,
+                    
+                    DaDat = _context.KetQuaThis.FirstOrDefault(kq => kq.MaKyThi == examId && kq.MaHocVien == hv.MaHocVien) != null 
+                        ? (bool?)_context.KetQuaThis.FirstOrDefault(kq => kq.MaKyThi == examId && kq.MaHocVien == hv.MaHocVien).DaDat : null,
+                    
+                    MaCapDaiMoi = _context.KetQuaThis.FirstOrDefault(kq => kq.MaKyThi == examId && kq.MaHocVien == hv.MaHocVien) != null 
+                        ? _context.KetQuaThis.FirstOrDefault(kq => kq.MaKyThi == examId && kq.MaHocVien == hv.MaHocVien).MaCapDaiMoi : null,
+                    
+                    TenCapDaiMoi = _context.KetQuaThis
+                        .Include(kq => kq.MaCapDaiMoiNavigation)
+                        .FirstOrDefault(kq => kq.MaKyThi == examId && kq.MaHocVien == hv.MaHocVien) != null && 
+                        _context.KetQuaThis.Include(kq => kq.MaCapDaiMoiNavigation).FirstOrDefault(kq => kq.MaKyThi == examId && kq.MaHocVien == hv.MaHocVien).MaCapDaiMoiNavigation != null
+                        ? _context.KetQuaThis.Include(kq => kq.MaCapDaiMoiNavigation).FirstOrDefault(kq => kq.MaKyThi == examId && kq.MaHocVien == hv.MaHocVien).MaCapDaiMoiNavigation.TenCapDai : null
+                })
+                .ToListAsync();
+
+            return Ok(new ApiResponse<List<TrainerExamResultDetailDto>>
+            {
+                Success = true,
+                Message = "Lấy kết quả thi của kỳ thi thành công",
+                Data = results
             });
         }
     }
