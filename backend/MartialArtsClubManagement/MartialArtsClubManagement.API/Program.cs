@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using MartialArtsClubManagement.API.Models.Entities;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using MartialArtsClubManagement.API.Models.Entities;
 using MartialArtsClubManagement.API.Models.Config;
 using MartialArtsClubManagement.API.Services;
+
+using MartialArtsClubManagement.API.Models.Entities;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,16 +34,66 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+    // Add Authorization services
+    builder.Services.AddAuthorization();
 
 // Register Auth service
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// Add Controllers
+builder.Services.AddControllers();
+
+// ------------------------------------------------------------
+// Swagger services (added)
+// ------------------------------------------------------------
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "MartialArtsClubManagement API",
+        Version = "v1",
+        Description = "Backend API for Martial Arts Club Management"
+    });
+    // Optional JWT support in Swagger UI
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ------------------------------------------------------------
+// Swagger middleware (added)
+// ------------------------------------------------------------
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "MartialArtsClubManagement API V1");
+        c.RoutePrefix = string.Empty; // UI at http://localhost:5000/
+    });
+
 }
 
 app.UseHttpsRedirection();
