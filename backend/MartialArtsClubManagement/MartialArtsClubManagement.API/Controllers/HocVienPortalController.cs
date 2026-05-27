@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MartialArtsClubManagement.API.Models.Entities;
 using MartialArtsClubManagement.API.Models.DTOs;
 using System.Security.Claims;
+using BCrypt.Net;
 
 namespace MartialArtsClubManagement.API.Controllers
 {
@@ -266,11 +267,45 @@ namespace MartialArtsClubManagement.API.Controllers
                 return StatusCode(500, new { Success = false, Message = ex.Message });
             }
         }
+
+        // PUT: api/HocVienPortal/change-password
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO dto)
+        {
+            try
+            {
+                int maTaiKhoan = GetCurrentTaiKhoanId();
+                var taiKhoan = await _context.TaiKhoans.FindAsync(maTaiKhoan);
+                
+                if (taiKhoan == null) return NotFound(new { Success = false, Message = "Tài khoản không tồn tại" });
+
+                if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, taiKhoan.MatKhauHash))
+                {
+                    return BadRequest(new { Success = false, Message = "Mật khẩu hiện tại không đúng" });
+                }
+
+                taiKhoan.MatKhauHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+                _context.TaiKhoans.Update(taiKhoan);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { Success = true, Message = "Đổi mật khẩu thành công" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Success = false, Message = ex.Message });
+            }
+        }
     }
 
     public class UpdateProfileDTO
     {
         public string? SoDienThoai { get; set; }
         public string? DiaChi { get; set; }
+    }
+
+    public class ChangePasswordDTO
+    {
+        public string CurrentPassword { get; set; } = null!;
+        public string NewPassword { get; set; } = null!;
     }
 }
