@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="close-btn">
+        <a href="dashboard.html">
+            <i class="fa-solid fa-xmark"></i>
+        </a>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-circle">
+                <i class="fa-solid fa-hand-fist"></i>
+            </div>
+            <h4>KARATE UTE</h4>
+        </div>
+        <div class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fa-solid fa-house"></i><span>Trang chủ</span>
+            </a>
+            <a href="hoso.html" class="nav-link">
+                <i class="fa-solid fa-user"></i><span>Hồ sơ</span>
+            </a>
+            <a href="lichtap.html" class="nav-link">
+                <i class="fa-solid fa-calendar"></i><span>Lịch tập</span>
+            </a>
+            <a href="diemdanh.html" class="nav-link">
+                <i class="fa-solid fa-check"></i><span>Điểm danh</span>
+            </a>
+            <a href="hocphi.html" class="nav-link">
+                <i class="fa-solid fa-money-bill"></i><span>Học phí</span>
+            </a>
+            <a href="dangkylop.html" class="nav-link">
+                <i class="fa-solid fa-pen-to-square"></i><span>Đăng ký lớp</span>
+            </a>
+            <a href="thanhtoan.html" class="nav-link active">
+                <i class="fa-solid fa-credit-card"></i><span>Thanh toán</span>
+            </a>
+            <a href="dangkysukien.html" class="nav-link">
+                <i class="fa-solid fa-ticket"></i><span>Đăng ký sự kiện</span>
+            </a>
+            <a href="thangdai.html" class="nav-link">
+                <i class="fa-solid fa-medal"></i><span>Thăng đai</span>
+            </a>
+            <a href="thongbao.html" class="nav-link">
+                <i class="fa-solid fa-bell"></i><span>Thông báo</span>
+            </a>
+            <a href="caidat.html" class="nav-link">
+                <i class="fa-solid fa-gear"></i><span>Cài đặt</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <h1 class="topbar-title">Hệ thống thanh toán</h1>
+        </div>
+
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="card p-4 shadow-sm border-0 mb-4" style="border-radius: 12px;">
+                        <h4 class="mb-3">Khoản cần thanh toán</h4>
+                        <table class="table table-borderless">
+                            <thead class="border-bottom">
+                                <tr>
+                                    <th>Nội dung</th>
+                                    <th>Loại</th>
+                                    <th class="text-end">Số tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Lớp Cơ Bản Khóa 20 (Tháng 5)</td>
+                                    <td>Học phí lớp</td>
+                                    <td class="text-end fw-bold">500,000 đ</td>
+                                </tr>
+                                <tr>
+                                    <td>Gói Kèm Riêng 10 buổi</td>
+                                    <td>Kèm riêng</td>
+                                    <td class="text-end fw-bold">2,000,000 đ</td>
+                                </tr>
+                                <tr class="border-top">
+                                    <td colspan="2" class="fw-bold">Tổng cộng:</td>
+                                    <td class="text-end fw-bold text-danger fs-5">2,500,000 đ</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-md-5">
+                    <div class="card p-4 shadow-sm border-0" style="border-radius: 12px;">
+                        <h4 class="mb-3">Phương thức thanh toán</h4>
+                        <div class="form-check mb-3 p-3 border rounded text-center">
+                            <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="momo" checked>
+                            <label class="form-check-label fw-bold d-flex align-items-center justify-content-center" for="momo">
+                                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" height="30" class="me-2">
+                                Ví MoMo
+                            </label>
+                        </div>
+                        <div class="form-check mb-3 p-3 border rounded text-center">
+                            <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="vnpay">
+                            <label class="form-check-label fw-bold d-flex align-items-center justify-content-center" for="vnpay">
+                                <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png" alt="VNPAY" height="30" class="me-2">
+                                VNPAY
+                            </label>
+                        </div>
+                        <div class="form-check mb-4 p-3 border rounded text-center">
+                            <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="bank">
+                            <label class="form-check-label fw-bold d-flex align-items-center justify-content-center" for="bank">
+                                <i class="fa-solid fa-building-columns fs-4 me-2 text-primary"></i>
+                                Chuyển khoản ngân hàng
+                            </label>
+                        </div>
+                        <button class="btn btn-primary w-100 py-2 fw-bold fs-5">Tiến hành thanh toán</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/app.js"></script>
+</body>
+</html>
