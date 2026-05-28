@@ -107,13 +107,13 @@ namespace MartialArtsClubManagement.API.Controllers
                     .Include(d => d.MaDangKyNavigation)
                         .ThenInclude(dk => dk.MaLopNavigation)
                     .Where(d => d.MaDangKyNavigation.MaHocVien == hocVien.MaHocVien)
-                    .OrderByDescending(d => d.NgayDiemDanh)
+                    .OrderByDescending(d => d.NgayHoc)
                     .Select(d => new
                     {
-                        d.MaDiemDanh,
-                        d.NgayDiemDanh,
-                        d.TrangThai,
-                        LopHoc = d.MaDangKyNavigation.MaLopNavigation.TenLop
+                        MaDiemDanh = d.MaDiemDanh,
+                        NgayHoc = d.NgayHoc,
+                        TrangThai = d.TrangThai,
+                        LopHoc = "Lớp " + d.MaDangKyNavigation.MaLopNavigation.MaLop
                     })
                     .ToListAsync();
 
@@ -143,10 +143,9 @@ namespace MartialArtsClubManagement.API.Controllers
                         k.MaKetQua,
                         k.MaKyThiNavigation.TenKyThi,
                         k.MaKyThiNavigation.NgayThi,
-                        k.DiemLyThuyet,
-                        k.DiemThucHanh,
-                        k.TrangThai,
-                        k.GhiChu
+                        k.DiemSo,
+                        k.DaDat,
+                        CapDaiMoi = k.MaCapDaiMoiNavigation != null ? k.MaCapDaiMoiNavigation.TenCapDai : null
                     })
                     .ToListAsync();
 
@@ -169,11 +168,12 @@ namespace MartialArtsClubManagement.API.Controllers
 
                 var lopHocs = await _context.DangKyLops
                     .Include(d => d.MaLopNavigation)
+                        .ThenInclude(l => l.MaKhoaHocNavigation)
                     .Where(d => d.MaHocVien == hocVien.MaHocVien)
                     .Select(d => new
                     {
                         Loai = "Lớp học",
-                        Ten = d.MaLopNavigation.TenLop,
+                        Ten = d.MaLopNavigation.MaKhoaHocNavigation.TenKhoaHoc,
                         Lich = d.MaLopNavigation.LichHoc,
                         NgayDangKy = d.NgayDangKy
                     })
@@ -187,7 +187,7 @@ namespace MartialArtsClubManagement.API.Controllers
                         Loai = "Kèm riêng",
                         Ten = d.MaGoiNavigation.TenGoi,
                         Lich = "Thỏa thuận với HLV",
-                        NgayDangKy = d.NgayBatDau
+                        NgayDangKy = d.NgayBatDau ?? DateOnly.FromDateTime(DateTime.Now)
                     })
                     .ToListAsync();
 
@@ -210,12 +210,13 @@ namespace MartialArtsClubManagement.API.Controllers
 
                 var lopHocs = await _context.DangKyLops
                     .Include(d => d.MaLopNavigation)
+                        .ThenInclude(l => l.MaKhoaHocNavigation)
                     .Where(d => d.MaHocVien == hocVien.MaHocVien)
                     .Select(d => new
                     {
                         Loai = "Lớp học",
-                        NoiDung = d.MaLopNavigation.TenLop,
-                        SoTien = d.MaLopNavigation.HocPhi,
+                        NoiDung = d.MaLopNavigation.MaKhoaHocNavigation.TenKhoaHoc,
+                        SoTien = d.MaLopNavigation.MaKhoaHocNavigation.HocPhi,
                         TrangThaiThanhToan = d.TrangThaiThanhToan,
                         NgayThanhToan = d.NgayThanhToan
                     })
@@ -249,7 +250,6 @@ namespace MartialArtsClubManagement.API.Controllers
             try
             {
                 var thongBaos = await _context.ThongBaos
-                    .Where(t => t.DoiTuongNhan == "HocVien" || t.DoiTuongNhan == "TatCa")
                     .OrderByDescending(t => t.NgayDang)
                     .Select(t => new
                     {

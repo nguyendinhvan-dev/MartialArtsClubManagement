@@ -676,7 +676,7 @@ namespace MartialArtsClubManagement.API.Controllers
                     if (existing != null)
                     {
                         existing.MaCapDaiMoi = item.MaCapDaiMoi;
-                        existing.DiemSo = item.DiemSo;
+                        existing.DiemSo = item.DiemSo ?? 0;
                         _context.KetQuaThis.Update(existing);
                         updatedCount++;
                     }
@@ -688,7 +688,7 @@ namespace MartialArtsClubManagement.API.Controllers
                     MaKyThi = dto.MaKyThi,
                     MaHocVien = item.MaHocVien,
                     MaCapDaiMoi = item.MaCapDaiMoi,
-                    DiemSo = item.DiemSo
+                    DiemSo = item.DiemSo ?? 0
                 };
 
                 _context.KetQuaThis.Add(newKetQua);
@@ -711,7 +711,7 @@ namespace MartialArtsClubManagement.API.Controllers
             var events = await _context.ThongBaos
                 .Include(t => t.MaTaiKhoanTaoNavigation)
                 .Where(t => t.LoaiThongBao == "SuKien" || t.LoaiThongBao == "ThongBao")
-                .OrderByDescending(t => t.NgayDang)
+                .OrderByDescending(d => d.NgayDang)
                 .Select(t => new TrainerThongBaoDto
                 {
                     MaThongBao = t.MaThongBao,

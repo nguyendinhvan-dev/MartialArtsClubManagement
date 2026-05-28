@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace MartialArtsClubManagement.API.Models.Entities;
@@ -14,6 +14,9 @@ public partial class LopHoc
     public int MaHlv { get; set; }
 
     public string LichHoc { get; set; } = null!;
+
+    public string TenLop { get; set; } = null!;
+    public decimal HocPhi { get; set; }
 
     public int SoLuongToiDa { get; set; }
 
