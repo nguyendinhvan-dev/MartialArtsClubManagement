@@ -15,51 +15,47 @@ async function handleLogin() {
     const MatKhau = passwordInput.value.trim();
 
     if (!TenDangNhap || !MatKhau) {
-        alert("Vui lòng nhập tên đăng nhập và mật khẩu");
+        toast("Vui lòng nhập tên đăng nhập và mật khẩu", 'error');
         return;
     }
 
     const body = {
-        Email: TenDangNhap,
+        Username: TenDangNhap,
         Password: MatKhau
     };
 
     try {
         const result = await apiCall('/auth/login', 'POST', body);
         
-        // Debug: Log full response to console for troubleshooting
         console.log('Login API result:', result);
         
-        if (result && result.success) {
-            // Extract payload correctly (ApiResponse wrapper)
-            const payload = result.data?.Data || result.data?.data || result.data;
-            const token = payload?.Token || payload?.token;
-            const role = payload?.Role || payload?.role;
-            const email = payload?.Email || payload?.email;
+        if (result && result.success && result.data && result.data.success) {
+            const payload = result.data.data;
+            const token = payload?.token;
+            const role = payload?.role;
 
             if (token) {
                 localStorage.setItem('token', token);
                 if (role) localStorage.setItem('role', role);
-                if (email) localStorage.setItem('email', email);
 
-                // Force admin redirect if user is admin (by role or email)
-                if (role && (role === 'Admin' || role === 'QuanTri' || role === 'QuanTriVien')) {
+                const roleLower = role ? role.toLowerCase() : '';
+                
+                // Force admin redirect if user is admin
+                if (roleLower === 'admin' || roleLower === 'quantri' || roleLower === 'quantrivien') {
                     window.location.href = '/admin/dashboard.html';
-                } else if (email && email.toLowerCase() === 'admin@clb.vn') {
-                    window.location.href = '/admin/dashboard.html';
-                } else if (role && role === 'HuanLuyenVien') {
-                    window.location.href = '/huanluyenvien/dashboard.html';
+                } else if (roleLower === 'huanluyenvien' || roleLower === 'trainer') {
+                    window.location.href = '/hlv.html';
                 } else {
-                    window.location.href = '/hocvien/dashboard.html';
+                    window.location.href = '/pages/dashboard.html';
                 }
             } else {
-                alert("Đăng nhập thất bại: Không nhận được token.");
+                toast("Đăng nhập thất bại: Không nhận được token.", 'error');
             }
         } else {
-            alert(result?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+            toast(result?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.", 'error');
         }
     } catch (error) {
-        alert("Có lỗi xảy ra: " + error.message);
+        toast("Có lỗi xảy ra: " + error.message, 'error');
     }
 }
 
@@ -80,13 +76,43 @@ function checkAuth(requiredRole = null) {
 
     if (requiredRole) {
         // requiredRole can be a string or an array of strings
-        const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-        if (!allowedRoles.includes(role)) {
-            alert("Bạn không có quyền truy cập trang này!");
-            window.location.href = '/login.html';
+        const allowedRoles = Array.isArray(requiredRole) ? requiredRole.map(r => r.toLowerCase()) : [requiredRole.toLowerCase()];
+        if (!role || !allowedRoles.includes(role.toLowerCase())) {
+            toast("Bạn không có quyền truy cập trang này!", 'error');
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 1500);
             return false;
         }
     }
 
     return true;
+}
+
+// Global Toast function for login page if not defined
+function toast(msg, type = 'success') {
+    if (window.toast && typeof window.toast === 'function' && window.toast !== toast) {
+        window.toast(msg, type);
+        return;
+    }
+    const colors = { success: '#1e8449', error: '#c0392b', warning: '#9a7d0a', info: '#2980b9' };
+    const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position:fixed;bottom:24px;right:24px;
+      background:${colors[type] || colors.info};
+      color:#fff;padding:12px 18px;border-radius:8px;
+      font-size:.82rem;font-weight:600;font-family:Montserrat,sans-serif;
+      display:flex;align-items:center;gap:9px;
+      box-shadow:0 4px 20px rgba(0,0,0,.4);
+      z-index:9999;animation:fadeUp .2s ease;
+      max-width:320px;
+    `;
+    el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${msg}`;
+    document.body.appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transition = 'opacity .3s';
+      setTimeout(() => el.remove(), 300);
+    }, 3000);
 }
