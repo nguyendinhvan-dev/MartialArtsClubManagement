@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kỳ thi thăng đai | Karate UTE Admin</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary:        #C0392B;
+      --primary-dark:   #922B21;
+      --primary-mid:    #E74C3C;
+      --primary-light:  #FADBD8;
+      --gold:           #D4AC0D;
+      --gold-dark:      #9A7D0A;
+      --gold-light:     #FEF9E7;
+      --bg-dark:        #111111;
+      --sidebar-bg:     #1A1A1A;
+      --surface-dark:   #2C2C2C;
+      --card-bg:        #1E1E1E;
+      --border:         #333333;
+      --border-light:   #444444;
+      --text-primary:   #FFFFFF;
+      --text-secondary: #AAAAAA;
+      --text-muted:     #666666;
+      --success:        #1E8449;
+      --sidebar-width:  260px;
+      --topbar-height:  58px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-dark); color: var(--text-primary); font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-width); height: 100vh; background: var(--sidebar-bg); position: fixed; top:0; left:0; border-right:1px solid var(--border); z-index:1000; display:flex; flex-direction:column; transition: transform .3s ease; }
+    .sidebar-header { padding:24px 20px 20px; text-align:center; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .logo-circle { width:58px; height:58px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.6rem; color:#fff; box-shadow:0 0 0 4px rgba(192,57,43,.25); }
+    .sidebar-header h4 { font-family:'Oswald',sans-serif; font-size:1.15rem; letter-spacing:2px; color:var(--text-primary); margin:0 0 2px; }
+    .sidebar-header small { color:var(--text-secondary); font-size:.7rem; }
+    .sidebar-nav { flex:1; overflow-y:auto; padding:12px 0; }
+    .sidebar-nav::-webkit-scrollbar { width:4px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+    .nav-section-label { font-size:.62rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); padding:14px 25px 5px; font-weight:700; }
+    .nav-link { color:var(--text-secondary); padding:11px 25px; font-weight:500; font-size:.84rem; display:flex; align-items:center; gap:11px; transition:all .25s; border-left:4px solid transparent; text-decoration:none; }
+    .nav-link i { width:20px; font-size:1rem; text-align:center; flex-shrink:0; }
+    .nav-link:hover { color:var(--text-primary); background:rgba(192,57,43,.08); border-left-color:rgba(192,57,43,.4); }
+    .nav-link.active { color:var(--text-primary); background:rgba(192,57,43,.13); border-left-color:var(--primary); }
+    .nav-link.active i { color:var(--primary); }
+    .nav-badge { margin-left:auto; background:var(--primary); color:#fff; font-size:.62rem; padding:2px 7px; border-radius:10px; font-weight:700; }
+    .sidebar-footer { border-top:1px solid var(--border); padding:8px 0; flex-shrink:0; }
+    .sidebar-divider { height:1px; background:var(--border); margin:4px 0; }
+    .logout-link { color:#e74c3c; padding:11px 25px; font-weight:500; font-size:.84rem; display:flex; align-items:center; gap:11px; cursor:pointer; border-left:4px solid transparent; transition:all .25s; user-select:none; }
+    .logout-link:hover { background:rgba(231,76,60,.1); border-left-color:#e74c3c; }
+    .logout-link i { width:20px; text-align:center; }
+
+    /* TOPBAR */
+    .topbar { position:fixed; top:0; left:var(--sidebar-width); right:0; height:var(--topbar-height); background:var(--sidebar-bg); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 28px; z-index:999; }
+    .topbar-left { display:flex; align-items:center; gap:12px; }
+    .topbar-toggle { display:none; width:34px; height:34px; border:1px solid var(--border); border-radius:7px; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; background:none; transition:all .2s; }
+    .topbar-toggle:hover { border-color:var(--primary); color:var(--primary); }
+    .topbar-title { font-family:'Oswald',sans-serif; font-size:1rem; text-transform:uppercase; letter-spacing:1px; }
+    .topbar-title .page-name { color:var(--primary); }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .topbar-date { font-size:.75rem; color:var(--text-secondary); }
+    .topbar-icon { width:34px; height:34px; border:1px solid var(--border); border-radius:7px; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; position:relative; transition:all .2s; background:none; }
+    .topbar-icon:hover { border-color:var(--primary); color:var(--primary); }
+    .notif-dot { position:absolute; top:6px; right:7px; width:7px; height:7px; background:var(--primary); border-radius:50%; border:1.5px solid var(--sidebar-bg); }
+    .admin-chip { display:flex; align-items:center; gap:8px; padding:4px 10px 4px 4px; border:1px solid var(--border); border-radius:20px; cursor:pointer; transition:border-color .2s; }
+    .admin-chip:hover { border-color:var(--primary); }
+    .admin-avatar { width:26px; height:26px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; }
+    .admin-name { font-size:.75rem; font-weight:600; color:var(--text-secondary); }
+
+    /* MAIN */
+    .main-content { margin-left:var(--sidebar-width); padding:calc(var(--topbar-height) + 20px) 28px 40px; min-height:100vh; }
+    .page-header { margin-bottom:24px; }
+    .page-title { font-family:'Oswald',sans-serif; font-size:1.7rem; text-transform:uppercase; border-left:5px solid var(--primary); padding-left:14px; line-height:1.1; margin-bottom:6px; }
+    .page-subtitle { font-size:.75rem; color:var(--text-secondary); margin-left:19px; }
+
+    /* STAT CARDS */
+    .stat-cards-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+    .stat-card { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:14px; display:flex; flex-direction:column; gap:8px; transition:transform .2s,border-color .2s; }
+    .stat-card:hover { transform:translateY(-3px); border-color:var(--border-light); }
+    .stat-left { display:flex; align-items:center; gap:10px; }
+    .stat-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .si-red    { background:rgba(192,57,43,.2); color:#e74c3c; }
+    .si-blue   { background:rgba(52,152,219,.2); color:#3498db; }
+    .si-green  { background:rgba(46,204,113,.2); color:#2ecc71; }
+    .si-gold   { background:rgba(212,172,13,.2); color:var(--gold); }
+    .si-orange { background:rgba(230,126,34,.2); color:#e67e22; }
+    .stat-num { font-family:'Oswald',sans-serif; font-size:1.5rem; font-weight:700; line-height:1; }
+    .stat-label { font-size:.68rem; color:var(--text-secondary); margin-top:3px; }
+
+    /* CARD BOX */
+    .card-box { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:22px; }
+    .card-box-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--border); }
+    .card-box-title { font-family:'Oswald',sans-serif; font-size:.95rem; text-transform:uppercase; letter-spacing:.5px; display:flex; align-items:center; gap:8px; }
+    .card-box-title i { color:var(--primary); }
+
+    /* TABLE */
+    .table { color:#ddd; margin:0; }
+    .table thead th { background:#252525; color:var(--primary); text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; padding:13px 16px; border-bottom:1px solid var(--border); font-weight:600; white-space:nowrap; }
+    .table tbody tr { transition:background .15s; }
+    .table tbody tr:hover { background:rgba(255,255,255,.03); }
+    .table td { padding:12px 16px; border-bottom:1px solid #252525; vertical-align:middle; font-size:.83rem; }
+    .table tbody tr:last-child td { border-bottom:none; }
+    .td-main { font-weight:600; font-size:.85rem; }
+    .td-sub  { color:var(--text-secondary); font-size:.72rem; margin-top:1px; }
+
+    /* TOOLBAR */
+    .table-toolbar { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .table-toolbar .ms-auto { margin-left:auto; }
+    .search-bar { display:flex; align-items:center; gap:8px; background:#161616; border:1px solid var(--border); border-radius:7px; padding:6px 12px; flex:1; max-width:280px; }
+    .search-bar i { color:var(--text-muted); font-size:.85rem; flex-shrink:0; }
+    .search-bar input { background:none; border:none; outline:none; color:#fff; font-size:.82rem; font-family:'Montserrat',sans-serif; width:100%; }
+    .search-bar input::placeholder { color:#555; }
+    .filter-select { background:#161616; border:1px solid var(--border); color:var(--text-secondary); border-radius:7px; font-size:.78rem; padding:6px 10px; font-family:'Montserrat',sans-serif; cursor:pointer; outline:none; }
+    .filter-select:focus { border-color:var(--primary); }
+    .filter-select option { background:#1e1e1e; }
+    .btn-primary-sm { background:var(--primary); color:#fff; border:none; border-radius:6px; padding:7px 14px; font-size:.78rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background .2s; }
+    .btn-primary-sm:hover { background:var(--primary-dark); }
+    .btn-gold-sm { background:var(--gold); color:#111; border:none; border-radius:6px; padding:7px 14px; font-size:.78rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background .2s; }
+    .btn-gold-sm:hover { background:var(--gold-dark); color:#fff; }
+
+    /* PAGINATION */
+    .pagination-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-top:1px solid var(--border); font-size:.75rem; color:var(--text-secondary); }
+    .pag-btns { display:flex; gap:4px; }
+    .pag-btn { width:30px; height:30px; border:1px solid var(--border); background:none; color:var(--text-secondary); border-radius:5px; font-size:.75rem; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; }
+    .pag-btn:hover, .pag-btn.active { border-color:var(--primary); color:var(--primary); }
+
+    /* STATUS */
+    .status { display:inline-flex; align-items:center; gap:5px; font-size:.75rem; font-weight:600; padding:3px 10px; border-radius:12px; }
+    .status-dot { width:6px; height:6px; border-radius:50%; }
+    .status-upcoming { background:rgba(52,152,219,.15); color:#3498db; }
+    .status-upcoming .status-dot { background:#3498db; }
+    .status-done     { background:rgba(46,204,113,.15); color:#2ecc71; }
+    .status-done .status-dot { background:#2ecc71; }
+    .status-cancel   { background:rgba(192,57,43,.12); color:#e74c3c; }
+    .status-cancel .status-dot { background:#e74c3c; }
+
+    /* BELT BADGES */
+    .belt { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; }
+    .belt-white  { background:#E0E0E0; color:#111; }
+    .belt-yellow { background:#FFD700; color:#111; }
+    .belt-orange { background:#F5A623; color:#fff; }
+    .belt-green  { background:#27AE60; color:#fff; }
+    .belt-blue   { background:#2980B9; color:#fff; }
+    .belt-purple { background:#8E44AD; color:#fff; }
+    .belt-red    { background:#C0392B; color:#fff; }
+    .belt-black  { background:#1A1A1A; color:var(--gold); border:1px solid #555; }
+
+    /* SCORE BADGE */
+    .score-badge { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; font-family:'Oswald',sans-serif; font-size:1rem; font-weight:700; }
+    .score-pass { background:rgba(46,204,113,.15); color:#2ecc71; border:1.5px solid rgba(46,204,113,.3); }
+    .score-fail { background:rgba(192,57,43,.12); color:#e74c3c; border:1.5px solid rgba(192,57,43,.25); }
+
+    /* ACTION BTNS */
+    .action-btn { width:28px; height:28px; border:1px solid var(--border); background:none; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; transition:all .2s; font-size:.78rem; }
+    .action-btn:hover { border-color:var(--border-light); color:#fff; }
+    .action-btn.view:hover  { border-color:#3498db; color:#3498db; }
+    .action-btn.edit:hover  { border-color:#f39c12; color:#f39c12; }
+    .action-btn.del:hover   { border-color:#e74c3c; color:#e74c3c; }
+    .action-btn.score:hover { border-color:var(--gold); color:var(--gold); }
+
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.78); z-index:2000; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.show { display:flex; }
+    .modal-box { background:var(--card-bg); border:1px solid #3a3a3a; border-radius:10px; width:100%; max-height:90vh; display:flex; flex-direction:column; animation:fadeUp .22s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+    .modal-hdr { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .modal-hdr-title { font-family:'Oswald',sans-serif; text-transform:uppercase; font-size:.95rem; display:flex; align-items:center; gap:9px; }
+    .modal-hdr-title i { color:var(--primary); }
+    .modal-close { background:none; border:none; color:var(--text-secondary); font-size:1rem; cursor:pointer; padding:4px 6px; border-radius:5px; transition:all .2s; }
+    .modal-close:hover { color:#fff; background:rgba(255,255,255,.05); }
+    .modal-body { padding:22px; overflow-y:auto; flex:1; }
+    .modal-ftr { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; flex-shrink:0; }
+    .modal-confirm { padding:32px 28px; text-align:center; }
+    .confirm-icon { width:66px; height:66px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:1.6rem; }
+    .ci-danger { background:rgba(231,76,60,.15); color:#e74c3c; }
+    .ci-logout { background:rgba(255,107,107,.12); color:#ff6b6b; }
+    .confirm-title { font-family:'Oswald',sans-serif; text-transform:uppercase; font-size:1.2rem; margin-bottom:10px; }
+    .confirm-desc { color:var(--text-secondary); font-size:.82rem; line-height:1.6; margin-bottom:24px; }
+    .confirm-btns { display:flex; gap:10px; justify-content:center; }
+
+    /* FORM */
+    .form-label { font-size:.78rem; color:var(--text-secondary); margin-bottom:6px; display:block; }
+    .form-control, .form-select { background:#111; border:1px solid #333; color:#fff; border-radius:7px; font-size:.84rem; padding:9px 13px; font-family:'Montserrat',sans-serif; width:100%; }
+    .form-control:focus, .form-select:focus { background:#111; border-color:var(--primary); color:#fff; box-shadow:0 0 0 3px rgba(192,57,43,.15); outline:none; }
+    .form-control::placeholder { color:#555; }
+    .form-control[readonly] { color:#555; cursor:not-allowed; }
+    .form-select option { background:#1e1e1e; }
+    textarea.form-control { resize:vertical; min-height:80px; }
+    .form-section-title { font-size:.7rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+
+    /* BUTTONS */
+    .btn-red { background:var(--primary); color:#fff; border:none; border-radius:7px; padding:9px 20px; font-size:.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:background .2s; font-family:'Montserrat',sans-serif; }
+    .btn-red:hover { background:var(--primary-dark); }
+    .btn-danger { background:#c0392b; color:#fff; border:none; border-radius:7px; padding:9px 20px; font-size:.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:background .2s; font-family:'Montserrat',sans-serif; }
+    .btn-danger:hover { background:#a93226; }
+    .btn-outline { background:transparent; border:1px solid var(--border-light); color:#aaa; border-radius:7px; padding:9px 18px; font-size:.83rem; cursor:pointer; transition:all .2s; font-family:'Montserrat',sans-serif; display:inline-flex; align-items:center; gap:7px; }
+    .btn-outline:hover { border-color:#666; color:#fff; }
+    .btn-gold { background:var(--gold); color:#111; border:none; border-radius:7px; padding:9px 20px; font-size:.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:background .2s; font-family:'Montserrat',sans-serif; }
+    .btn-gold:hover { background:var(--gold-dark); color:#fff; }
+
+    /* INFO VIEW */
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .info-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); margin-bottom:3px; }
+    .info-value { font-size:.85rem; font-weight:600; color:#ddd; }
+
+    /* KẾT QUẢ THI TABLE in modal */
+    .result-table { width:100%; border-collapse:collapse; font-size:.82rem; }
+    .result-table th { background:#252525; color:var(--primary); font-size:.72rem; text-transform:uppercase; padding:10px 12px; border-bottom:1px solid var(--border); font-weight:600; }
+    .result-table td { padding:10px 12px; border-bottom:1px solid #252525; vertical-align:middle; color:#ddd; }
+    .result-table tbody tr:last-child td { border-bottom:none; }
+    .result-table tbody tr:hover { background:rgba(255,255,255,.02); }
+
+    /* RESPONSIVE */
+    @media (max-width:992px) { .sidebar{transform:translateX(-260px);} .sidebar.open{transform:translateX(0);} .topbar{left:0;} .main-content{margin-left:0;} .topbar-toggle{display:flex;} .topbar-date{display:none;} }
+    @media (max-width:768px) { .stat-cards-grid{grid-template-columns:repeat(2,1fr);} }
+    @media (max-width:576px) { .main-content{padding:calc(var(--topbar-height) + 16px) 16px 32px;} .info-grid{grid-template-columns:1fr;} }
+
+    /* TOAST */
+    #toastContainer { position:fixed; bottom:22px; right:22px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+    .toast-item { background:#222; border:1px solid var(--border); border-radius:8px; padding:12px 16px; font-size:.82rem; display:flex; align-items:center; gap:10px; min-width:240px; max-width:360px; animation:slideIn .22s ease; }
+    @keyframes slideIn { from{opacity:0;transform:translateX(30px);} to{opacity:1;transform:translateX(0);} }
+    .toast-success { border-left:3px solid #2ecc71; }
+    .toast-error   { border-left:3px solid #e74c3c; }
+    .toast-info    { border-left:3px solid #3498db; }
+    .toast-icon-s { color:#2ecc71; } .toast-icon-e { color:#e74c3c; } .toast-icon-i { color:#3498db; }
+    ::-webkit-scrollbar { width:4px; height:4px; }
+    ::-webkit-scrollbar-thumb { background:#333; border-radius:4px; }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     SIDEBAR — DÙNG CHUNG (giữ nguyên)
+================================================================= -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-circle"><i class="fas fa-hand-fist"></i></div>
+    <h4>KARATE UTE</h4>
+    <small>Hệ thống quản lý CLB</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Chính</div>
+    <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+    <div class="nav-section-label">Quản lý</div>
+    <a href="hocvien.html" class="nav-link"><i class="fas fa-user-graduate"></i><span>Quản lý Học viên</span><span class="nav-badge">128</span></a>
+    <a href="huanluyenvien.html" class="nav-link"><i class="fas fa-user-tie"></i><span>Huấn luyện viên</span></a>
+    <a href="lophoc.html" class="nav-link"><i class="fas fa-chalkboard"></i><span>Khóa học &amp; Lớp</span></a>
+    <a href="diemdanh.html" class="nav-link"><i class="fas fa-clipboard-check"></i><span>Điểm danh</span></a>
+    <div class="nav-section-label">Tài chính &amp; Thi đua</div>
+    <a href="hocphi.html" class="nav-link"><i class="fas fa-wallet"></i><span>Học phí &amp; Thu chi</span><span class="nav-badge">3</span></a>
+    <a href="thangdai.html" class="nav-link active"><i class="fas fa-trophy"></i><span>Kỳ thi thăng đai</span></a>
+    <a href="sukien.html" class="nav-link"><i class="fas fa-bullhorn"></i><span>Thông báo &amp; Sự kiện</span></a>
+    <div class="nav-section-label">Hệ thống</div>
+    <a href="taikhoan.html" class="nav-link"><i class="fas fa-users-cog"></i><span>Tài khoản Admin</span></a>
+    <a href="caidat.html" class="nav-link"><i class="fas fa-cog"></i><span>Cài đặt hệ thống</span></a>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="padding:10px 25px 4px;display:flex;align-items:center;gap:10px;">
+      <div style="width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;">A</div>
+      <div>
+        <div style="font-size:.78rem;font-weight:600;color:#ddd;">Admin</div>
+        <div style="font-size:.65rem;color:var(--text-muted);">admin@karateute.edu.vn</div>
+      </div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="logout-link" onclick="showModal('logoutModal')"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></div>
+  </div>
+</div>
+<div id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;" onclick="closeSidebar()"></div>
+
+<!-- ================================================================
+     TOPBAR — DÙNG CHUNG (giữ nguyên)
+================================================================= -->
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="topbar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="topbar-title">
+      <span class="page-name">Kỳ thi thăng đai</span> &rsaquo; <span>Danh sách kỳ thi</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-date"><i class="far fa-calendar-alt me-1"></i><span id="topbarDate">Đang tải...</span></span>
+    <div class="topbar-icon"><i class="fas fa-bell"></i><span class="notif-dot"></span></div>
+    <div class="admin-chip" onclick="showModal('logoutModal')">
+      <div class="admin-avatar">A</div>
+      <span class="admin-name">Admin</span>
+    </div>
+  </div>
+</header>
+
+<!-- ================================================================
+     MAIN CONTENT — KỲ THI THĂNG ĐAI
+================================================================= -->
+<main class="main-content">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title"><i class="fas fa-trophy" style="color:var(--gold);margin-right:10px;font-size:1.3rem;"></i>Kỳ thi thăng đai</div>
+    <div class="page-subtitle">Tài chính &amp; Thi đua &rsaquo; Kỳ thi thăng đai</div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-cards-grid">
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-icon si-gold"><i class="fas fa-trophy"></i></div>
+        <div>
+          <div class="stat-num" id="statTongKyThi">—</div>
+          <div class="stat-label">Tổng kỳ thi</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-icon si-blue"><i class="fas fa-clock"></i></div>
+        <div>
+          <div class="stat-num" id="statSapDienRa">—</div>
+          <div class="stat-label">Sắp diễn ra</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-icon si-green"><i class="fas fa-circle-check"></i></div>
+        <div>
+          <div class="stat-num" id="statDaDienRa">—</div>
+          <div class="stat-label">Đã kết thúc</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-icon si-red"><i class="fas fa-users"></i></div>
+        <div>
+          <div class="stat-num" id="statTongThiSinh">—</div>
+          <div class="stat-label">Tổng thí sinh</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Danh sách Kỳ thi -->
+  <div class="card-box">
+    <div class="card-box-header">
+      <div class="card-box-title"><i class="fas fa-list"></i> Danh sách kỳ thi</div>
+      <button class="btn-primary-sm" onclick="showModal('modalThemKyThi')"><i class="fas fa-plus"></i> Thêm kỳ thi</button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="table-toolbar">
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchKyThi" placeholder="Tìm theo tên khóa học, mô tả...">
+      </div>
+      <select class="filter-select" id="filterTrangThai">
+        <option value="">Tất cả trạng thái</option>
+        <option value="SapDienRa">Sắp diễn ra</option>
+        <option value="DaDienRa">Đã diễn ra</option>
+        <option value="DaHuy">Đã hủy</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:50px;">Mã</th>
+            <th>Khóa học</th>
+            <th>Ngày thi</th>
+            <th>Mô tả</th>
+            <th>Thí sinh</th>
+            <th>Tỉ lệ đạt</th>
+            <th>Trạng thái</th>
+            <th style="width:110px;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyKyThi">
+          <!-- JS render -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination-bar">
+      <span id="paginfoKyThi">Hiển thị 0 / 0 kỳ thi</span>
+      <div class="pag-btns">
+        <button class="pag-btn active">1</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toastContainer"></div>
+
+<!-- ================================================================
+     MODAL: LOGOUT — DÙNG CHUNG (giữ nguyên)
+================================================================= -->
+<div class="modal-overlay" id="logoutModal" onclick="backdropClose(event,'logoutModal')">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-confirm">
+      <div class="confirm-icon ci-logout"><i class="fas fa-sign-out-alt"></i></div>
+      <div class="confirm-title">Đăng xuất?</div>
+      <div class="confirm-desc">Bạn có chắc muốn đăng xuất khỏi hệ thống Karate UTE không?</div>
+      <div class="confirm-btns">
+        <button class="btn-outline" onclick="hideModal('logoutModal')"><i class="fas fa-times"></i> Hủy</button>
+        <button class="btn-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL: THÊM KỲ THI
+     Bảng: KyThiThangDai (MaKhoaHoc, NgayThi, MoTa, TrangThai)
+================================================================= -->
+<div class="modal-overlay" id="modalThemKyThi" onclick="backdropClose(event,'modalThemKyThi')">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title"><i class="fas fa-plus-circle"></i> Thêm kỳ thi thăng đai</div>
+      <button class="modal-close" onclick="hideModal('modalThemKyThi')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;gap:14px;">
+        <div class="form-section-title">Thông tin kỳ thi</div>
+        <div>
+          <label class="form-label">Khóa học <span style="color:var(--primary)">*</span></label>
+          <select class="form-select" id="them_MaKhoaHoc">
+            <option value="">-- Chọn khóa học --</option>
+            <option value="1">Khóa 5 – 2026</option>
+            <option value="2">Khóa 6 – 2026</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Ngày thi <span style="color:var(--primary)">*</span></label>
+          <input type="date" class="form-control" id="them_NgayThi">
+        </div>
+        <div>
+          <label class="form-label">Mô tả</label>
+          <textarea class="form-control" id="them_MoTa" placeholder="VD: Kỳ thi thăng đai cuối Khóa 5..."></textarea>
+        </div>
+        <div>
+          <label class="form-label">Trạng thái</label>
+          <select class="form-select" id="them_TrangThai">
+            <option value="SapDienRa">Sắp diễn ra</option>
+            <option value="DaDienRa">Đã diễn ra</option>
+            <option value="DaHuy">Đã hủy</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalThemKyThi')"><i class="fas fa-times"></i> Hủy</button>
+      <button class="btn-red" onclick="luuThemKyThi()"><i class="fas fa-save"></i> Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL: SỬA KỲ THI
+     Bảng: KyThiThangDai (MaKyThi, MaKhoaHoc, NgayThi, MoTa, TrangThai)
+================================================================= -->
+<div class="modal-overlay" id="modalSuaKyThi" onclick="backdropClose(event,'modalSuaKyThi')">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:#f39c12;"><i class="fas fa-pen" style="color:#f39c12;"></i> Chỉnh sửa kỳ thi</div>
+      <button class="modal-close" onclick="hideModal('modalSuaKyThi')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;gap:14px;">
+        <input type="hidden" id="sua_MaKyThi">
+        <div class="form-section-title">Thông tin kỳ thi</div>
+        <div>
+          <label class="form-label">Mã kỳ thi</label>
+          <input type="text" class="form-control" id="sua_MaKyThi_show" readonly>
+        </div>
+        <div>
+          <label class="form-label">Khóa học <span style="color:var(--primary)">*</span></label>
+          <select class="form-select" id="sua_MaKhoaHoc">
+            <option value="1">Khóa 5 – 2026</option>
+            <option value="2">Khóa 6 – 2026</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Ngày thi <span style="color:var(--primary)">*</span></label>
+          <input type="date" class="form-control" id="sua_NgayThi">
+        </div>
+        <div>
+          <label class="form-label">Mô tả</label>
+          <textarea class="form-control" id="sua_MoTa"></textarea>
+        </div>
+        <div>
+          <label class="form-label">Trạng thái</label>
+          <select class="form-select" id="sua_TrangThai">
+            <option value="SapDienRa">Sắp diễn ra</option>
+            <option value="DaDienRa">Đã diễn ra</option>
+            <option value="DaHuy">Đã hủy</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalSuaKyThi')"><i class="fas fa-times"></i> Hủy</button>
+      <button class="btn-red" onclick="luuSuaKyThi()"><i class="fas fa-save"></i> Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL: XEM CHI TIẾT KỲ THI
+     Hiển thị: KyThiThangDai + KetQuaThi (JOIN HocVien, CapDai)
+================================================================= -->
+<div class="modal-overlay" id="modalXemKyThi" onclick="backdropClose(event,'modalXemKyThi')">
+  <div class="modal-box" style="max-width:700px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:#3498db;"><i class="fas fa-trophy" style="color:var(--gold);"></i> Chi tiết kỳ thi</div>
+      <button class="modal-close" onclick="hideModal('modalXemKyThi')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <!-- Thông tin kỳ thi -->
+      <div class="info-grid" style="margin-bottom:20px;">
+        <div>
+          <div class="info-label">Mã kỳ thi</div>
+          <div class="info-value" id="xem_MaKyThi">—</div>
+        </div>
+        <div>
+          <div class="info-label">Khóa học</div>
+          <div class="info-value" id="xem_TenKhoaHoc">—</div>
+        </div>
+        <div>
+          <div class="info-label">Ngày thi</div>
+          <div class="info-value" id="xem_NgayThi">—</div>
+        </div>
+        <div>
+          <div class="info-label">Trạng thái</div>
+          <div class="info-value" id="xem_TrangThai">—</div>
+        </div>
+        <div style="grid-column:1/-1;">
+          <div class="info-label">Mô tả</div>
+          <div class="info-value" id="xem_MoTa" style="font-weight:400;color:#bbb;">—</div>
+        </div>
+      </div>
+
+      <!-- Kết quả thi -->
+      <div class="form-section-title" style="margin-bottom:12px;">
+        <i class="fas fa-list-check" style="color:var(--primary);margin-right:6px;"></i>Kết quả thí sinh
+      </div>
+      <!-- Summary row -->
+      <div style="display:flex;gap:14px;margin-bottom:14px;" id="xem_Summary">
+        <div style="background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);border-radius:7px;padding:10px 16px;flex:1;text-align:center;">
+          <div style="font-family:'Oswald',sans-serif;font-size:1.3rem;color:#2ecc71;" id="xem_SoDat">0</div>
+          <div style="font-size:.7rem;color:var(--text-secondary);">Đạt</div>
+        </div>
+        <div style="background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.2);border-radius:7px;padding:10px 16px;flex:1;text-align:center;">
+          <div style="font-family:'Oswald',sans-serif;font-size:1.3rem;color:#e74c3c;" id="xem_SoKhongDat">0</div>
+          <div style="font-size:.7rem;color:var(--text-secondary);">Không đạt</div>
+        </div>
+        <div style="background:rgba(212,172,13,.08);border:1px solid rgba(212,172,13,.2);border-radius:7px;padding:10px 16px;flex:1;text-align:center;">
+          <div style="font-family:'Oswald',sans-serif;font-size:1.3rem;color:var(--gold);" id="xem_DiemTB">—</div>
+          <div style="font-size:.7rem;color:var(--text-secondary);">Điểm trung bình</div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th>Học viên</th>
+              <th style="text-align:center;">Điểm số</th>
+              <th>Đai mới</th>
+              <th style="text-align:center;">Kết quả</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyKetQua">
+            <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">Chưa có kết quả</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalXemKyThi')"><i class="fas fa-times"></i> Đóng</button>
+      <button class="btn-gold" onclick="hideModal('modalXemKyThi');openNhapKetQua(_currentViewId)"><i class="fas fa-pen-to-square"></i> Nhập kết quả</button>
+      <button class="btn-red" onclick="hideModal('modalXemKyThi');openEditKyThi(_currentViewId)"><i class="fas fa-pen"></i> Chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL: NHẬP KẾT QUẢ THI
+     Bảng: KetQuaThi (MaKyThi, MaHocVien, DiemSo, DaDat, MaCapDaiMoi)
+================================================================= -->
+<div class="modal-overlay" id="modalNhapKetQua" onclick="backdropClose(event,'modalNhapKetQua')">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:var(--gold);"><i class="fas fa-pen-to-square" style="color:var(--gold);"></i> Nhập kết quả thi</div>
+      <button class="modal-close" onclick="hideModal('modalNhapKetQua')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="background:rgba(212,172,13,.06);border:1px solid rgba(212,172,13,.15);border-radius:7px;padding:12px 16px;margin-bottom:18px;font-size:.82rem;color:#ccc;">
+        <i class="fas fa-info-circle" style="color:var(--gold);margin-right:6px;"></i>
+        Nhập điểm số (thang 10) và đai mới cho từng thí sinh. Điểm ≥ 5.0 = Đạt.
+      </div>
+      <div id="formNhapKetQua" style="display:grid;gap:12px;">
+        <!-- JS render rows -->
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalNhapKetQua')"><i class="fas fa-times"></i> Hủy</button>
+      <button class="btn-gold" onclick="luuKetQua()"><i class="fas fa-save"></i> Lưu kết quả</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL: XÁC NHẬN XÓA
+================================================================= -->
+<div class="modal-overlay" id="modalXoaKyThi" onclick="backdropClose(event,'modalXoaKyThi')">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-confirm">
+      <div class="confirm-icon ci-danger"><i class="fas fa-trash-alt"></i></div>
+      <div class="confirm-title">Xóa kỳ thi?</div>
+      <div class="confirm-desc">Kỳ thi <strong id="xoa_TenKyThi"></strong> và toàn bộ kết quả thi liên quan sẽ bị xóa vĩnh viễn và không thể hoàn tác.</div>
+      <div class="confirm-btns">
+        <button class="btn-outline" onclick="hideModal('modalXoaKyThi')"><i class="fas fa-times"></i> Hủy</button>
+        <button class="btn-danger" onclick="xacNhanXoaKyThi()"><i class="fas fa-trash-alt"></i> Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCRIPTS
+================================================================= -->
+<script>
+/* ── DỮ LIỆU MẪU — bám cột SQL: KyThiThangDai + KetQuaThi ── */
+const khoaHocMap = {
+  1: 'Khóa 5 – 2026',
+  2: 'Khóa 6 – 2026'
+};
+
+const capDaiList = [
+  { MaCapDai:1, TenCapDai:'Đai Trắng',      MauSac:'white',  cls:'belt-white' },
+  { MaCapDai:2, TenCapDai:'Đai Vàng',        MauSac:'yellow', cls:'belt-yellow' },
+  { MaCapDai:3, TenCapDai:'Đai Cam',         MauSac:'orange', cls:'belt-orange' },
+  { MaCapDai:4, TenCapDai:'Đai Xanh lá',    MauSac:'green',  cls:'belt-green' },
+  { MaCapDai:5, TenCapDai:'Đai Xanh dương', MauSac:'blue',   cls:'belt-blue' },
+  { MaCapDai:6, TenCapDai:'Đai Đỏ',         MauSac:'red',    cls:'belt-red' },
+  { MaCapDai:7, TenCapDai:'Đai Đen',         MauSac:'black',  cls:'belt-black' },
+];
+
+/* KyThiThangDai */
+const danhSachKyThi = {
+  1: { MaKyThi:1, MaKhoaHoc:1, NgayThi:'2026-05-25', MoTa:'Kỳ thi thăng đai cuối Khóa 5', TrangThai:'SapDienRa' },
+  2: { MaKyThi:2, MaKhoaHoc:1, NgayThi:'2026-02-10', MoTa:'Kỳ thi thăng đai giữa Khóa 5', TrangThai:'DaDienRa' },
+};
+
+/* KetQuaThi — MaKyThi → mảng kết quả */
+const ketQuaThiMap = {
+  2: [
+    { MaKetQua:1, MaKyThi:2, MaHocVien:1, HoTen:'Nguyễn Đình Văn',   DiemSo:8.5, DaDat:1, MaCapDaiMoi:2 },
+    { MaKetQua:2, MaKyThi:2, MaHocVien:2, HoTen:'Trần Nhật Hoàng',   DiemSo:6.0, DaDat:1, MaCapDaiMoi:3 },
+    { MaKetQua:3, MaKyThi:2, MaHocVien:3, HoTen:'Nguyễn Đăng Thắng', DiemSo:4.5, DaDat:0, MaCapDaiMoi:null },
+  ]
+};
+
+/* Danh sách học viên (giả lập để nhập kết quả) */
+const hocVienList = [
+  { MaHocVien:1, HoTen:'Nguyễn Đình Văn',   CapDaiHienTai:'Đai Trắng' },
+  { MaHocVien:2, HoTen:'Trần Nhật Hoàng',   CapDaiHienTai:'Đai Vàng' },
+  { MaHocVien:3, HoTen:'Nguyễn Đăng Thắng', CapDaiHienTai:'Đai Trắng' },
+];
+
+let _currentViewId   = null;
+let _currentDeleteId = null;
+let _nextId = 3;
+
+/* ── FORMAT DATE ── */
+function fmtDate(d) {
+  if (!d) return '—';
+  const p = d.split('-');
+  return p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : d;
+}
+
+/* ── TRẠNG THÁI BADGE ── */
+function trangThaiBadge(tt) {
+  if (tt==='SapDienRa') return '<span class="status status-upcoming"><span class="status-dot"></span>Sắp diễn ra</span>';
+  if (tt==='DaDienRa')  return '<span class="status status-done"><span class="status-dot"></span>Đã diễn ra</span>';
+  return '<span class="status status-cancel"><span class="status-dot"></span>Đã hủy</span>';
+}
+
+/* ── ĐAI BADGE ── */
+function daiBadge(maDai) {
+  if (!maDai) return '<span style="color:var(--text-muted)">—</span>';
+  const d = capDaiList.find(x=>x.MaCapDai===maDai);
+  if (!d) return '—';
+  return `<span class="belt ${d.cls}">${d.TenCapDai}</span>`;
+}
+
+/* ── THỐNG KÊ ── */
+function updateStats() {
+  const all = Object.values(danhSachKyThi);
+  document.getElementById('statTongKyThi').textContent   = all.length;
+  document.getElementById('statSapDienRa').textContent   = all.filter(k=>k.TrangThai==='SapDienRa').length;
+  document.getElementById('statDaDienRa').textContent    = all.filter(k=>k.TrangThai==='DaDienRa').length;
+  // Tổng thí sinh qua tất cả kỳ thi
+  let total = 0;
+  Object.values(ketQuaThiMap).forEach(arr => total += arr.length);
+  document.getElementById('statTongThiSinh').textContent = total;
+}
+
+/* ── RENDER TABLE ── */
+function renderTable() {
+  const q  = (document.getElementById('searchKyThi').value||'').toLowerCase().trim();
+  const ts = document.getElementById('filterTrangThai').value;
+
+  const rows = Object.values(danhSachKyThi).filter(k => {
+    const text = (khoaHocMap[k.MaKhoaHoc]||'') + (k.MoTa||'');
+    const matchQ  = !q  || text.toLowerCase().includes(q);
+    const matchTS = !ts || k.TrangThai===ts;
+    return matchQ && matchTS;
+  });
+
+  document.getElementById('paginfoKyThi').textContent =
+    `Hiển thị ${rows.length} / ${Object.keys(danhSachKyThi).length} kỳ thi`;
+
+  const tbody = document.getElementById('tbodyKyThi');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted);">Không có kỳ thi nào</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(k => {
+    const kq   = ketQuaThiMap[k.MaKyThi] || [];
+    const dat  = kq.filter(r=>r.DaDat).length;
+    const tong = kq.length;
+    const tiLe = tong > 0 ? Math.round(dat/tong*100) + '%' : '—';
+    const diemTB = tong > 0
+      ? (kq.reduce((s,r)=>s+r.DiemSo,0)/tong).toFixed(1)
+      : '—';
+
+    return `
+      <tr>
+        <td style="color:var(--text-muted);font-size:.75rem;">#${k.MaKyThi}</td>
+        <td>
+          <div class="td-main">${khoaHocMap[k.MaKhoaHoc]||'—'}</div>
+        </td>
+        <td><div class="td-main">${fmtDate(k.NgayThi)}</div></td>
+        <td style="max-width:200px;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;color:var(--text-secondary);font-size:.8rem;">${k.MoTa||'—'}</div></td>
+        <td style="text-align:center;">
+          <span style="font-family:'Oswald',sans-serif;font-size:1.1rem;">${tong}</span>
+          <div style="font-size:.65rem;color:var(--text-muted);">thí sinh</div>
+        </td>
+        <td style="text-align:center;">
+          ${tong>0
+            ? `<span style="font-weight:700;color:${dat===tong?'#2ecc71':'#f1c40f'};">${tiLe}</span>
+               <div style="font-size:.65rem;color:var(--text-muted);">${dat}/${tong}</div>`
+            : '<span style="color:var(--text-muted);">—</span>'}
+        </td>
+        <td>${trangThaiBadge(k.TrangThai)}</td>
+        <td>
+          <div style="display:flex;gap:5px;">
+            <button class="action-btn view" title="Xem chi tiết" onclick="openXemKyThi(${k.MaKyThi})"><i class="fas fa-eye"></i></button>
+            <button class="action-btn score" title="Nhập kết quả" onclick="openNhapKetQua(${k.MaKyThi})"><i class="fas fa-pen-to-square"></i></button>
+            <button class="action-btn edit"  title="Chỉnh sửa"    onclick="openEditKyThi(${k.MaKyThi})"><i class="fas fa-pen"></i></button>
+            <button class="action-btn del"   title="Xóa"           onclick="openXoaKyThi(${k.MaKyThi})"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+/* ── XEM CHI TIẾT ── */
+function openXemKyThi(id) {
+  _currentViewId = id;
+  const k  = danhSachKyThi[id];
+  const kq = ketQuaThiMap[id] || [];
+
+  document.getElementById('xem_MaKyThi').textContent    = '#' + k.MaKyThi;
+  document.getElementById('xem_TenKhoaHoc').textContent = khoaHocMap[k.MaKhoaHoc]||'—';
+  document.getElementById('xem_NgayThi').textContent    = fmtDate(k.NgayThi);
+  document.getElementById('xem_MoTa').textContent       = k.MoTa||'—';
+  document.getElementById('xem_TrangThai').innerHTML    = trangThaiBadge(k.TrangThai);
+
+  const dat  = kq.filter(r=>r.DaDat).length;
+  const tong = kq.length;
+  document.getElementById('xem_SoDat').textContent       = dat;
+  document.getElementById('xem_SoKhongDat').textContent  = tong - dat;
+  document.getElementById('xem_DiemTB').textContent      = tong>0
+    ? (kq.reduce((s,r)=>s+r.DiemSo,0)/tong).toFixed(1) : '—';
+
+  const tbodyKQ = document.getElementById('tbodyKetQua');
+  if (!kq.length) {
+    tbodyKQ.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:18px;">Chưa có kết quả thi</td></tr>`;
+  } else {
+    tbodyKQ.innerHTML = kq.map(r => `
+      <tr>
+        <td><div style="font-weight:600;font-size:.83rem;">${r.HoTen}</div></td>
+        <td style="text-align:center;">
+          <span class="score-badge ${r.DaDat?'score-pass':'score-fail'}">${r.DiemSo.toFixed(1)}</span>
+        </td>
+        <td>${daiBadge(r.MaCapDaiMoi)}</td>
+        <td style="text-align:center;">
+          ${r.DaDat
+            ? '<span style="color:#2ecc71;font-weight:700;font-size:.8rem;"><i class="fas fa-check-circle"></i> Đạt</span>'
+            : '<span style="color:#e74c3c;font-weight:700;font-size:.8rem;"><i class="fas fa-times-circle"></i> Không đạt</span>'}
+        </td>
+      </tr>`).join('');
+  }
+
+  showModal('modalXemKyThi');
+}
+
+/* ── NHẬP KẾT QUẢ ── */
+function openNhapKetQua(id) {
+  _currentViewId = id;
+  const kq = ketQuaThiMap[id] || [];
+
+  // Tạo map để điền sẵn nếu đã có kết quả
+  const kqMap = {};
+  kq.forEach(r => kqMap[r.MaHocVien] = r);
+
+  const container = document.getElementById('formNhapKetQua');
+
+  // Build form rows
+  const capDaiOptions = capDaiList.map(c =>
+    `<option value="${c.MaCapDai}">${c.TenCapDai}</option>`).join('');
+
+  container.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 100px 160px 90px;gap:8px;align-items:center;padding:0 4px;">
+      <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Học viên</div>
+      <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-muted);font-weight:700;text-align:center;">Điểm số</div>
+      <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Đai mới</div>
+      <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-muted);font-weight:700;text-align:center;">Kết quả</div>
+    </div>
+    ${hocVienList.map(hv => {
+      const r = kqMap[hv.MaHocVien];
+      return `
+      <div style="display:grid;grid-template-columns:1fr 100px 160px 90px;gap:8px;align-items:center;background:#161616;border:1px solid var(--border);border-radius:7px;padding:10px 12px;">
+        <div>
+          <div style="font-weight:600;font-size:.83rem;">${hv.HoTen}</div>
+          <div style="font-size:.68rem;color:var(--text-muted);">Đang giữ: ${hv.CapDaiHienTai}</div>
+        </div>
+        <div>
+          <input type="number" class="form-control" id="diem_${hv.MaHocVien}"
+            min="0" max="10" step="0.5" placeholder="0.0"
+            value="${r ? r.DiemSo : ''}"
+            style="text-align:center;padding:7px 6px;"
+            oninput="autoResult(${hv.MaHocVien})">
+        </div>
+        <div>
+          <select class="form-select" id="dai_${hv.MaHocVien}" style="padding:7px 8px;font-size:.8rem;">
+            <option value="">-- Không đổi --</option>
+            ${capDaiOptions}
+          </select>
+        </div>
+        <div style="text-align:center;" id="result_${hv.MaHocVien}">
+          ${r ? (r.DaDat
+            ? '<span style="color:#2ecc71;font-size:.75rem;font-weight:700;">✓ Đạt</span>'
+            : '<span style="color:#e74c3c;font-size:.75rem;font-weight:700;">✗ Không đạt</span>') : '—'}
+        </div>
+      </div>`;
+    }).join('')}`;
+
+  // Điền sẵn đai mới nếu có
+  kq.forEach(r => {
+    const sel = document.getElementById(`dai_${r.MaHocVien}`);
+    if (sel && r.MaCapDaiMoi) sel.value = r.MaCapDaiMoi;
+  });
+
+  showModal('modalNhapKetQua');
+}
+
+function autoResult(maHV) {
+  const diem = parseFloat(document.getElementById(`diem_${maHV}`).value);
+  const el   = document.getElementById(`result_${maHV}`);
+  if (isNaN(diem)) { el.innerHTML = '—'; return; }
+  el.innerHTML = diem >= 5
+    ? '<span style="color:#2ecc71;font-size:.75rem;font-weight:700;">✓ Đạt</span>'
+    : '<span style="color:#e74c3c;font-size:.75rem;font-weight:700;">✗ Không đạt</span>';
+}
+
+function luuKetQua() {
+  const id  = _currentViewId;
+  const arr = [];
+  let valid = true;
+
+  hocVienList.forEach(hv => {
+    const diemRaw = document.getElementById(`diem_${hv.MaHocVien}`).value;
+    if (diemRaw === '') return; // bỏ qua nếu không nhập
+    const diem = parseFloat(diemRaw);
+    if (isNaN(diem) || diem < 0 || diem > 10) { valid = false; return; }
+    const daiMoi = parseInt(document.getElementById(`dai_${hv.MaHocVien}`).value)||null;
+    arr.push({
+      MaKetQua: Date.now() + hv.MaHocVien,
+      MaKyThi: id,
+      MaHocVien: hv.MaHocVien,
+      HoTen: hv.HoTen,
+      DiemSo: diem,
+      DaDat: diem >= 5 ? 1 : 0,
+      MaCapDaiMoi: diem >= 5 ? daiMoi : null
+    });
+  });
+
+  if (!valid) { toast('Điểm số không hợp lệ (0–10)', 'error'); return; }
+  if (!arr.length) { toast('Chưa nhập điểm cho học viên nào', 'error'); return; }
+
+  ketQuaThiMap[id] = arr;
+  hideModal('modalNhapKetQua');
+  renderTable();
+  updateStats();
+  toast('Đã lưu kết quả thi thành công', 'success');
+}
+
+/* ── CHỈNH SỬA ── */
+function openEditKyThi(id) {
+  const k = danhSachKyThi[id];
+  document.getElementById('sua_MaKyThi').value         = id;
+  document.getElementById('sua_MaKyThi_show').value    = '#' + id;
+  document.getElementById('sua_MaKhoaHoc').value       = k.MaKhoaHoc;
+  document.getElementById('sua_NgayThi').value         = k.NgayThi;
+  document.getElementById('sua_MoTa').value            = k.MoTa||'';
+  document.getElementById('sua_TrangThai').value       = k.TrangThai;
+  showModal('modalSuaKyThi');
+}
+
+function luuSuaKyThi() {
+  const id    = parseInt(document.getElementById('sua_MaKyThi').value);
+  const khoa  = document.getElementById('sua_MaKhoaHoc').value;
+  const ngay  = document.getElementById('sua_NgayThi').value;
+  const moTa  = document.getElementById('sua_MoTa').value.trim();
+  const tt    = document.getElementById('sua_TrangThai').value;
+
+  if (!khoa || !ngay) { toast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error'); return; }
+
+  danhSachKyThi[id] = { ...danhSachKyThi[id], MaKhoaHoc:parseInt(khoa), NgayThi:ngay, MoTa:moTa, TrangThai:tt };
+  hideModal('modalSuaKyThi');
+  renderTable();
+  updateStats();
+  toast('Đã cập nhật kỳ thi thành công', 'success');
+}
+
+/* ── THÊM MỚI ── */
+function luuThemKyThi() {
+  const khoa = document.getElementById('them_MaKhoaHoc').value;
+  const ngay = document.getElementById('them_NgayThi').value;
+  const moTa = document.getElementById('them_MoTa').value.trim();
+  const tt   = document.getElementById('them_TrangThai').value;
+
+  if (!khoa || !ngay) { toast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error'); return; }
+
+  const id = _nextId++;
+  danhSachKyThi[id] = { MaKyThi:id, MaKhoaHoc:parseInt(khoa), NgayThi:ngay, MoTa:moTa, TrangThai:tt };
+
+  // Reset form
+  ['them_MaKhoaHoc','them_NgayThi','them_MoTa'].forEach(f => {
+    const el = document.getElementById(f);
+    if (el) el.value = '';
+  });
+  document.getElementById('them_TrangThai').value = 'SapDienRa';
+
+  hideModal('modalThemKyThi');
+  renderTable();
+  updateStats();
+  toast('Đã thêm kỳ thi thành công', 'success');
+}
+
+/* ── XÓA ── */
+function openXoaKyThi(id) {
+  _currentDeleteId = id;
+  const k = danhSachKyThi[id];
+  document.getElementById('xoa_TenKyThi').textContent =
+    `"${khoaHocMap[k.MaKhoaHoc]||'—'} – ${fmtDate(k.NgayThi)}"`;
+  showModal('modalXoaKyThi');
+}
+
+function xacNhanXoaKyThi() {
+  delete danhSachKyThi[_currentDeleteId];
+  delete ketQuaThiMap[_currentDeleteId];
+  _currentDeleteId = null;
+  hideModal('modalXoaKyThi');
+  renderTable();
+  updateStats();
+  toast('Đã xóa kỳ thi', 'error');
+}
+
+/* ── MODAL HELPERS (giữ nguyên) ── */
+function showModal(id) { const el=document.getElementById(id); if(el) el.classList.add('show'); }
+function hideModal(id) { const el=document.getElementById(id); if(el) el.classList.remove('show'); }
+function backdropClose(e, id) { if(e.target.id===id) hideModal(id); }
+
+/* ── SIDEBAR MOBILE (giữ nguyên) ── */
+function toggleSidebar() {
+  const s=document.getElementById('sidebar'), o=document.getElementById('sidebarOverlay');
+  const isOpen=s.classList.contains('open');
+  if(isOpen){s.classList.remove('open');o.style.display='none';}
+  else{s.classList.add('open');o.style.display='block';}
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').style.display='none';
+}
+
+/* ── TOAST (giữ nguyên) ── */
+function toast(msg, type='success') {
+  const map = { success:{icon:'fa-check-circle',cls:'toast-success',icls:'toast-icon-s'}, error:{icon:'fa-times-circle',cls:'toast-error',icls:'toast-icon-e'}, info:{icon:'fa-info-circle',cls:'toast-info',icls:'toast-icon-i'} };
+  const m = map[type]||map.info;
+  const el = document.createElement('div');
+  el.className = `toast-item ${m.cls}`;
+  el.innerHTML = `<i class="fas ${m.icon} ${m.icls}"></i> ${msg}`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3000);
+}
+
+/* ── DATE (giữ nguyên) ── */
+document.addEventListener('DOMContentLoaded', () => {
+  const now=new Date();
+  const days=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+  const dateEl=document.getElementById('topbarDate');
+  if(dateEl) dateEl.textContent = days[now.getDay()]+', '+
+    String(now.getDate()).padStart(2,'0')+'/'+
+    String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
+
+  // Search & filter events
+  document.getElementById('searchKyThi').addEventListener('input', renderTable);
+  document.getElementById('filterTrangThai').addEventListener('change', renderTable);
+
+  renderTable();
+  updateStats();
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thông báo &amp; Sự kiện | Karate UTE Admin</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary:        #C0392B;
+      --primary-dark:   #922B21;
+      --primary-mid:    #E74C3C;
+      --primary-light:  #FADBD8;
+      --gold:           #D4AC0D;
+      --gold-dark:      #9A7D0A;
+      --bg-dark:        #111111;
+      --sidebar-bg:     #1A1A1A;
+      --card-bg:        #1E1E1E;
+      --border:         #333333;
+      --border-light:   #444444;
+      --text-primary:   #FFFFFF;
+      --text-secondary: #AAAAAA;
+      --text-muted:     #666666;
+      --sidebar-width:  260px;
+      --topbar-height:  58px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-dark); color: var(--text-primary); font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: var(--sidebar-width); height: 100vh; background: var(--sidebar-bg); position: fixed; top:0; left:0; border-right:1px solid var(--border); z-index:1000; display:flex; flex-direction:column; transition: transform .3s ease; }
+    .sidebar-header { padding:24px 20px 20px; text-align:center; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .logo-circle { width:58px; height:58px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.6rem; color:#fff; box-shadow:0 0 0 4px rgba(192,57,43,.25); }
+    .sidebar-header h4 { font-family:'Oswald',sans-serif; font-size:1.15rem; letter-spacing:2px; color:var(--text-primary); margin:0 0 2px; }
+    .sidebar-header small { color:var(--text-secondary); font-size:.7rem; }
+    .sidebar-nav { flex:1; overflow-y:auto; padding:12px 0; }
+    .sidebar-nav::-webkit-scrollbar { width:4px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+    .nav-section-label { font-size:.62rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); padding:14px 25px 5px; font-weight:700; }
+    .nav-link { color:var(--text-secondary); padding:11px 25px; font-weight:500; font-size:.84rem; display:flex; align-items:center; gap:11px; transition:all .25s; border-left:4px solid transparent; text-decoration:none; }
+    .nav-link i { width:20px; font-size:1rem; text-align:center; flex-shrink:0; }
+    .nav-link:hover { color:var(--text-primary); background:rgba(192,57,43,.08); border-left-color:rgba(192,57,43,.4); }
+    .nav-link.active { color:var(--text-primary); background:rgba(192,57,43,.13); border-left-color:var(--primary); }
+    .nav-link.active i { color:var(--primary); }
+    .nav-badge { margin-left:auto; background:var(--primary); color:#fff; font-size:.62rem; padding:2px 7px; border-radius:10px; font-weight:700; }
+    .sidebar-footer { border-top:1px solid var(--border); padding:8px 0; flex-shrink:0; }
+    .sidebar-divider { height:1px; background:var(--border); margin:4px 0; }
+    .logout-link { color:#e74c3c; padding:11px 25px; font-weight:500; font-size:.84rem; display:flex; align-items:center; gap:11px; cursor:pointer; border-left:4px solid transparent; transition:all .25s; user-select:none; }
+    .logout-link:hover { background:rgba(231,76,60,.1); border-left-color:#e74c3c; }
+    .logout-link i { width:20px; text-align:center; }
+
+    /* ── TOPBAR ── */
+    .topbar { position:fixed; top:0; left:var(--sidebar-width); right:0; height:var(--topbar-height); background:var(--sidebar-bg); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 28px; z-index:999; }
+    .topbar-left { display:flex; align-items:center; gap:12px; }
+    .topbar-toggle { display:none; width:34px; height:34px; border:1px solid var(--border); border-radius:7px; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; background:none; transition:all .2s; }
+    .topbar-toggle:hover { border-color:var(--primary); color:var(--primary); }
+    .topbar-title { font-family:'Oswald',sans-serif; font-size:1rem; text-transform:uppercase; letter-spacing:1px; }
+    .topbar-title .page-name { color:var(--primary); }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .topbar-date { font-size:.75rem; color:var(--text-secondary); }
+    .topbar-icon { width:34px; height:34px; border:1px solid var(--border); border-radius:7px; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; position:relative; transition:all .2s; background:none; }
+    .topbar-icon:hover { border-color:var(--primary); color:var(--primary); }
+    .notif-dot { position:absolute; top:6px; right:7px; width:7px; height:7px; background:var(--primary); border-radius:50%; border:1.5px solid var(--sidebar-bg); }
+    .admin-chip { display:flex; align-items:center; gap:8px; padding:4px 10px 4px 4px; border:1px solid var(--border); border-radius:20px; cursor:pointer; transition:border-color .2s; }
+    .admin-chip:hover { border-color:var(--primary); }
+    .admin-avatar { width:26px; height:26px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; }
+    .admin-name { font-size:.75rem; font-weight:600; color:var(--text-secondary); }
+
+    /* ── MAIN ── */
+    .main-content { margin-left:var(--sidebar-width); padding:calc(var(--topbar-height) + 20px) 28px 40px; min-height:100vh; }
+    .page-header { margin-bottom:24px; }
+    .page-title { font-family:'Oswald',sans-serif; font-size:1.7rem; text-transform:uppercase; border-left:5px solid var(--primary); padding-left:14px; line-height:1.1; margin-bottom:6px; }
+    .page-subtitle { font-size:.75rem; color:var(--text-secondary); margin-left:19px; }
+
+    /* ── STAT CARDS ── */
+    .stat-cards-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+    .stat-card { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:14px; display:flex; flex-direction:column; gap:8px; transition:transform .2s,border-color .2s; }
+    .stat-card:hover { transform:translateY(-3px); border-color:var(--border-light); }
+    .stat-left { display:flex; align-items:center; gap:10px; }
+    .stat-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .si-red    { background:rgba(192,57,43,.2);  color:#e74c3c; }
+    .si-blue   { background:rgba(52,152,219,.2); color:#3498db; }
+    .si-green  { background:rgba(46,204,113,.2); color:#2ecc71; }
+    .si-orange { background:rgba(230,126,34,.2); color:#e67e22; }
+    .stat-num { font-family:'Oswald',sans-serif; font-size:1.5rem; font-weight:700; line-height:1; }
+    .stat-label { font-size:.68rem; color:var(--text-secondary); margin-top:3px; }
+
+    /* ── CARD BOX ── */
+    .card-box { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:22px; }
+    .card-box-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--border); }
+    .card-box-title { font-family:'Oswald',sans-serif; font-size:.95rem; text-transform:uppercase; letter-spacing:.5px; display:flex; align-items:center; gap:8px; }
+    .card-box-title i { color:var(--primary); }
+
+    /* ── TABLE ── */
+    .table { color:#ddd; margin:0; }
+    .table thead th { background:#252525; color:var(--primary); text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; padding:13px 16px; border-bottom:1px solid var(--border); font-weight:600; white-space:nowrap; }
+    .table tbody tr { transition:background .15s; }
+    .table tbody tr:hover { background:rgba(255,255,255,.03); }
+    .table td { padding:12px 16px; border-bottom:1px solid #252525; vertical-align:middle; font-size:.83rem; }
+    .table tbody tr:last-child td { border-bottom:none; }
+    .td-main { font-weight:600; font-size:.85rem; }
+    .td-sub  { color:var(--text-secondary); font-size:.72rem; margin-top:1px; }
+
+    /* ── TOOLBAR ── */
+    .table-toolbar { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .table-toolbar .ms-auto { margin-left:auto; }
+    .search-bar { display:flex; align-items:center; gap:8px; background:#161616; border:1px solid var(--border); border-radius:7px; padding:6px 12px; flex:1; max-width:300px; }
+    .search-bar i { color:var(--text-muted); font-size:.85rem; flex-shrink:0; }
+    .search-bar input { background:none; border:none; outline:none; color:#fff; font-size:.82rem; font-family:'Montserrat',sans-serif; width:100%; }
+    .search-bar input::placeholder { color:#555; }
+    .filter-select { background:#161616; border:1px solid var(--border); color:var(--text-secondary); border-radius:7px; font-size:.78rem; padding:6px 10px; font-family:'Montserrat',sans-serif; cursor:pointer; outline:none; }
+    .filter-select:focus { border-color:var(--primary); }
+    .filter-select option { background:#1e1e1e; }
+    .btn-primary-sm { background:var(--primary); color:#fff; border:none; border-radius:6px; padding:7px 14px; font-size:.78rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background .2s; }
+    .btn-primary-sm:hover { background:var(--primary-dark); }
+
+    /* ── PAGINATION ── */
+    .pagination-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-top:1px solid var(--border); font-size:.75rem; color:var(--text-secondary); }
+    .pag-btns { display:flex; gap:4px; }
+    .pag-btn { width:30px; height:30px; border:1px solid var(--border); background:none; color:var(--text-secondary); border-radius:5px; font-size:.75rem; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; }
+    .pag-btn:hover, .pag-btn.active { border-color:var(--primary); color:var(--primary); }
+
+    /* ── LOẠI THÔNG BÁO BADGE ── */
+    .loai-badge { display:inline-flex; align-items:center; gap:5px; font-size:.7rem; font-weight:700; padding:3px 10px; border-radius:4px; text-transform:uppercase; letter-spacing:.4px; }
+    .loai-thongbao { background:rgba(52,152,219,.15); color:#3498db; }
+    .loai-sukien   { background:rgba(230,126,34,.15);  color:#e67e22; }
+
+    /* ── ACTION BTNS ── */
+    .action-btn { width:28px; height:28px; border:1px solid var(--border); background:none; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; transition:all .2s; font-size:.78rem; }
+    .action-btn:hover { border-color:var(--border-light); color:#fff; }
+    .action-btn.view:hover    { border-color:#3498db; color:#3498db; }
+    .action-btn.edit:hover    { border-color:#f39c12; color:#f39c12; }
+    .action-btn.del:hover     { border-color:#e74c3c; color:#e74c3c; }
+    .action-btn.members:hover { border-color:#e67e22; color:#e67e22; }
+
+    /* ── MODAL ── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.78); z-index:2000; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.show { display:flex; }
+    .modal-box { background:var(--card-bg); border:1px solid #3a3a3a; border-radius:10px; width:100%; max-height:90vh; display:flex; flex-direction:column; animation:fadeUp .22s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+    .modal-hdr { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .modal-hdr-title { font-family:'Oswald',sans-serif; text-transform:uppercase; font-size:.95rem; display:flex; align-items:center; gap:9px; }
+    .modal-hdr-title i { color:var(--primary); }
+    .modal-close { background:none; border:none; color:var(--text-secondary); font-size:1rem; cursor:pointer; padding:4px 6px; border-radius:5px; transition:all .2s; }
+    .modal-close:hover { color:#fff; background:rgba(255,255,255,.05); }
+    .modal-body { padding:22px; overflow-y:auto; flex:1; }
+    .modal-ftr { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; flex-shrink:0; }
+    .modal-confirm { padding:32px 28px; text-align:center; }
+    .confirm-icon { width:66px; height:66px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:1.6rem; }
+    .ci-danger { background:rgba(231,76,60,.15); color:#e74c3c; }
+    .ci-logout { background:rgba(255,107,107,.12); color:#ff6b6b; }
+    .confirm-title { font-family:'Oswald',sans-serif; text-transform:uppercase; font-size:1.2rem; margin-bottom:10px; }
+    .confirm-desc { color:var(--text-secondary); font-size:.82rem; line-height:1.6; margin-bottom:24px; }
+    .confirm-btns { display:flex; gap:10px; justify-content:center; }
+
+    /* ── FORM ── */
+    .form-label { font-size:.78rem; color:var(--text-secondary); margin-bottom:6px; display:block; }
+    .form-control, .form-select { background:#111; border:1px solid #333; color:#fff; border-radius:7px; font-size:.84rem; padding:9px 13px; font-family:'Montserrat',sans-serif; width:100%; }
+    .form-control:focus, .form-select:focus { background:#111; border-color:var(--primary); color:#fff; box-shadow:0 0 0 3px rgba(192,57,43,.15); outline:none; }
+    .form-control::placeholder { color:#555; }
+    .form-control[readonly] { color:#555; cursor:not-allowed; }
+    .form-select option { background:#1e1e1e; }
+    textarea.form-control { resize:vertical; min-height:100px; }
+    .form-section-title { font-size:.7rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+
+    /* ── BUTTONS ── */
+    .btn-red { background:var(--primary); color:#fff; border:none; border-radius:7px; padding:9px 20px; font-size:.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:background .2s; font-family:'Montserrat',sans-serif; }
+    .btn-red:hover { background:var(--primary-dark); }
+    .btn-danger { background:#c0392b; color:#fff; border:none; border-radius:7px; padding:9px 20px; font-size:.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:background .2s; font-family:'Montserrat',sans-serif; }
+    .btn-danger:hover { background:#a93226; }
+    .btn-outline { background:transparent; border:1px solid var(--border-light); color:#aaa; border-radius:7px; padding:9px 18px; font-size:.83rem; cursor:pointer; transition:all .2s; font-family:'Montserrat',sans-serif; display:inline-flex; align-items:center; gap:7px; }
+    .btn-outline:hover { border-color:#666; color:#fff; }
+    .btn-orange { background:#e67e22; color:#fff; border:none; border-radius:7px; padding:9px 20px; font-size:.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:background .2s; font-family:'Montserrat',sans-serif; }
+    .btn-orange:hover { background:#ca6f1e; }
+
+    /* ── INFO VIEW ── */
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .info-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); margin-bottom:3px; }
+    .info-value { font-size:.85rem; font-weight:600; color:#ddd; }
+
+    /* ── NỘI DUNG preview box ── */
+    .noidung-box { background:#161616; border:1px solid var(--border); border-radius:7px; padding:14px 16px; font-size:.84rem; color:#ccc; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
+
+    /* ── ĐĂNG KÝ TABLE (in modal) ── */
+    .reg-table { width:100%; border-collapse:collapse; font-size:.82rem; }
+    .reg-table th { background:#252525; color:var(--primary); font-size:.72rem; text-transform:uppercase; padding:10px 12px; border-bottom:1px solid var(--border); font-weight:600; }
+    .reg-table td { padding:10px 12px; border-bottom:1px solid #252525; vertical-align:middle; color:#ddd; }
+    .reg-table tbody tr:last-child td { border-bottom:none; }
+    .reg-table tbody tr:hover { background:rgba(255,255,255,.02); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:992px) { .sidebar{transform:translateX(-260px);} .sidebar.open{transform:translateX(0);} .topbar{left:0;} .main-content{margin-left:0;} .topbar-toggle{display:flex;} .topbar-date{display:none;} }
+    @media (max-width:768px) { .stat-cards-grid{grid-template-columns:repeat(2,1fr);} }
+    @media (max-width:576px) { .main-content{padding:calc(var(--topbar-height) + 16px) 16px 32px;} .info-grid{grid-template-columns:1fr;} }
+
+    /* ── TOAST ── */
+    #toastContainer { position:fixed; bottom:22px; right:22px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+    .toast-item { background:#222; border:1px solid var(--border); border-radius:8px; padding:12px 16px; font-size:.82rem; display:flex; align-items:center; gap:10px; min-width:240px; max-width:360px; animation:slideIn .22s ease; }
+    @keyframes slideIn { from{opacity:0;transform:translateX(30px);} to{opacity:1;transform:translateX(0);} }
+    .toast-success { border-left:3px solid #2ecc71; }
+    .toast-error   { border-left:3px solid #e74c3c; }
+    .toast-info    { border-left:3px solid #3498db; }
+    .toast-icon-s { color:#2ecc71; } .toast-icon-e { color:#e74c3c; } .toast-icon-i { color:#3498db; }
+    ::-webkit-scrollbar { width:4px; height:4px; }
+    ::-webkit-scrollbar-thumb { background:#333; border-radius:4px; }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     SIDEBAR — DÙNG CHUNG (giữ nguyên)
+================================================================= -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-circle"><i class="fas fa-hand-fist"></i></div>
+    <h4>KARATE UTE</h4>
+    <small>Hệ thống quản lý CLB</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Chính</div>
+    <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+    <div class="nav-section-label">Quản lý</div>
+    <a href="hocvien.html" class="nav-link"><i class="fas fa-user-graduate"></i><span>Quản lý Học viên</span><span class="nav-badge">128</span></a>
+    <a href="huanluyenvien.html" class="nav-link"><i class="fas fa-user-tie"></i><span>Huấn luyện viên</span></a>
+    <a href="lophoc.html" class="nav-link"><i class="fas fa-chalkboard"></i><span>Khóa học &amp; Lớp</span></a>
+    <a href="diemdanh.html" class="nav-link"><i class="fas fa-clipboard-check"></i><span>Điểm danh</span></a>
+    <div class="nav-section-label">Tài chính &amp; Thi đua</div>
+    <a href="hocphi.html" class="nav-link"><i class="fas fa-wallet"></i><span>Học phí &amp; Thu chi</span><span class="nav-badge">3</span></a>
+    <a href="thangdai.html" class="nav-link"><i class="fas fa-trophy"></i><span>Kỳ thi thăng đai</span></a>
+    <a href="sukien.html" class="nav-link active"><i class="fas fa-bullhorn"></i><span>Thông báo &amp; Sự kiện</span></a>
+    <div class="nav-section-label">Hệ thống</div>
+    <a href="taikhoan.html" class="nav-link"><i class="fas fa-users-cog"></i><span>Tài khoản Admin</span></a>
+    <a href="caidat.html" class="nav-link"><i class="fas fa-cog"></i><span>Cài đặt hệ thống</span></a>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="padding:10px 25px 4px;display:flex;align-items:center;gap:10px;">
+      <div style="width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;">A</div>
+      <div>
+        <div style="font-size:.78rem;font-weight:600;color:#ddd;">Admin</div>
+        <div style="font-size:.65rem;color:var(--text-muted);">admin@karateute.edu.vn</div>
+      </div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="logout-link" onclick="showModal('logoutModal')"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></div>
+  </div>
+</div>
+<div id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;" onclick="closeSidebar()"></div>
+
+<!-- ================================================================
+     TOPBAR — DÙNG CHUNG (giữ nguyên)
+================================================================= -->
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="topbar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="topbar-title">
+      <span class="page-name">Thông báo &amp; Sự kiện</span> &rsaquo; <span>Danh sách</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-date"><i class="far fa-calendar-alt me-1"></i><span id="topbarDate">Đang tải...</span></span>
+    <div class="topbar-icon"><i class="fas fa-bell"></i><span class="notif-dot"></span></div>
+    <div class="admin-chip" onclick="showModal('logoutModal')">
+      <div class="admin-avatar">A</div>
+      <span class="admin-name">Admin</span>
+    </div>
+  </div>
+</header>
+
+<!-- ================================================================
+     MAIN CONTENT — THÔNG BÁO & SỰ KIỆN
+================================================================= -->
+<main class="main-content">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title"><i class="fas fa-bullhorn" style="color:var(--primary);margin-right:10px;font-size:1.3rem;"></i>Thông báo &amp; Sự kiện</div>
+    <div class="page-subtitle">Tài chính &amp; Thi đua &rsaquo; Thông báo &amp; Sự kiện</div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-cards-grid">
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-icon si-red"><i class="fas fa-bullhorn"></i></div>
+        <div>
+          <div class="stat-num" id="statTong">—</div>
+          <div class="stat-label">Tổng bài đăng</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-icon si-blue"><i class="fas fa-bell"></i></div>
+        <div>
+          <div class="stat-num" id="statThongBao">—</div>
+          <div class="stat-label">Thông báo</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-icon si-orange"><i class="fas fa-calendar-star"></i></div>
+        <div>
+          <div class="stat-num" id="statSuKien">—</div>
+          <div class="stat-label">Sự kiện</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-icon si-green"><i class="fas fa-user-check"></i></div>
+        <div>
+          <div class="stat-num" id="statDangKy">—</div>
+          <div class="stat-label">Lượt đăng ký sự kiện</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Danh sách Thông báo & Sự kiện -->
+  <div class="card-box">
+    <div class="card-box-header">
+      <div class="card-box-title"><i class="fas fa-list"></i> Danh sách thông báo &amp; sự kiện</div>
+      <button class="btn-primary-sm" onclick="showModal('modalThem')"><i class="fas fa-plus"></i> Thêm mới</button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="table-toolbar">
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchTB" placeholder="Tìm theo tiêu đề, nội dung...">
+      </div>
+      <select class="filter-select" id="filterLoai">
+        <option value="">Tất cả loại</option>
+        <option value="ThongBao">Thông báo</option>
+        <option value="SuKien">Sự kiện</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:50px;">Mã</th>
+            <th>Tiêu đề</th>
+            <th>Loại</th>
+            <th>Người đăng</th>
+            <th>Ngày đăng</th>
+            <th>Đăng ký</th>
+            <th style="width:110px;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyTB">
+          <!-- JS render -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination-bar">
+      <span id="paginfoTB">Hiển thị 0 / 0 bài đăng</span>
+      <div class="pag-btns">
+        <button class="pag-btn active">1</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toastContainer"></div>
+
+<!-- ================================================================
+     MODAL: LOGOUT — DÙNG CHUNG (giữ nguyên)
+================================================================= -->
+<div class="modal-overlay" id="logoutModal" onclick="backdropClose(event,'logoutModal')">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-confirm">
+      <div class="confirm-icon ci-logout"><i class="fas fa-sign-out-alt"></i></div>
+      <div class="confirm-title">Đăng xuất?</div>
+      <div class="confirm-desc">Bạn có chắc muốn đăng xuất khỏi hệ thống Karate UTE không?</div>
+      <div class="confirm-btns">
+        <button class="btn-outline" onclick="hideModal('logoutModal')"><i class="fas fa-times"></i> Hủy</button>
+        <button class="btn-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL: THÊM THÔNG BÁO / SỰ KIỆN
+     Bảng: ThongBao (MaTaiKhoanTao, TieuDe, NoiDung, LoaiThongBao, NgayDang)
+================================================================= -->
+<div class="modal-overlay" id="modalThem" onclick="backdropClose(event,'modalThem')">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title"><i class="fas fa-plus-circle"></i> Thêm thông báo / sự kiện</div>
+      <button class="modal-close" onclick="hideModal('modalThem')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;gap:14px;">
+        <div class="form-section-title">Thông tin bài đăng</div>
+        <div>
+          <label class="form-label">Loại <span style="color:var(--primary)">*</span></label>
+          <select class="form-select" id="them_Loai">
+            <option value="ThongBao">📢 Thông báo</option>
+            <option value="SuKien">📅 Sự kiện</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Tiêu đề <span style="color:var(--primary)">*</span></label>
+          <input type="text" class="form-control" id="them_TieuDe" placeholder="VD: Lịch tập tháng 6 năm 2026...">
+        </div>
+        <div>
+          <label class="form-label">Nội dung <span style="color:var(--primary)">*</span></label>
+          <textarea class="form-control" id="them_NoiDung" placeholder="Nhập nội dung chi tiết..."></textarea>
+        </div>
+        <div>
+          <label class="form-label">Ngày đăng</label>
+          <input type="datetime-local" class="form-control" id="them_NgayDang">
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalThem')"><i class="fas fa-times"></i> Hủy</button>
+      <button class="btn-red" onclick="luuThem()"><i class="fas fa-save"></i> Đăng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL: SỬA THÔNG BÁO / SỰ KIỆN
+     Bảng: ThongBao (MaThongBao, TieuDe, NoiDung, LoaiThongBao)
+================================================================= -->
+<div class="modal-overlay" id="modalSua" onclick="backdropClose(event,'modalSua')">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:#f39c12;"><i class="fas fa-pen" style="color:#f39c12;"></i> Chỉnh sửa bài đăng</div>
+      <button class="modal-close" onclick="hideModal('modalSua')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;gap:14px;">
+        <input type="hidden" id="sua_Ma">
+        <div class="form-section-title">Thông tin bài đăng</div>
+        <div>
+          <label class="form-label">Mã</label>
+          <input type="text" class="form-control" id="sua_Ma_show" readonly>
+        </div>
+        <div>
+          <label class="form-label">Loại <span style="color:var(--primary)">*</span></label>
+          <select class="form-select" id="sua_Loai">
+            <option value="ThongBao">📢 Thông báo</option>
+            <option value="SuKien">📅 Sự kiện</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Tiêu đề <span style="color:var(--primary)">*</span></label>
+          <input type="text" class="form-control" id="sua_TieuDe">
+        </div>
+        <div>
+          <label class="form-label">Nội dung <span style="color:var(--primary)">*</span></label>
+          <textarea class="form-control" id="sua_NoiDung"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalSua')"><i class="fas fa-times"></i> Hủy</button>
+      <button class="btn-red" onclick="luuSua()"><i class="fas fa-save"></i> Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL: XEM CHI TIẾT
+     Hiển thị: ThongBao + DangKySuKien (nếu là SuKien)
+================================================================= -->
+<div class="modal-overlay" id="modalXem" onclick="backdropClose(event,'modalXem')">
+  <div class="modal-box" style="max-width:620px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:#3498db;"><i class="fas fa-eye" style="color:#3498db;"></i> Chi tiết bài đăng</div>
+      <button class="modal-close" onclick="hideModal('modalXem')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <!-- Meta -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <span id="xem_LoaiBadge"></span>
+        <span style="font-size:.72rem;color:var(--text-muted);">Mã #<span id="xem_Ma">—</span></span>
+        <span style="font-size:.72rem;color:var(--text-muted);">·</span>
+        <span style="font-size:.72rem;color:var(--text-muted);">Đăng bởi <strong style="color:#ccc;" id="xem_NguoiDang">—</strong></span>
+        <span style="font-size:.72rem;color:var(--text-muted);">·</span>
+        <span style="font-size:.72rem;color:var(--text-muted);" id="xem_NgayDang">—</span>
+      </div>
+      <!-- Tiêu đề -->
+      <div style="font-family:'Oswald',sans-serif;font-size:1.15rem;letter-spacing:.5px;margin-bottom:14px;" id="xem_TieuDe">—</div>
+      <!-- Nội dung -->
+      <div class="noidung-box" id="xem_NoiDung">—</div>
+
+      <!-- Danh sách đăng ký (chỉ hiện nếu là SuKien) -->
+      <div id="xem_DangKySection" style="display:none;margin-top:20px;">
+        <div class="form-section-title" style="margin-bottom:12px;">
+          <i class="fas fa-users" style="color:#e67e22;margin-right:6px;"></i>
+          Danh sách đăng ký tham gia (<span id="xem_SoDK">0</span> người)
+        </div>
+        <div class="table-responsive">
+          <table class="reg-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Học viên</th>
+                <th>Ngày đăng ký</th>
+                <th style="text-align:center;">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyDangKy">
+              <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:16px;">Chưa có đăng ký</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalXem')"><i class="fas fa-times"></i> Đóng</button>
+      <button class="btn-red" onclick="hideModal('modalXem');openEdit(_currentViewId)"><i class="fas fa-pen"></i> Chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL: XEM DANH SÁCH ĐĂNG KÝ SỰ KIỆN
+     Bảng: DangKySuKien (MaDangKySuKien, MaThongBao, MaHocVien, NgayDangKy)
+================================================================= -->
+<div class="modal-overlay" id="modalDangKy" onclick="backdropClose(event,'modalDangKy')">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:#e67e22;"><i class="fas fa-users" style="color:#e67e22;"></i> Đăng ký sự kiện</div>
+      <button class="modal-close" onclick="hideModal('modalDangKy')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#161616;border:1px solid var(--border);border-radius:7px;padding:12px 16px;margin-bottom:16px;">
+        <div style="font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Sự kiện</div>
+        <div style="font-weight:600;font-size:.9rem;" id="dk_TieuDe">—</div>
+      </div>
+      <div class="table-responsive">
+        <table class="reg-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Học viên</th>
+              <th>Ngày đăng ký</th>
+              <th style="text-align:center;">Xóa</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDK">
+            <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:16px;">Chưa có đăng ký</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalDangKy')"><i class="fas fa-times"></i> Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL: XÁC NHẬN XÓA
+================================================================= -->
+<div class="modal-overlay" id="modalXoa" onclick="backdropClose(event,'modalXoa')">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-confirm">
+      <div class="confirm-icon ci-danger"><i class="fas fa-trash-alt"></i></div>
+      <div class="confirm-title">Xóa bài đăng?</div>
+      <div class="confirm-desc">Bài đăng <strong id="xoa_TieuDe"></strong> và toàn bộ dữ liệu đăng ký liên quan sẽ bị xóa vĩnh viễn.</div>
+      <div class="confirm-btns">
+        <button class="btn-outline" onclick="hideModal('modalXoa')"><i class="fas fa-times"></i> Hủy</button>
+        <button class="btn-danger" onclick="xacNhanXoa()"><i class="fas fa-trash-alt"></i> Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCRIPTS
+================================================================= -->
+<script>
+/* ── DỮ LIỆU MẪU — bám cột SQL: ThongBao + DangKySuKien ── */
+
+/* ThongBao */
+const danhSachTB = {
+  1: { MaThongBao:1, MaTaiKhoanTao:1, TenNguoiDang:'Nguyễn Văn Admin', TieuDe:'Lịch tập tháng 5 năm 2026', NoiDung:'Kính gửi toàn thể học viên,\n\nLịch tập tháng 5/2026 dự kiến giữ nguyên như tháng trước:\n- Thứ 2, 4, 6: 17:00 – 18:30 (Phòng A)\n- Thứ 3, 5, 7: 17:00 – 18:30 (Phòng B)\n\nMọi thắc mắc vui lòng liên hệ Ban quản lý CLB.\n\nTrân trọng.', LoaiThongBao:'ThongBao', NgayDang:'2026-05-01T08:00:00' },
+  2: { MaThongBao:2, MaTaiKhoanTao:1, TenNguoiDang:'Nguyễn Văn Admin', TieuDe:'Kỳ thi thăng đai cuối Khóa 5 – 25/05/2026', NoiDung:'CLB thông báo kỳ thi thăng đai cuối Khóa 5 sẽ diễn ra vào ngày 25/05/2026 tại Phòng A.\n\nHọc viên đủ điều kiện sẽ được thông báo riêng. Mọi câu hỏi liên hệ huấn luyện viên phụ trách.', LoaiThongBao:'ThongBao', NgayDang:'2026-05-03T09:30:00' },
+  3: { MaThongBao:3, MaTaiKhoanTao:1, TenNguoiDang:'Nguyễn Văn Admin', TieuDe:'Giao lưu Karate liên CLB – 15/06/2026', NoiDung:'CLB Karate UTE tổ chức buổi giao lưu Karate liên CLB vào ngày 15/06/2026.\n\nThời gian: 08:00 – 12:00\nĐịa điểm: Nhà thi đấu UTE, 54 Nguyễn Văn Bảo\n\nHọc viên quan tâm vui lòng đăng ký tham gia trước ngày 10/06/2026.', LoaiThongBao:'SuKien', NgayDang:'2026-05-05T10:00:00' },
+  4: { MaThongBao:4, MaTaiKhoanTao:2, TenNguoiDang:'Trần Minh Tuấn', TieuDe:'Buổi học bổ sung thứ Bảy 17/05', NoiDung:'Do lịch thi cuối kỳ, sẽ có buổi học bổ sung vào thứ Bảy 17/05/2026 lúc 15:00 – 16:30 tại Phòng A.\n\nHọc viên lớp Đai Trắng vui lòng sắp xếp tham dự.', LoaiThongBao:'ThongBao', NgayDang:'2026-05-07T14:00:00' },
+  5: { MaThongBao:5, MaTaiKhoanTao:1, TenNguoiDang:'Nguyễn Văn Admin', TieuDe:'Hội trại Karate hè 2026', NoiDung:'CLB tổ chức Hội trại Karate hè 2026 dành cho toàn bộ học viên.\n\nThời gian: 20-22/07/2026\nĐịa điểm: Khu du lịch Hồ Tuyền Lâm, Đà Lạt\nChi phí: 800.000đ/người (bao gồm xe, ăn, ở)\n\nĐăng ký trước 30/06/2026. Số lượng có hạn!', LoaiThongBao:'SuKien', NgayDang:'2026-05-08T08:30:00' },
+};
+
+/* DangKySuKien — MaThongBao → mảng đăng ký */
+const dangKyMap = {
+  3: [
+    { MaDangKySuKien:1, MaThongBao:3, MaHocVien:1, HoTen:'Nguyễn Đình Văn',   NgayDangKy:'2026-05-06T09:15:00' },
+    { MaDangKySuKien:2, MaThongBao:3, MaHocVien:2, HoTen:'Trần Nhật Hoàng',   NgayDangKy:'2026-05-06T11:00:00' },
+  ],
+  5: [
+    { MaDangKySuKien:3, MaThongBao:5, MaHocVien:1, HoTen:'Nguyễn Đình Văn',   NgayDangKy:'2026-05-09T08:45:00' },
+    { MaDangKySuKien:4, MaThongBao:5, MaHocVien:3, HoTen:'Nguyễn Đăng Thắng', NgayDangKy:'2026-05-09T10:30:00' },
+    { MaDangKySuKien:5, MaThongBao:5, MaHocVien:2, HoTen:'Trần Nhật Hoàng',   NgayDangKy:'2026-05-09T14:00:00' },
+  ]
+};
+
+let _currentViewId   = null;
+let _currentDeleteId = null;
+let _nextId = 6;
+
+/* ── FORMAT DATE ── */
+function fmtDatetime(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+/* ── LOẠI BADGE ── */
+function loaiBadge(loai) {
+  if (loai==='SuKien')
+    return '<span class="loai-badge loai-sukien"><i class="fas fa-calendar-star"></i> Sự kiện</span>';
+  return '<span class="loai-badge loai-thongbao"><i class="fas fa-bell"></i> Thông báo</span>';
+}
+
+/* ── THỐNG KÊ ── */
+function updateStats() {
+  const all = Object.values(danhSachTB);
+  document.getElementById('statTong').textContent      = all.length;
+  document.getElementById('statThongBao').textContent  = all.filter(t=>t.LoaiThongBao==='ThongBao').length;
+  document.getElementById('statSuKien').textContent    = all.filter(t=>t.LoaiThongBao==='SuKien').length;
+  let totalDK = 0;
+  Object.values(dangKyMap).forEach(arr => totalDK += arr.length);
+  document.getElementById('statDangKy').textContent = totalDK;
+}
+
+/* ── RENDER TABLE ── */
+function renderTable() {
+  const q     = (document.getElementById('searchTB').value||'').toLowerCase().trim();
+  const loai  = document.getElementById('filterLoai').value;
+
+  const rows = Object.values(danhSachTB)
+    .sort((a,b)=> new Date(b.NgayDang) - new Date(a.NgayDang))
+    .filter(t => {
+      const text = (t.TieuDe + (t.NoiDung||'')).toLowerCase();
+      return (!q || text.includes(q)) && (!loai || t.LoaiThongBao===loai);
+    });
+
+  document.getElementById('paginfoTB').textContent =
+    `Hiển thị ${rows.length} / ${Object.keys(danhSachTB).length} bài đăng`;
+
+  const tbody = document.getElementById('tbodyTB');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">Không có bài đăng nào</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(t => {
+    const dkArr = (t.LoaiThongBao==='SuKien') ? (dangKyMap[t.MaThongBao]||[]) : null;
+    const preview = (t.NoiDung||'').replace(/\n/g,' ').substring(0,60) + ((t.NoiDung||'').length>60?'…':'');
+    return `
+      <tr>
+        <td style="color:var(--text-muted);font-size:.75rem;">#${t.MaThongBao}</td>
+        <td>
+          <div class="td-main">${t.TieuDe}</div>
+          <div class="td-sub">${preview}</div>
+        </td>
+        <td>${loaiBadge(t.LoaiThongBao)}</td>
+        <td>
+          <div class="td-main" style="font-size:.8rem;">${t.TenNguoiDang}</div>
+        </td>
+        <td><div style="font-size:.8rem;">${fmtDatetime(t.NgayDang)}</div></td>
+        <td style="text-align:center;">
+          ${t.LoaiThongBao==='SuKien'
+            ? `<span style="font-family:'Oswald',sans-serif;font-size:1.1rem;color:#e67e22;">${(dangKyMap[t.MaThongBao]||[]).length}</span>
+               <div style="font-size:.65rem;color:var(--text-muted);">người</div>`
+            : '<span style="color:var(--text-muted);font-size:.75rem;">—</span>'}
+        </td>
+        <td>
+          <div style="display:flex;gap:5px;">
+            <button class="action-btn view"    title="Xem chi tiết"        onclick="openXem(${t.MaThongBao})"><i class="fas fa-eye"></i></button>
+            ${t.LoaiThongBao==='SuKien'
+              ? `<button class="action-btn members" title="Danh sách đăng ký" onclick="openDangKy(${t.MaThongBao})"><i class="fas fa-users"></i></button>`
+              : ''}
+            <button class="action-btn edit"    title="Chỉnh sửa"           onclick="openEdit(${t.MaThongBao})"><i class="fas fa-pen"></i></button>
+            <button class="action-btn del"     title="Xóa"                  onclick="openXoa(${t.MaThongBao})"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+/* ── XEM CHI TIẾT ── */
+function openXem(id) {
+  _currentViewId = id;
+  const t = danhSachTB[id];
+  document.getElementById('xem_Ma').textContent        = t.MaThongBao;
+  document.getElementById('xem_LoaiBadge').innerHTML   = loaiBadge(t.LoaiThongBao);
+  document.getElementById('xem_TieuDe').textContent    = t.TieuDe;
+  document.getElementById('xem_NoiDung').textContent   = t.NoiDung||'';
+  document.getElementById('xem_NguoiDang').textContent = t.TenNguoiDang;
+  document.getElementById('xem_NgayDang').textContent  = fmtDatetime(t.NgayDang);
+
+  const secDK = document.getElementById('xem_DangKySection');
+  if (t.LoaiThongBao==='SuKien') {
+    secDK.style.display = '';
+    const dkArr = dangKyMap[id]||[];
+    document.getElementById('xem_SoDK').textContent = dkArr.length;
+    const tbody = document.getElementById('tbodyDangKy');
+    tbody.innerHTML = dkArr.length
+      ? dkArr.map((d,i) => `
+          <tr>
+            <td style="color:var(--text-muted);">${i+1}</td>
+            <td><strong>${d.HoTen}</strong></td>
+            <td style="font-size:.78rem;color:var(--text-secondary);">${fmtDatetime(d.NgayDangKy)}</td>
+            <td style="text-align:center;">
+              <button class="action-btn del" title="Xóa đăng ký" onclick="xoaDangKy(${id},${d.MaDangKySuKien})"><i class="fas fa-times"></i></button>
+            </td>
+          </tr>`).join('')
+      : `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:16px;">Chưa có đăng ký</td></tr>`;
+  } else {
+    secDK.style.display = 'none';
+  }
+
+  showModal('modalXem');
+}
+
+/* ── DANH SÁCH ĐĂNG KÝ (modal riêng) ── */
+function openDangKy(id) {
+  _currentViewId = id;
+  const t    = danhSachTB[id];
+  const dkArr = dangKyMap[id]||[];
+  document.getElementById('dk_TieuDe').textContent = t.TieuDe;
+
+  const tbody = document.getElementById('tbodyDK');
+  tbody.innerHTML = dkArr.length
+    ? dkArr.map((d,i) => `
+        <tr>
+          <td style="color:var(--text-muted);">${i+1}</td>
+          <td><strong>${d.HoTen}</strong></td>
+          <td style="font-size:.78rem;color:var(--text-secondary);">${fmtDatetime(d.NgayDangKy)}</td>
+          <td style="text-align:center;">
+            <button class="action-btn del" title="Xóa đăng ký" onclick="xoaDangKyDK(${id},${d.MaDangKySuKien})"><i class="fas fa-times"></i></button>
+          </td>
+        </tr>`).join('')
+    : `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:16px;">Chưa có đăng ký</td></tr>`;
+
+  showModal('modalDangKy');
+}
+
+/* Xóa 1 đăng ký (trong modal xem chi tiết) */
+function xoaDangKy(maTB, maDK) {
+  if (!dangKyMap[maTB]) return;
+  dangKyMap[maTB] = dangKyMap[maTB].filter(d=>d.MaDangKySuKien!==maDK);
+  openXem(maTB); // reload modal
+  renderTable();
+  updateStats();
+  toast('Đã xóa đăng ký', 'info');
+}
+/* Xóa 1 đăng ký (trong modal đăng ký riêng) */
+function xoaDangKyDK(maTB, maDK) {
+  if (!dangKyMap[maTB]) return;
+  dangKyMap[maTB] = dangKyMap[maTB].filter(d=>d.MaDangKySuKien!==maDK);
+  openDangKy(maTB);
+  renderTable();
+  updateStats();
+  toast('Đã xóa đăng ký', 'info');
+}
+
+/* ── CHỈNH SỬA ── */
+function openEdit(id) {
+  const t = danhSachTB[id];
+  document.getElementById('sua_Ma').value        = id;
+  document.getElementById('sua_Ma_show').value   = '#' + id;
+  document.getElementById('sua_Loai').value      = t.LoaiThongBao;
+  document.getElementById('sua_TieuDe').value    = t.TieuDe;
+  document.getElementById('sua_NoiDung').value   = t.NoiDung||'';
+  showModal('modalSua');
+}
+
+function luuSua() {
+  const id    = parseInt(document.getElementById('sua_Ma').value);
+  const loai  = document.getElementById('sua_Loai').value;
+  const tieu  = document.getElementById('sua_TieuDe').value.trim();
+  const noi   = document.getElementById('sua_NoiDung').value.trim();
+  if (!tieu || !noi) { toast('Vui lòng điền đầy đủ tiêu đề và nội dung', 'error'); return; }
+  danhSachTB[id] = { ...danhSachTB[id], LoaiThongBao:loai, TieuDe:tieu, NoiDung:noi };
+  hideModal('modalSua');
+  renderTable();
+  updateStats();
+  toast('Đã cập nhật bài đăng thành công', 'success');
+}
+
+/* ── THÊM MỚI ── */
+function luuThem() {
+  const loai  = document.getElementById('them_Loai').value;
+  const tieu  = document.getElementById('them_TieuDe').value.trim();
+  const noi   = document.getElementById('them_NoiDung').value.trim();
+  const ngay  = document.getElementById('them_NgayDang').value || new Date().toISOString().slice(0,16);
+  if (!tieu || !noi) { toast('Vui lòng điền đầy đủ tiêu đề và nội dung', 'error'); return; }
+  const id = _nextId++;
+  danhSachTB[id] = { MaThongBao:id, MaTaiKhoanTao:1, TenNguoiDang:'Nguyễn Văn Admin', TieuDe:tieu, NoiDung:noi, LoaiThongBao:loai, NgayDang:ngay };
+  // Reset
+  ['them_TieuDe','them_NoiDung','them_NgayDang'].forEach(f => { const el=document.getElementById(f); if(el) el.value=''; });
+  document.getElementById('them_Loai').value = 'ThongBao';
+  hideModal('modalThem');
+  renderTable();
+  updateStats();
+  toast('Đã đăng bài thành công', 'success');
+}
+
+/* ── XÓA ── */
+function openXoa(id) {
+  _currentDeleteId = id;
+  document.getElementById('xoa_TieuDe').textContent = `"${danhSachTB[id].TieuDe}"`;
+  showModal('modalXoa');
+}
+
+function xacNhanXoa() {
+  delete danhSachTB[_currentDeleteId];
+  delete dangKyMap[_currentDeleteId];
+  _currentDeleteId = null;
+  hideModal('modalXoa');
+  renderTable();
+  updateStats();
+  toast('Đã xóa bài đăng', 'error');
+}
+
+/* ── MODAL HELPERS (giữ nguyên) ── */
+function showModal(id) { const el=document.getElementById(id); if(el) el.classList.add('show'); }
+function hideModal(id) { const el=document.getElementById(id); if(el) el.classList.remove('show'); }
+function backdropClose(e, id) { if(e.target.id===id) hideModal(id); }
+
+/* ── SIDEBAR MOBILE (giữ nguyên) ── */
+function toggleSidebar() {
+  const s=document.getElementById('sidebar'), o=document.getElementById('sidebarOverlay');
+  const isOpen=s.classList.contains('open');
+  if(isOpen){s.classList.remove('open');o.style.display='none';}
+  else{s.classList.add('open');o.style.display='block';}
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').style.display='none';
+}
+
+/* ── TOAST (giữ nguyên) ── */
+function toast(msg, type='success') {
+  const map = {
+    success:{icon:'fa-check-circle',cls:'toast-success',icls:'toast-icon-s'},
+    error:{icon:'fa-times-circle',cls:'toast-error',icls:'toast-icon-e'},
+    info:{icon:'fa-info-circle',cls:'toast-info',icls:'toast-icon-i'}
+  };
+  const m = map[type]||map.info;
+  const el = document.createElement('div');
+  el.className = `toast-item ${m.cls}`;
+  el.innerHTML = `<i class="fas ${m.icon} ${m.icls}"></i> ${msg}`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3000);
+}
+
+/* ── KHỞI TẠO ── */
+document.addEventListener('DOMContentLoaded', () => {
+  // Date topbar
+  const now=new Date();
+  const days=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+  const dateEl=document.getElementById('topbarDate');
+  if(dateEl) dateEl.textContent = days[now.getDay()]+', '+
+    String(now.getDate()).padStart(2,'0')+'/'+
+    String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
+
+  // Default datetime-local input to now
+  const nowStr = new Date().toISOString().slice(0,16);
+  const dtEl = document.getElementById('them_NgayDang');
+  if (dtEl) dtEl.value = nowStr;
+
+  // Events
+  document.getElementById('searchTB').addEventListener('input', renderTable);
+  document.getElementById('filterLoai').addEventListener('change', renderTable);
+
+  renderTable();
+  updateStats();
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

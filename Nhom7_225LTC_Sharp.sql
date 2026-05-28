@@ -1,4 +1,4 @@
-﻿-- ============================================================
+-- ============================================================
 --  DATABASE: Quản lý Câu lạc bộ Võ thuật
 --  Ngôn ngữ: SQL Server (T-SQL)
 --  Mô tả: Script tạo toàn bộ cơ sở dữ liệu cho hệ thống
@@ -196,6 +196,9 @@ CREATE TABLE LopHoc (
     -- Mỗi khóa chỉ có 1 lớp cho mỗi cấp đai
     CONSTRAINT UQ_LopHoc_KhoaCapDai UNIQUE (MaKhoaHoc, MaCapDai)
 );
+
+ALTER TABLE LopHoc ADD TenLop NVARCHAR(100) NOT NULL DEFAULT N'';
+ALTER TABLE LopHoc ADD HocPhi DECIMAL(10,0) NOT NULL DEFAULT 0;
 GO
 
 
@@ -416,14 +419,14 @@ GO
 -- DỮ LIỆU MẪU (SEED DATA) – dùng để test hệ thống
 -- ============================================================
 
--- Tài khoản mẫu (mật khẩu đều là "Admin@123" – hash giả)
+-- Tài khoản mẫu (mật khẩu đều là "Admin@123" đã được hash bằng BCrypt)
 INSERT INTO TaiKhoan (HoTen, Email, MatKhauHash, VaiTro) VALUES
-    (N'Nguyễn Văn Admin',   'admin@clb.vn',      'hash_admin',   'QuanTriVien'),
-    (N'Trần Minh Tuấn',     'hlv1@clb.vn',       'hash_hlv1',    'HuanLuyenVien'),
-    (N'Lê Thị Hoa',         'hlv2@clb.vn',       'hash_hlv2',    'HuanLuyenVien'),
-    (N'Nguyễn Đình Văn',    'van@student.vn',    'hash_hv1',     'HocVien'),
-    (N'Trần Nhật Hoàng',    'hoang@student.vn',  'hash_hv2',     'HocVien'),
-    (N'Nguyễn Đăng Thắng',  'thang@student.vn',  'hash_hv3',     'HocVien');
+    (N'Nguyễn Văn Admin',   'admin@clb.vn',      '$2a$11$ixlyCsUGhF1c.euhnpf09uXlT9/W4QsaefiSYmX/agw/0wS1CIacW',   'QuanTriVien'),
+    (N'Trần Minh Tuấn',     'hlv1@clb.vn',       '$2a$11$ixlyCsUGhF1c.euhnpf09uXlT9/W4QsaefiSYmX/agw/0wS1CIacW',    'HuanLuyenVien'),
+    (N'Lê Thị Hoa',         'hlv2@clb.vn',       '$2a$11$ixlyCsUGhF1c.euhnpf09uXlT9/W4QsaefiSYmX/agw/0wS1CIacW',    'HuanLuyenVien'),
+    (N'Nguyễn Đình Văn',    'van@student.vn',    '$2a$11$ixlyCsUGhF1c.euhnpf09uXlT9/W4QsaefiSYmX/agw/0wS1CIacW',     'HocVien'),
+    (N'Trần Nhật Hoàng',    'hoang@student.vn',  '$2a$11$ixlyCsUGhF1c.euhnpf09uXlT9/W4QsaefiSYmX/agw/0wS1CIacW',     'HocVien'),
+    (N'Nguyễn Đăng Thắng',  'thang@student.vn',  '$2a$11$ixlyCsUGhF1c.euhnpf09uXlT9/W4QsaefiSYmX/agw/0wS1CIacW',     'HocVien');
 GO
 
 -- Huấn luyện viên mẫu

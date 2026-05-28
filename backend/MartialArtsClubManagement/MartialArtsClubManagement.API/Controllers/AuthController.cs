@@ -45,5 +45,11 @@ namespace MartialArtsClubManagement.API.Controllers
                 Data = response
             });
         }
+
+        [HttpGet("hash")]
+        public IActionResult HashPassword([FromQuery] string password)
+        {
+            return Ok(BCrypt.Net.BCrypt.HashPassword(password));
+        }
     }
 }

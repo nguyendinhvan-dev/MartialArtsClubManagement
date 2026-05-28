@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khóa học & Lớp học | Karate UTE Admin</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary:        #C0392B;
+      --primary-dark:   #922B21;
+      --gold:           #D4AC0D;
+      --bg-dark:        #111111;
+      --sidebar-bg:     #1A1A1A;
+      --card-bg:        #1E1E1E;
+      --border:         #333333;
+      --border-light:   #444444;
+      --text-primary:   #FFFFFF;
+      --text-secondary: #AAAAAA;
+      --text-muted:     #666666;
+      --sidebar-width:  260px;
+      --topbar-height:  58px;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg-dark); color:var(--text-primary); font-family:'Montserrat',sans-serif; overflow-x:hidden; }
+
+    /* SIDEBAR */
+    .sidebar { width:var(--sidebar-width); height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; border-right:1px solid var(--border); z-index:1000; display:flex; flex-direction:column; transition:transform .3s ease; }
+    .sidebar-header { padding:24px 20px 20px; text-align:center; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .logo-circle { width:58px; height:58px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.6rem; color:#fff; box-shadow:0 0 0 4px rgba(192,57,43,.25); }
+    .sidebar-header h4 { font-family:'Oswald',sans-serif; font-size:1.15rem; letter-spacing:2px; margin:0 0 2px; }
+    .sidebar-header small { color:var(--text-secondary); font-size:.7rem; }
+    .sidebar-nav { flex:1; overflow-y:auto; padding:12px 0; }
+    .sidebar-nav::-webkit-scrollbar { width:4px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+    .nav-section-label { font-size:.62rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); padding:14px 25px 5px; font-weight:700; }
+    .nav-link { color:var(--text-secondary); padding:11px 25px; font-weight:500; font-size:.84rem; display:flex; align-items:center; gap:11px; transition:all .25s; border-left:4px solid transparent; text-decoration:none; }
+    .nav-link i { width:20px; font-size:1rem; text-align:center; flex-shrink:0; }
+    .nav-link:hover { color:var(--text-primary); background:rgba(192,57,43,.08); border-left-color:rgba(192,57,43,.4); }
+    .nav-link.active { color:var(--text-primary); background:rgba(192,57,43,.13); border-left-color:var(--primary); }
+    .nav-link.active i { color:var(--primary); }
+    .nav-badge { margin-left:auto; background:var(--primary); color:#fff; font-size:.62rem; padding:2px 7px; border-radius:10px; font-weight:700; }
+    .sidebar-footer { border-top:1px solid var(--border); padding:8px 0; flex-shrink:0; }
+    .sidebar-divider { height:1px; background:var(--border); margin:4px 0; }
+    .logout-link { color:#e74c3c; padding:11px 25px; font-weight:500; font-size:.84rem; display:flex; align-items:center; gap:11px; cursor:pointer; border-left:4px solid transparent; transition:all .25s; }
+    .logout-link:hover { background:rgba(231,76,60,.1); border-left-color:#e74c3c; }
+    .logout-link i { width:20px; text-align:center; }
+
+    /* TOPBAR */
+    .topbar { position:fixed; top:0; left:var(--sidebar-width); right:0; height:var(--topbar-height); background:var(--sidebar-bg); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 28px; z-index:999; }
+    .topbar-left { display:flex; align-items:center; gap:12px; }
+    .topbar-toggle { display:none; width:34px; height:34px; border:1px solid var(--border); border-radius:7px; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; background:none; }
+    .topbar-toggle:hover { border-color:var(--primary); color:var(--primary); }
+    .topbar-title { font-family:'Oswald',sans-serif; font-size:1rem; text-transform:uppercase; letter-spacing:1px; }
+    .topbar-title .page-name { color:var(--primary); }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .topbar-date { font-size:.75rem; color:var(--text-secondary); }
+    .topbar-icon { width:34px; height:34px; border:1px solid var(--border); border-radius:7px; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; position:relative; transition:all .2s; background:none; }
+    .topbar-icon:hover { border-color:var(--primary); color:var(--primary); }
+    .notif-dot { position:absolute; top:6px; right:7px; width:7px; height:7px; background:var(--primary); border-radius:50%; border:1.5px solid var(--sidebar-bg); }
+    .admin-chip { display:flex; align-items:center; gap:8px; padding:4px 10px 4px 4px; border:1px solid var(--border); border-radius:20px; cursor:pointer; transition:border-color .2s; }
+    .admin-chip:hover { border-color:var(--primary); }
+    .admin-avatar { width:26px; height:26px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; }
+    .admin-name { font-size:.75rem; font-weight:600; color:var(--text-secondary); }
+
+    /* MAIN */
+    .main-content { margin-left:var(--sidebar-width); padding:calc(var(--topbar-height) + 20px) 28px 40px; min-height:100vh; }
+    .page-header { margin-bottom:24px; }
+    .page-title { font-family:'Oswald',sans-serif; font-size:1.7rem; text-transform:uppercase; border-left:5px solid var(--primary); padding-left:14px; line-height:1.1; margin-bottom:6px; }
+    .page-subtitle { font-size:.75rem; color:var(--text-secondary); margin-left:19px; }
+
+    /* TABS */
+    .tab-bar { display:flex; gap:4px; margin-bottom:20px; background:var(--card-bg); border:1px solid var(--border); border-radius:9px; padding:5px; width:fit-content; }
+    .tab-btn { padding:8px 22px; border:none; background:none; color:var(--text-secondary); font-family:'Montserrat',sans-serif; font-size:.83rem; font-weight:600; border-radius:6px; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:7px; }
+    .tab-btn:hover { color:#fff; }
+    .tab-btn.active { background:var(--primary); color:#fff; }
+    .tab-pane { display:none; }
+    .tab-pane.show { display:block; }
+
+    /* STAT CARDS */
+    .stat-cards-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+    .stat-card { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:14px; display:flex; flex-direction:column; gap:8px; transition:transform .2s,border-color .2s; }
+    .stat-card:hover { transform:translateY(-3px); border-color:var(--border-light); }
+    .stat-left { display:flex; align-items:center; gap:10px; }
+    .stat-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .si-red    { background:rgba(192,57,43,.2);  color:#e74c3c; }
+    .si-blue   { background:rgba(52,152,219,.2); color:#3498db; }
+    .si-green  { background:rgba(46,204,113,.2); color:#2ecc71; }
+    .si-gold   { background:rgba(212,172,13,.2); color:var(--gold); }
+    .si-orange { background:rgba(230,126,34,.2); color:#e67e22; }
+    .stat-num { font-family:'Oswald',sans-serif; font-size:1.5rem; font-weight:700; line-height:1; }
+    .stat-label { font-size:.68rem; color:var(--text-secondary); margin-top:3px; }
+
+    /* CARD BOX */
+    .card-box { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+    .card-box-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--border); }
+    .card-box-title { font-family:'Oswald',sans-serif; font-size:.95rem; text-transform:uppercase; letter-spacing:.5px; display:flex; align-items:center; gap:8px; }
+    .card-box-title i { color:var(--primary); }
+
+    /* TABLE */
+    .table { color:#ddd; margin:0; }
+    .table thead th { background:#252525; color:var(--primary); text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; padding:13px 16px; border-bottom:1px solid var(--border); font-weight:600; white-space:nowrap; }
+    .table tbody tr { transition:background .15s; }
+    .table tbody tr:hover { background:rgba(255,255,255,.03); }
+    .table td { padding:12px 16px; border-bottom:1px solid #252525; vertical-align:middle; font-size:.83rem; }
+    .table tbody tr:last-child td { border-bottom:none; }
+    .td-main { font-weight:600; font-size:.85rem; }
+    .td-sub  { color:var(--text-secondary); font-size:.72rem; margin-top:1px; }
+
+    /* TOOLBAR */
+    .table-toolbar { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .search-bar { display:flex; align-items:center; gap:8px; background:#161616; border:1px solid var(--border); border-radius:7px; padding:6px 12px; flex:1; max-width:280px; }
+    .search-bar i { color:var(--text-muted); font-size:.85rem; flex-shrink:0; }
+    .search-bar input { background:none; border:none; outline:none; color:#fff; font-size:.82rem; font-family:'Montserrat',sans-serif; width:100%; }
+    .search-bar input::placeholder { color:#555; }
+    .filter-select { background:#161616; border:1px solid var(--border); color:var(--text-secondary); border-radius:7px; font-size:.78rem; padding:6px 10px; font-family:'Montserrat',sans-serif; cursor:pointer; outline:none; }
+    .filter-select:focus { border-color:var(--primary); }
+    .filter-select option { background:#1e1e1e; }
+    .btn-primary-sm { background:var(--primary); color:#fff; border:none; border-radius:6px; padding:7px 14px; font-size:.78rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background .2s; }
+    .btn-primary-sm:hover { background:var(--primary-dark); }
+
+    /* PAGINATION */
+    .pagination-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-top:1px solid var(--border); font-size:.75rem; color:var(--text-secondary); }
+    .pag-btns { display:flex; gap:4px; }
+    .pag-btn { width:30px; height:30px; border:1px solid var(--border); background:none; color:var(--text-secondary); border-radius:5px; font-size:.75rem; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; }
+    .pag-btn:hover, .pag-btn.active { border-color:var(--primary); color:var(--primary); }
+
+    /* STATUS BADGES */
+    .badge-kh { display:inline-block; font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:10px; }
+    .badge-ChuaMo        { background:rgba(127,140,141,.15); color:#95a5a6; }
+    .badge-DangTuyenSinh { background:rgba(52,152,219,.15);  color:#3498db; }
+    .badge-DangHoc       { background:rgba(46,204,113,.15);  color:#2ecc71; }
+    .badge-DaKetThuc     { background:rgba(127,140,141,.15); color:#666; }
+
+    .status { display:inline-flex; align-items:center; gap:5px; font-size:.75rem; font-weight:600; padding:3px 10px; border-radius:12px; }
+    .status-dot { width:6px; height:6px; border-radius:50%; }
+    .status-active   { background:rgba(30,132,73,.15); color:#2ecc71; }
+    .status-active .status-dot { background:#2ecc71; }
+    .status-inactive { background:rgba(192,57,43,.12); color:#e74c3c; }
+    .status-inactive .status-dot { background:#e74c3c; }
+
+    /* BELT BADGES */
+    .belt { display:inline-block; font-size:.7rem; font-weight:700; padding:2px 9px; border-radius:4px; }
+    .belt-white  { background:#e0e0e0; color:#333; }
+    .belt-yellow { background:#FFD700; color:#333; }
+    .belt-orange { background:#F5A623; color:#333; }
+    .belt-green  { background:rgba(39,174,96,.25); color:#2ecc71; }
+    .belt-blue   { background:rgba(41,128,185,.25); color:#3498db; }
+    .belt-red    { background:rgba(192,57,43,.25); color:#e74c3c; }
+    .belt-black  { background:#333; color:#ccc; border:1px solid #444; }
+
+    /* ACTION BTNS */
+    .action-btn { width:28px; height:28px; border:1px solid var(--border); background:none; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; transition:all .2s; font-size:.78rem; }
+    .action-btn.view:hover  { border-color:#3498db; color:#3498db; }
+    .action-btn.edit:hover  { border-color:#f39c12; color:#f39c12; }
+    .action-btn.del:hover   { border-color:#e74c3c; color:#e74c3c; }
+
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.78); z-index:2000; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.show { display:flex; }
+    .modal-box { background:var(--card-bg); border:1px solid #3a3a3a; border-radius:10px; width:100%; max-height:90vh; display:flex; flex-direction:column; animation:fadeUp .22s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+    .modal-hdr { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .modal-hdr-title { font-family:'Oswald',sans-serif; text-transform:uppercase; font-size:.95rem; display:flex; align-items:center; gap:9px; }
+    .modal-hdr-title i { color:var(--primary); }
+    .modal-close { background:none; border:none; color:var(--text-secondary); font-size:1rem; cursor:pointer; padding:4px 6px; border-radius:5px; transition:all .2s; }
+    .modal-close:hover { color:#fff; background:rgba(255,255,255,.05); }
+    .modal-body { padding:22px; overflow-y:auto; flex:1; }
+    .modal-ftr { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; flex-shrink:0; }
+    .modal-confirm { padding:32px 28px; text-align:center; }
+    .confirm-icon { width:66px; height:66px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:1.6rem; }
+    .ci-danger { background:rgba(231,76,60,.15); color:#e74c3c; }
+    .ci-logout { background:rgba(255,107,107,.12); color:#ff6b6b; }
+    .confirm-title { font-family:'Oswald',sans-serif; text-transform:uppercase; font-size:1.2rem; margin-bottom:10px; }
+    .confirm-desc { color:var(--text-secondary); font-size:.82rem; line-height:1.6; margin-bottom:24px; }
+    .confirm-btns { display:flex; gap:10px; justify-content:center; }
+
+    /* FORM */
+    .form-label { font-size:.78rem; color:var(--text-secondary); margin-bottom:6px; display:block; }
+    .form-control, .form-select { background:#111; border:1px solid #333; color:#fff; border-radius:7px; font-size:.84rem; padding:9px 13px; font-family:'Montserrat',sans-serif; width:100%; }
+    .form-control:focus, .form-select:focus { background:#111; border-color:var(--primary); color:#fff; box-shadow:0 0 0 3px rgba(192,57,43,.15); outline:none; }
+    .form-control::placeholder { color:#555; }
+    .form-control[readonly] { color:#555; cursor:not-allowed; }
+    .form-select option { background:#1e1e1e; }
+    .form-section-title { font-size:.7rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+
+    /* BUTTONS */
+    .btn-red { background:var(--primary); color:#fff; border:none; border-radius:7px; padding:9px 20px; font-size:.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:background .2s; font-family:'Montserrat',sans-serif; }
+    .btn-red:hover { background:var(--primary-dark); }
+    .btn-danger { background:#c0392b; color:#fff; border:none; border-radius:7px; padding:9px 20px; font-size:.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:background .2s; font-family:'Montserrat',sans-serif; }
+    .btn-danger:hover { background:#a93226; }
+    .btn-outline { background:transparent; border:1px solid var(--border-light); color:#aaa; border-radius:7px; padding:9px 18px; font-size:.83rem; cursor:pointer; transition:all .2s; font-family:'Montserrat',sans-serif; display:inline-flex; align-items:center; gap:7px; }
+    .btn-outline:hover { border-color:#666; color:#fff; }
+
+    /* INFO VIEW */
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .info-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); margin-bottom:3px; }
+    .info-value { font-size:.85rem; font-weight:600; color:#ddd; }
+
+    /* LOPHOC expand row */
+    .lop-expand-row td { background:#161616; padding:0; }
+    .lop-expand-inner { padding:14px 20px; }
+    .lop-tag { display:inline-block; font-size:.7rem; font-weight:600; padding:2px 9px; border-radius:4px; background:rgba(192,57,43,.15); color:#e74c3c; margin-right:6px; }
+
+    /* RESPONSIVE */
+    @media (max-width:992px) { .sidebar{transform:translateX(-260px);} .sidebar.open{transform:translateX(0);} .topbar{left:0;} .main-content{margin-left:0;} .topbar-toggle{display:flex;} .topbar-date{display:none;} }
+    @media (max-width:768px) { .stat-cards-grid{grid-template-columns:repeat(2,1fr);} }
+    @media (max-width:576px) { .main-content{padding:calc(var(--topbar-height)+16px) 16px 32px;} .info-grid{grid-template-columns:1fr;} }
+
+    /* TOAST */
+    #toastContainer { position:fixed; bottom:22px; right:22px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+    .toast-item { background:#222; border:1px solid var(--border); border-radius:8px; padding:12px 16px; font-size:.82rem; display:flex; align-items:center; gap:10px; min-width:240px; max-width:360px; animation:slideIn .22s ease; }
+    @keyframes slideIn { from{opacity:0;transform:translateX(30px);} to{opacity:1;transform:translateX(0);} }
+    .toast-success { border-left:3px solid #2ecc71; }
+    .toast-error   { border-left:3px solid #e74c3c; }
+    .toast-icon-s { color:#2ecc71; } .toast-icon-e { color:#e74c3c; }
+    ::-webkit-scrollbar { width:4px; height:4px; }
+    ::-webkit-scrollbar-thumb { background:#333; border-radius:4px; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-circle"><i class="fas fa-hand-fist"></i></div>
+    <h4>KARATE UTE</h4>
+    <small>Hệ thống quản lý CLB</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Chính</div>
+    <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+    <div class="nav-section-label">Quản lý</div>
+    <a href="hocvien.html" class="nav-link"><i class="fas fa-user-graduate"></i><span>Quản lý Học viên</span><span class="nav-badge">128</span></a>
+    <a href="huanluyenvien.html" class="nav-link"><i class="fas fa-user-tie"></i><span>Huấn luyện viên</span></a>
+    <a href="lophoc.html" class="nav-link active"><i class="fas fa-chalkboard"></i><span>Khóa học &amp; Lớp</span></a>
+    <a href="diemdanh.html" class="nav-link"><i class="fas fa-clipboard-check"></i><span>Điểm danh</span></a>
+    <div class="nav-section-label">Tài chính &amp; Thi đua</div>
+    <a href="hocphi.html" class="nav-link"><i class="fas fa-wallet"></i><span>Học phí &amp; Thu chi</span><span class="nav-badge">3</span></a>
+    <a href="thangdai.html" class="nav-link"><i class="fas fa-trophy"></i><span>Kỳ thi thăng đai</span></a>
+    <a href="sukien.html" class="nav-link"><i class="fas fa-bullhorn"></i><span>Thông báo &amp; Sự kiện</span></a>
+    <div class="nav-section-label">Hệ thống</div>
+    <a href="taikhoan.html" class="nav-link"><i class="fas fa-users-cog"></i><span>Tài khoản Admin</span></a>
+    <a href="caidat.html" class="nav-link"><i class="fas fa-cog"></i><span>Cài đặt hệ thống</span></a>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="padding:10px 25px 4px;display:flex;align-items:center;gap:10px;">
+      <div style="width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;">A</div>
+      <div>
+        <div style="font-size:.78rem;font-weight:600;color:#ddd;">Admin</div>
+        <div style="font-size:.65rem;color:var(--text-muted);">admin@karateute.edu.vn</div>
+      </div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="logout-link" onclick="showModal('logoutModal')"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></div>
+  </div>
+</div>
+<div id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;" onclick="closeSidebar()"></div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="topbar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="topbar-title">
+      <span class="page-name">Khóa học &amp; Lớp</span> &rsaquo; <span id="topbarBread">Khóa học</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-date"><i class="far fa-calendar-alt me-1"></i><span id="topbarDate"></span></span>
+    <div class="topbar-icon"><i class="fas fa-bell"></i><span class="notif-dot"></span></div>
+    <div class="admin-chip"><div class="admin-avatar">A</div><span class="admin-name">Admin</span></div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main-content">
+
+  <div class="page-header">
+    <div class="page-title"><i class="fas fa-chalkboard" style="color:var(--primary);margin-right:10px;font-size:1.3rem;"></i>Khóa học &amp; Lớp học</div>
+    <div class="page-subtitle">Quản lý &rsaquo; Khóa học &amp; Lớp học</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabBtnKhoa" onclick="switchTab('khoa')">
+      <i class="fas fa-book-open"></i> Khóa học
+    </button>
+    <button class="tab-btn" id="tabBtnLop" onclick="switchTab('lop')">
+      <i class="fas fa-chalkboard-teacher"></i> Lớp học
+    </button>
+  </div>
+
+  <!-- ═══════════════════ TAB: KHOÁ HỌC ═══════════════════ -->
+  <div class="tab-pane show" id="paneKhoa">
+
+    <!-- Stat cards khóa -->
+    <div class="stat-cards-grid">
+      <div class="stat-card"><div class="stat-left"><div class="stat-icon si-red"><i class="fas fa-book-open"></i></div><div><div class="stat-num" id="ks_Tong">—</div><div class="stat-label">Tổng khóa học</div></div></div></div>
+      <div class="stat-card"><div class="stat-left"><div class="stat-icon si-blue"><i class="fas fa-door-open"></i></div><div><div class="stat-num" id="ks_TuyenSinh">—</div><div class="stat-label">Đang tuyển sinh</div></div></div></div>
+      <div class="stat-card"><div class="stat-left"><div class="stat-icon si-green"><i class="fas fa-play-circle"></i></div><div><div class="stat-num" id="ks_DangHoc">—</div><div class="stat-label">Đang học</div></div></div></div>
+      <div class="stat-card"><div class="stat-left"><div class="stat-icon si-gold"><i class="fas fa-wallet"></i></div><div><div class="stat-num" id="ks_HocPhi">—</div><div class="stat-label">Học phí hiện tại</div></div></div></div>
+    </div>
+
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="fas fa-book-open"></i> Danh sách khóa học</div>
+        <button class="btn-primary-sm" onclick="showModal('modalThemKhoa')"><i class="fas fa-plus"></i> Thêm khóa</button>
+      </div>
+      <div class="table-toolbar">
+        <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="searchKhoa" placeholder="Tìm tên khóa học..."></div>
+        <select class="filter-select" id="filterKhoaTT">
+          <option value="">Tất cả trạng thái</option>
+          <option value="ChuaMo">Chưa mở</option>
+          <option value="DangTuyenSinh">Đang tuyển sinh</option>
+          <option value="DangHoc">Đang học</option>
+          <option value="DaKetThuc">Đã kết thúc</option>
+        </select>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:50px;">Mã</th>
+              <th>Tên khóa học</th>
+              <th>Ngày khai giảng</th>
+              <th>Ngày kết thúc</th>
+              <th>Học phí</th>
+              <th>Sĩ số tối đa</th>
+              <th>Trạng thái</th>
+              <th style="width:90px;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyKhoa"></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span id="pagInfoKhoa">Hiển thị 0 / 0 khóa học</span>
+        <div class="pag-btns"><button class="pag-btn active">1</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ TAB: LỚP HỌC ═══════════════════ -->
+  <div class="tab-pane" id="paneLop">
+
+    <!-- Stat cards lớp -->
+    <div class="stat-cards-grid">
+      <div class="stat-card"><div class="stat-left"><div class="stat-icon si-red"><i class="fas fa-chalkboard-teacher"></i></div><div><div class="stat-num" id="ls_Tong">—</div><div class="stat-label">Tổng lớp học</div></div></div></div>
+      <div class="stat-card"><div class="stat-left"><div class="stat-icon si-green"><i class="fas fa-play-circle"></i></div><div><div class="stat-num" id="ls_DangHoc">—</div><div class="stat-label">Lớp đang hoạt động</div></div></div></div>
+      <div class="stat-card"><div class="stat-left"><div class="stat-icon si-blue"><i class="fas fa-user-tie"></i></div><div><div class="stat-num" id="ls_HLV">—</div><div class="stat-label">HLV đang dạy</div></div></div></div>
+      <div class="stat-card"><div class="stat-left"><div class="stat-icon si-orange"><i class="fas fa-users"></i></div><div><div class="stat-num" id="ls_SiSo">—</div><div class="stat-label">Tổng sĩ số tối đa</div></div></div></div>
+    </div>
+
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="fas fa-chalkboard-teacher"></i> Danh sách lớp học</div>
+        <button class="btn-primary-sm" onclick="showModal('modalThemLop')"><i class="fas fa-plus"></i> Thêm lớp</button>
+      </div>
+      <div class="table-toolbar">
+        <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="searchLop" placeholder="Tìm lớp, HLV, phòng tập..."></div>
+        <select class="filter-select" id="filterLopKhoa">
+          <option value="">Tất cả khóa</option>
+        </select>
+        <select class="filter-select" id="filterLopDai">
+          <option value="">Tất cả cấp đai</option>
+          <option value="white">Đai Trắng</option>
+          <option value="yellow">Đai Vàng</option>
+          <option value="orange">Đai Cam</option>
+          <option value="green">Đai Xanh lá</option>
+          <option value="blue">Đai Xanh dương</option>
+          <option value="red">Đai Đỏ</option>
+          <option value="black">Đai Đen</option>
+        </select>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:50px;">Mã</th>
+              <th>Khóa học</th>
+              <th>Cấp đai</th>
+              <th>Huấn luyện viên</th>
+              <th>Lịch học</th>
+              <th>Phòng tập</th>
+              <th>Sĩ số tối đa</th>
+              <th style="width:90px;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyLop"></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span id="pagInfoLop">Hiển thị 0 / 0 lớp học</span>
+        <div class="pag-btns"><button class="pag-btn active">1</button></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div id="toastContainer"></div>
+
+<!-- ═══════════ MODAL: LOGOUT ═══════════ -->
+<div class="modal-overlay" id="logoutModal" onclick="backdropClose(event,'logoutModal')">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-confirm">
+      <div class="confirm-icon ci-logout"><i class="fas fa-sign-out-alt"></i></div>
+      <div class="confirm-title">Đăng xuất?</div>
+      <div class="confirm-desc">Bạn có chắc muốn đăng xuất khỏi hệ thống Karate UTE không?</div>
+      <div class="confirm-btns">
+        <button class="btn-outline" onclick="hideModal('logoutModal')"><i class="fas fa-times"></i> Hủy</button>
+        <button class="btn-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: THÊM KHOÁ HỌC ═══════════
+     Cột: TenKhoaHoc, NgayKhaiGiang, NgayKetThuc, HocPhi, SoLuongToiDa, TrangThai
+-->
+<div class="modal-overlay" id="modalThemKhoa" onclick="backdropClose(event,'modalThemKhoa')">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title"><i class="fas fa-plus-circle"></i> Thêm khóa học</div>
+      <button class="modal-close" onclick="hideModal('modalThemKhoa')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;gap:14px;">
+        <div>
+          <label class="form-label">Tên khóa học <span style="color:var(--primary)">*</span></label>
+          <input type="text" class="form-control" id="kh_Ten" placeholder="VD: Khóa 6 – 2026">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Ngày khai giảng <span style="color:var(--primary)">*</span></label>
+            <input type="date" class="form-control" id="kh_NgayKhaiGiang">
+          </div>
+          <div>
+            <label class="form-label">Ngày kết thúc <span style="color:var(--primary)">*</span></label>
+            <input type="date" class="form-control" id="kh_NgayKetThuc">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Học phí (VNĐ) <span style="color:var(--primary)">*</span></label>
+            <input type="number" class="form-control" id="kh_HocPhi" placeholder="1200000" min="0">
+          </div>
+          <div>
+            <label class="form-label">Sĩ số tối đa</label>
+            <input type="number" class="form-control" id="kh_SoLuongToiDa" placeholder="100" min="1">
+          </div>
+        </div>
+        <div>
+          <label class="form-label">Trạng thái</label>
+          <select class="form-control" id="kh_TrangThai">
+            <option value="ChuaMo">Chưa mở</option>
+            <option value="DangTuyenSinh">Đang tuyển sinh</option>
+            <option value="DangHoc">Đang học</option>
+            <option value="DaKetThuc">Đã kết thúc</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalThemKhoa')"><i class="fas fa-times"></i> Hủy</button>
+      <button class="btn-red" onclick="luuThemKhoa()"><i class="fas fa-save"></i> Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: SỬA KHOÁ HỌC ═══════════ -->
+<div class="modal-overlay" id="modalSuaKhoa" onclick="backdropClose(event,'modalSuaKhoa')">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:#f39c12;"><i class="fas fa-pen" style="color:#f39c12;"></i> Chỉnh sửa khóa học</div>
+      <button class="modal-close" onclick="hideModal('modalSuaKhoa')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;gap:14px;">
+        <input type="hidden" id="sua_kh_Ma">
+        <div>
+          <label class="form-label">Mã khóa học</label>
+          <input type="text" class="form-control" id="sua_kh_Ma_show" readonly>
+        </div>
+        <div>
+          <label class="form-label">Tên khóa học <span style="color:var(--primary)">*</span></label>
+          <input type="text" class="form-control" id="sua_kh_Ten">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Ngày khai giảng</label>
+            <input type="date" class="form-control" id="sua_kh_NgayKhaiGiang">
+          </div>
+          <div>
+            <label class="form-label">Ngày kết thúc</label>
+            <input type="date" class="form-control" id="sua_kh_NgayKetThuc">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Học phí (VNĐ)</label>
+            <input type="number" class="form-control" id="sua_kh_HocPhi" min="0">
+          </div>
+          <div>
+            <label class="form-label">Sĩ số tối đa</label>
+            <input type="number" class="form-control" id="sua_kh_SoLuongToiDa" min="1">
+          </div>
+        </div>
+        <div>
+          <label class="form-label">Trạng thái</label>
+          <select class="form-control" id="sua_kh_TrangThai">
+            <option value="ChuaMo">Chưa mở</option>
+            <option value="DangTuyenSinh">Đang tuyển sinh</option>
+            <option value="DangHoc">Đang học</option>
+            <option value="DaKetThuc">Đã kết thúc</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalSuaKhoa')"><i class="fas fa-times"></i> Hủy</button>
+      <button class="btn-red" onclick="luuSuaKhoa()"><i class="fas fa-save"></i> Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: XEM KHOÁ HỌC ═══════════ -->
+<div class="modal-overlay" id="modalXemKhoa" onclick="backdropClose(event,'modalXemKhoa')">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:#3498db;"><i class="fas fa-book-open" style="color:#3498db;"></i> Chi tiết khóa học</div>
+      <button class="modal-close" onclick="hideModal('modalXemKhoa')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="info-grid">
+        <div><div class="info-label">Mã khóa học</div><div class="info-value" id="xkh_Ma">—</div></div>
+        <div><div class="info-label">Trạng thái</div><div class="info-value" id="xkh_TrangThai">—</div></div>
+        <div style="grid-column:1/-1;"><div class="info-label">Tên khóa học</div><div class="info-value" id="xkh_Ten">—</div></div>
+        <div><div class="info-label">Ngày khai giảng</div><div class="info-value" id="xkh_NgayKhaiGiang">—</div></div>
+        <div><div class="info-label">Ngày kết thúc</div><div class="info-value" id="xkh_NgayKetThuc">—</div></div>
+        <div><div class="info-label">Học phí</div><div class="info-value" id="xkh_HocPhi">—</div></div>
+        <div><div class="info-label">Sĩ số tối đa</div><div class="info-value" id="xkh_SoLuongToiDa">—</div></div>
+      </div>
+      <!-- Danh sách lớp thuộc khóa -->
+      <div style="margin-top:18px;">
+        <div class="form-section-title">Lớp học trong khóa này</div>
+        <div id="xkh_DanhSachLop" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalXemKhoa')"><i class="fas fa-times"></i> Đóng</button>
+      <button class="btn-red" onclick="hideModal('modalXemKhoa');openEditKhoa(_curKhoaId)"><i class="fas fa-pen"></i> Chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: XÓA KHOÁ ═══════════ -->
+<div class="modal-overlay" id="modalXoaKhoa" onclick="backdropClose(event,'modalXoaKhoa')">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-confirm">
+      <div class="confirm-icon ci-danger"><i class="fas fa-trash-alt"></i></div>
+      <div class="confirm-title">Xóa khóa học?</div>
+      <div class="confirm-desc">Xóa khóa <strong id="xoa_TenKhoa"></strong> sẽ xóa toàn bộ lớp học liên quan. Thao tác không thể hoàn tác.</div>
+      <div class="confirm-btns">
+        <button class="btn-outline" onclick="hideModal('modalXoaKhoa')"><i class="fas fa-times"></i> Hủy</button>
+        <button class="btn-danger" onclick="xacNhanXoaKhoa()"><i class="fas fa-trash-alt"></i> Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: THÊM LỚP HỌC ═══════════
+     Cột: MaKhoaHoc, MaCapDai, MaHLV, LichHoc, SoLuongToiDa, PhongTap
+-->
+<div class="modal-overlay" id="modalThemLop" onclick="backdropClose(event,'modalThemLop')">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title"><i class="fas fa-plus-circle"></i> Thêm lớp học</div>
+      <button class="modal-close" onclick="hideModal('modalThemLop')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;gap:14px;">
+        <div>
+          <label class="form-label">Khóa học <span style="color:var(--primary)">*</span></label>
+          <select class="form-control" id="lh_MaKhoaHoc">
+            <option value="">-- Chọn khóa học --</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Cấp đai <span style="color:var(--primary)">*</span></label>
+            <select class="form-control" id="lh_MaCapDai">
+              <option value="">-- Chọn cấp đai --</option>
+              <option value="1">Đai Trắng</option>
+              <option value="2">Đai Vàng</option>
+              <option value="3">Đai Cam</option>
+              <option value="4">Đai Xanh lá</option>
+              <option value="5">Đai Xanh dương</option>
+              <option value="6">Đai Đỏ</option>
+              <option value="7">Đai Đen</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Huấn luyện viên <span style="color:var(--primary)">*</span></label>
+            <select class="form-control" id="lh_MaHLV">
+              <option value="">-- Chọn HLV --</option>
+              <option value="1">Trần Minh Tuấn</option>
+              <option value="2">Lê Thị Hoa</option>
+              <option value="3">Nguyễn Duy Khang</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="form-label">Lịch học <span style="color:var(--primary)">*</span></label>
+          <input type="text" class="form-control" id="lh_LichHoc" placeholder="VD: Thứ 2,4,6 – 17:00-18:30">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Sĩ số tối đa</label>
+            <input type="number" class="form-control" id="lh_SoLuongToiDa" placeholder="30" min="1">
+          </div>
+          <div>
+            <label class="form-label">Phòng tập</label>
+            <input type="text" class="form-control" id="lh_PhongTap" placeholder="VD: Phòng A">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalThemLop')"><i class="fas fa-times"></i> Hủy</button>
+      <button class="btn-red" onclick="luuThemLop()"><i class="fas fa-save"></i> Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: SỬA LỚP HỌC ═══════════ -->
+<div class="modal-overlay" id="modalSuaLop" onclick="backdropClose(event,'modalSuaLop')">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:#f39c12;"><i class="fas fa-pen" style="color:#f39c12;"></i> Chỉnh sửa lớp học</div>
+      <button class="modal-close" onclick="hideModal('modalSuaLop')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;gap:14px;">
+        <input type="hidden" id="sua_lh_Ma">
+        <div>
+          <label class="form-label">Mã lớp</label>
+          <input type="text" class="form-control" id="sua_lh_Ma_show" readonly>
+        </div>
+        <div>
+          <label class="form-label">Khóa học</label>
+          <select class="form-control" id="sua_lh_MaKhoaHoc"></select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Cấp đai</label>
+            <select class="form-control" id="sua_lh_MaCapDai">
+              <option value="1">Đai Trắng</option>
+              <option value="2">Đai Vàng</option>
+              <option value="3">Đai Cam</option>
+              <option value="4">Đai Xanh lá</option>
+              <option value="5">Đai Xanh dương</option>
+              <option value="6">Đai Đỏ</option>
+              <option value="7">Đai Đen</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Huấn luyện viên</label>
+            <select class="form-control" id="sua_lh_MaHLV">
+              <option value="1">Trần Minh Tuấn</option>
+              <option value="2">Lê Thị Hoa</option>
+              <option value="3">Nguyễn Duy Khang</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="form-label">Lịch học</label>
+          <input type="text" class="form-control" id="sua_lh_LichHoc">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Sĩ số tối đa</label>
+            <input type="number" class="form-control" id="sua_lh_SoLuongToiDa" min="1">
+          </div>
+          <div>
+            <label class="form-label">Phòng tập</label>
+            <input type="text" class="form-control" id="sua_lh_PhongTap">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalSuaLop')"><i class="fas fa-times"></i> Hủy</button>
+      <button class="btn-red" onclick="luuSuaLop()"><i class="fas fa-save"></i> Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: XEM LỚP HỌC ═══════════ -->
+<div class="modal-overlay" id="modalXemLop" onclick="backdropClose(event,'modalXemLop')">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:#3498db;"><i class="fas fa-chalkboard" style="color:#3498db;"></i> Chi tiết lớp học</div>
+      <button class="modal-close" onclick="hideModal('modalXemLop')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="info-grid">
+        <div><div class="info-label">Mã lớp</div><div class="info-value" id="xlh_Ma">—</div></div>
+        <div><div class="info-label">Cấp đai</div><div class="info-value" id="xlh_CapDai">—</div></div>
+        <div style="grid-column:1/-1;"><div class="info-label">Khóa học</div><div class="info-value" id="xlh_Khoa">—</div></div>
+        <div><div class="info-label">Huấn luyện viên</div><div class="info-value" id="xlh_HLV">—</div></div>
+        <div><div class="info-label">Phòng tập</div><div class="info-value" id="xlh_PhongTap">—</div></div>
+        <div style="grid-column:1/-1;"><div class="info-label">Lịch học</div><div class="info-value" id="xlh_LichHoc">—</div></div>
+        <div><div class="info-label">Sĩ số tối đa</div><div class="info-value" id="xlh_SoLuongToiDa">—</div></div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalXemLop')"><i class="fas fa-times"></i> Đóng</button>
+      <button class="btn-red" onclick="hideModal('modalXemLop');openEditLop(_curLopId)"><i class="fas fa-pen"></i> Chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: XÓA LỚP ═══════════ -->
+<div class="modal-overlay" id="modalXoaLop" onclick="backdropClose(event,'modalXoaLop')">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-confirm">
+      <div class="confirm-icon ci-danger"><i class="fas fa-trash-alt"></i></div>
+      <div class="confirm-title">Xóa lớp học?</div>
+      <div class="confirm-desc">Xóa lớp <strong id="xoa_TenLop"></strong> sẽ xóa toàn bộ đăng ký liên quan. Không thể hoàn tác.</div>
+      <div class="confirm-btns">
+        <button class="btn-outline" onclick="hideModal('modalXoaLop')"><i class="fas fa-times"></i> Hủy</button>
+        <button class="btn-danger" onclick="xacNhanXoaLop()"><i class="fas fa-trash-alt"></i> Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script>
+/* ── DỮ LIỆU MẪU: KhoaHoc ── */
+const danhSachKhoa = {
+  1: { MaKhoaHoc:1, TenKhoaHoc:'Khóa 5 – 2026', NgayKhaiGiang:'2026-03-01', NgayKetThuc:'2026-05-31', HocPhi:1200000, SoLuongToiDa:60, TrangThai:'DangHoc' },
+  2: { MaKhoaHoc:2, TenKhoaHoc:'Khóa 6 – 2026', NgayKhaiGiang:'2026-06-01', NgayKetThuc:'2026-08-31', HocPhi:1200000, SoLuongToiDa:60, TrangThai:'DangTuyenSinh' },
+  3: { MaKhoaHoc:3, TenKhoaHoc:'Khóa 7 – 2026', NgayKhaiGiang:'2026-09-01', NgayKetThuc:'2026-11-30', HocPhi:1300000, SoLuongToiDa:80, TrangThai:'ChuaMo' },
+  4: { MaKhoaHoc:4, TenKhoaHoc:'Khóa 4 – 2025', NgayKhaiGiang:'2025-09-01', NgayKetThuc:'2025-11-30', HocPhi:1100000, SoLuongToiDa:50, TrangThai:'DaKetThuc' },
+};
+
+/* ── DỮ LIỆU MẪU: LopHoc (JOIN KhoaHoc + CapDai + HuanLuyenVien) ── */
+const capDaiMap = {
+  1:{ten:'Đai Trắng',   key:'white'},
+  2:{ten:'Đai Vàng',    key:'yellow'},
+  3:{ten:'Đai Cam',     key:'orange'},
+  4:{ten:'Đai Xanh lá', key:'green'},
+  5:{ten:'Đai Xanh dương',key:'blue'},
+  6:{ten:'Đai Đỏ',      key:'red'},
+  7:{ten:'Đai Đen',     key:'black'},
+};
+const hlvMap = { 1:'Trần Minh Tuấn', 2:'Lê Thị Hoa', 3:'Nguyễn Duy Khang' };
+
+const danhSachLop = {
+  1: { MaLop:1, MaKhoaHoc:1, MaCapDai:1, MaHLV:1, LichHoc:'Thứ 2,4,6 – 17:00-18:30', SoLuongToiDa:25, PhongTap:'Phòng A' },
+  2: { MaLop:2, MaKhoaHoc:1, MaCapDai:2, MaHLV:2, LichHoc:'Thứ 3,5,7 – 17:00-18:30', SoLuongToiDa:20, PhongTap:'Phòng B' },
+  3: { MaLop:3, MaKhoaHoc:2, MaCapDai:1, MaHLV:3, LichHoc:'Thứ 2,4,6 – 18:30-20:00', SoLuongToiDa:30, PhongTap:'Phòng A' },
+  4: { MaLop:4, MaKhoaHoc:2, MaCapDai:4, MaHLV:1, LichHoc:'Thứ 3,5,7 – 18:30-20:00', SoLuongToiDa:15, PhongTap:'Phòng C' },
+};
+
+let _nextKhoaId = 5, _nextLopId = 5;
+let _curKhoaId = null, _curLopId = null;
+let _delKhoaId = null, _delLopId = null;
+
+/* ── HELPERS ── */
+function fmtDate(d) {
+  if (!d) return '—';
+  const p = d.split('-');
+  return p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : d;
+}
+function fmtMoney(n) {
+  return Number(n).toLocaleString('vi-VN') + ' ₫';
+}
+const ttLabel = { ChuaMo:'Chưa mở', DangTuyenSinh:'Đang tuyển sinh', DangHoc:'Đang học', DaKetThuc:'Đã kết thúc' };
+
+/* ── RENDER KHOÁ HỌC ── */
+function renderKhoa() {
+  const q  = (document.getElementById('searchKhoa').value||'').toLowerCase();
+  const ts = document.getElementById('filterKhoaTT').value;
+
+  const rows = Object.values(danhSachKhoa).filter(k => {
+    return (!q || k.TenKhoaHoc.toLowerCase().includes(q)) && (!ts || k.TrangThai===ts);
+  });
+
+  document.getElementById('tbodyKhoa').innerHTML = rows.length===0
+    ? `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">Không tìm thấy khóa học nào</td></tr>`
+    : rows.map(k => `<tr>
+        <td><span style="color:var(--text-muted);font-size:.78rem;">#${k.MaKhoaHoc}</span></td>
+        <td><div class="td-main">${k.TenKhoaHoc}</div></td>
+        <td>${fmtDate(k.NgayKhaiGiang)}</td>
+        <td>${fmtDate(k.NgayKetThuc)}</td>
+        <td style="color:var(--gold);font-weight:600;">${fmtMoney(k.HocPhi)}</td>
+        <td>${k.SoLuongToiDa} học viên</td>
+        <td><span class="badge-kh badge-${k.TrangThai}">${ttLabel[k.TrangThai]||k.TrangThai}</span></td>
+        <td><div style="display:flex;gap:4px;">
+          <button class="action-btn view" title="Xem" onclick="openViewKhoa(${k.MaKhoaHoc})"><i class="fas fa-eye"></i></button>
+          <button class="action-btn edit" title="Sửa" onclick="openEditKhoa(${k.MaKhoaHoc})"><i class="fas fa-pen"></i></button>
+          <button class="action-btn del"  title="Xóa" onclick="openDelKhoa(${k.MaKhoaHoc})"><i class="fas fa-trash-alt"></i></button>
+        </div></td>
+      </tr>`).join('');
+
+  const all = Object.values(danhSachKhoa);
+  document.getElementById('ks_Tong').textContent      = all.length;
+  document.getElementById('ks_TuyenSinh').textContent = all.filter(k=>k.TrangThai==='DangTuyenSinh').length;
+  document.getElementById('ks_DangHoc').textContent   = all.filter(k=>k.TrangThai==='DangHoc').length;
+  const activeHP = all.filter(k=>k.TrangThai==='DangHoc'||k.TrangThai==='DangTuyenSinh').map(k=>k.HocPhi);
+  document.getElementById('ks_HocPhi').textContent    = activeHP.length ? fmtMoney(Math.max(...activeHP)) : '—';
+  document.getElementById('pagInfoKhoa').textContent  = `Hiển thị ${rows.length} / ${all.length} khóa học`;
+}
+
+/* ── RENDER LỚP HỌC ── */
+function renderLop() {
+  const q  = (document.getElementById('searchLop').value||'').toLowerCase();
+  const mk = document.getElementById('filterLopKhoa').value;
+  const md = document.getElementById('filterLopDai').value;
+
+  const rows = Object.values(danhSachLop).filter(l => {
+    const text = (danhSachKhoa[l.MaKhoaHoc]?.TenKhoaHoc||'') + (hlvMap[l.MaHLV]||'') + (l.PhongTap||'');
+    const matchQ  = !q  || text.toLowerCase().includes(q);
+    const matchMK = !mk || String(l.MaKhoaHoc)===mk;
+    const matchMD = !md || capDaiMap[l.MaCapDai]?.key===md;
+    return matchQ && matchMK && matchMD;
+  });
+
+  document.getElementById('tbodyLop').innerHTML = rows.length===0
+    ? `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">Không tìm thấy lớp học nào</td></tr>`
+    : rows.map(l => {
+        const cd = capDaiMap[l.MaCapDai]||{ten:'—',key:'white'};
+        const kh = danhSachKhoa[l.MaKhoaHoc];
+        return `<tr>
+          <td><span style="color:var(--text-muted);font-size:.78rem;">#${l.MaLop}</span></td>
+          <td>
+            <div class="td-main">${kh?.TenKhoaHoc||'—'}</div>
+            <div class="td-sub"><span class="badge-kh badge-${kh?.TrangThai||''}">${ttLabel[kh?.TrangThai]||'—'}</span></div>
+          </td>
+          <td><span class="belt belt-${cd.key}">${cd.ten}</span></td>
+          <td>${hlvMap[l.MaHLV]||'—'}</td>
+          <td style="color:var(--text-secondary);font-size:.78rem;">${l.LichHoc}</td>
+          <td>${l.PhongTap||'—'}</td>
+          <td>${l.SoLuongToiDa} HV</td>
+          <td><div style="display:flex;gap:4px;">
+            <button class="action-btn view" title="Xem" onclick="openViewLop(${l.MaLop})"><i class="fas fa-eye"></i></button>
+            <button class="action-btn edit" title="Sửa" onclick="openEditLop(${l.MaLop})"><i class="fas fa-pen"></i></button>
+            <button class="action-btn del"  title="Xóa" onclick="openDelLop(${l.MaLop})"><i class="fas fa-trash-alt"></i></button>
+          </div></td>
+        </tr>`;
+      }).join('');
+
+  const all = Object.values(danhSachLop);
+  const activeKhoa = new Set(Object.values(danhSachKhoa).filter(k=>k.TrangThai==='DangHoc').map(k=>k.MaKhoaHoc));
+  document.getElementById('ls_Tong').textContent    = all.length;
+  document.getElementById('ls_DangHoc').textContent = all.filter(l=>activeKhoa.has(l.MaKhoaHoc)).length;
+  document.getElementById('ls_HLV').textContent     = new Set(all.map(l=>l.MaHLV)).size;
+  document.getElementById('ls_SiSo').textContent    = all.reduce((s,l)=>s+l.SoLuongToiDa,0);
+  document.getElementById('pagInfoLop').textContent = `Hiển thị ${rows.length} / ${all.length} lớp học`;
+}
+
+/* ── POPULATE FILTER SELECT KHOÁ ── */
+function populateKhoaSelect() {
+  const opts = Object.values(danhSachKhoa).map(k=>
+    `<option value="${k.MaKhoaHoc}">${k.TenKhoaHoc}</option>`).join('');
+  document.getElementById('filterLopKhoa').innerHTML = '<option value="">Tất cả khóa</option>' + opts;
+  document.getElementById('lh_MaKhoaHoc').innerHTML  = '<option value="">-- Chọn khóa học --</option>' + opts;
+  document.getElementById('sua_lh_MaKhoaHoc').innerHTML = opts;
+}
+
+/* ── MODAL XEM KHOÁ ── */
+function openViewKhoa(id) {
+  _curKhoaId = id;
+  const k = danhSachKhoa[id]; if (!k) return;
+  document.getElementById('xkh_Ma').textContent           = 'KH' + String(k.MaKhoaHoc).padStart(3,'0');
+  document.getElementById('xkh_TrangThai').innerHTML      = `<span class="badge-kh badge-${k.TrangThai}">${ttLabel[k.TrangThai]}</span>`;
+  document.getElementById('xkh_Ten').textContent          = k.TenKhoaHoc;
+  document.getElementById('xkh_NgayKhaiGiang').textContent= fmtDate(k.NgayKhaiGiang);
+  document.getElementById('xkh_NgayKetThuc').textContent  = fmtDate(k.NgayKetThuc);
+  document.getElementById('xkh_HocPhi').textContent       = fmtMoney(k.HocPhi);
+  document.getElementById('xkh_SoLuongToiDa').textContent = k.SoLuongToiDa + ' học viên';
+  // Lớp thuộc khóa
+  const lops = Object.values(danhSachLop).filter(l=>l.MaKhoaHoc===id);
+  document.getElementById('xkh_DanhSachLop').innerHTML = lops.length===0
+    ? '<div style="color:var(--text-muted);font-size:.8rem;">Chưa có lớp nào</div>'
+    : lops.map(l=>{
+        const cd = capDaiMap[l.MaCapDai]||{ten:'—',key:'white'};
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#252525;border-radius:6px;font-size:.8rem;">
+          <span><span class="belt belt-${cd.key}" style="margin-right:8px;">${cd.ten}</span>${hlvMap[l.MaHLV]||'—'}</span>
+          <span style="color:var(--text-secondary);">${l.LichHoc}</span>
+        </div>`;
+      }).join('');
+  showModal('modalXemKhoa');
+}
+
+/* ── MODAL SỬA KHOÁ ── */
+function openEditKhoa(id) {
+  _curKhoaId = id;
+  const k = danhSachKhoa[id]; if (!k) return;
+  document.getElementById('sua_kh_Ma').value           = id;
+  document.getElementById('sua_kh_Ma_show').value      = 'KH' + String(k.MaKhoaHoc).padStart(3,'0');
+  document.getElementById('sua_kh_Ten').value          = k.TenKhoaHoc;
+  document.getElementById('sua_kh_NgayKhaiGiang').value= k.NgayKhaiGiang;
+  document.getElementById('sua_kh_NgayKetThuc').value  = k.NgayKetThuc;
+  document.getElementById('sua_kh_HocPhi').value       = k.HocPhi;
+  document.getElementById('sua_kh_SoLuongToiDa').value = k.SoLuongToiDa;
+  document.getElementById('sua_kh_TrangThai').value    = k.TrangThai;
+  showModal('modalSuaKhoa');
+}
+
+function openDelKhoa(id) {
+  _delKhoaId = id;
+  document.getElementById('xoa_TenKhoa').textContent = danhSachKhoa[id]?.TenKhoaHoc||'';
+  showModal('modalXoaKhoa');
+}
+
+/* ── MODAL XEM LỚP ── */
+function openViewLop(id) {
+  _curLopId = id;
+  const l = danhSachLop[id]; if (!l) return;
+  const cd = capDaiMap[l.MaCapDai]||{ten:'—',key:'white'};
+  const kh = danhSachKhoa[l.MaKhoaHoc];
+  document.getElementById('xlh_Ma').textContent         = 'L' + String(l.MaLop).padStart(3,'0');
+  document.getElementById('xlh_CapDai').innerHTML       = `<span class="belt belt-${cd.key}">${cd.ten}</span>`;
+  document.getElementById('xlh_Khoa').textContent       = kh?.TenKhoaHoc||'—';
+  document.getElementById('xlh_HLV').textContent        = hlvMap[l.MaHLV]||'—';
+  document.getElementById('xlh_PhongTap').textContent   = l.PhongTap||'—';
+  document.getElementById('xlh_LichHoc').textContent    = l.LichHoc;
+  document.getElementById('xlh_SoLuongToiDa').textContent = l.SoLuongToiDa + ' học viên';
+  showModal('modalXemLop');
+}
+
+/* ── MODAL SỬA LỚP ── */
+function openEditLop(id) {
+  _curLopId = id;
+  const l = danhSachLop[id]; if (!l) return;
+  document.getElementById('sua_lh_Ma').value          = id;
+  document.getElementById('sua_lh_Ma_show').value     = 'L' + String(l.MaLop).padStart(3,'0');
+  document.getElementById('sua_lh_MaKhoaHoc').value   = l.MaKhoaHoc;
+  document.getElementById('sua_lh_MaCapDai').value    = l.MaCapDai;
+  document.getElementById('sua_lh_MaHLV').value       = l.MaHLV;
+  document.getElementById('sua_lh_LichHoc').value     = l.LichHoc;
+  document.getElementById('sua_lh_SoLuongToiDa').value= l.SoLuongToiDa;
+  document.getElementById('sua_lh_PhongTap').value    = l.PhongTap||'';
+  showModal('modalSuaLop');
+}
+
+function openDelLop(id) {
+  _delLopId = id;
+  const l = danhSachLop[id];
+  const cd = capDaiMap[l?.MaCapDai]||{ten:'—'};
+  document.getElementById('xoa_TenLop').textContent = cd.ten + ' – ' + (danhSachKhoa[l?.MaKhoaHoc]?.TenKhoaHoc||'');
+  showModal('modalXoaLop');
+}
+
+/* ── LƯU THÊM KHOÁ ── */
+function luuThemKhoa() {
+  const ten = document.getElementById('kh_Ten').value.trim();
+  const nd  = document.getElementById('kh_NgayKhaiGiang').value;
+  const nkt = document.getElementById('kh_NgayKetThuc').value;
+  const hp  = document.getElementById('kh_HocPhi').value;
+  if (!ten || !nd || !nkt || !hp) { toast('Vui lòng nhập đầy đủ thông tin bắt buộc!','error'); return; }
+  if (nd >= nkt) { toast('Ngày kết thúc phải sau ngày khai giảng!','error'); return; }
+  danhSachKhoa[_nextKhoaId] = {
+    MaKhoaHoc: _nextKhoaId, TenKhoaHoc: ten,
+    NgayKhaiGiang: nd, NgayKetThuc: nkt,
+    HocPhi: parseInt(hp),
+    SoLuongToiDa: parseInt(document.getElementById('kh_SoLuongToiDa').value)||100,
+    TrangThai: document.getElementById('kh_TrangThai').value,
+  };
+  _nextKhoaId++;
+  toast('Thêm khóa học <strong>' + ten + '</strong> thành công!','success');
+  hideModal('modalThemKhoa');
+  ['kh_Ten','kh_NgayKhaiGiang','kh_NgayKetThuc','kh_HocPhi','kh_SoLuongToiDa'].forEach(id=>{ document.getElementById(id).value=''; });
+  populateKhoaSelect();
+  renderKhoa();
+}
+
+/* ── LƯU SỬA KHOÁ ── */
+function luuSuaKhoa() {
+  const id  = document.getElementById('sua_kh_Ma').value;
+  const ten = document.getElementById('sua_kh_Ten').value.trim();
+  const nd  = document.getElementById('sua_kh_NgayKhaiGiang').value;
+  const nkt = document.getElementById('sua_kh_NgayKetThuc').value;
+  if (!ten) { toast('Tên khóa học không được để trống!','error'); return; }
+  if (nd && nkt && nd >= nkt) { toast('Ngày kết thúc phải sau ngày khai giảng!','error'); return; }
+  if (danhSachKhoa[id]) {
+    Object.assign(danhSachKhoa[id], {
+      TenKhoaHoc: ten,
+      NgayKhaiGiang: nd,
+      NgayKetThuc: nkt,
+      HocPhi: parseInt(document.getElementById('sua_kh_HocPhi').value)||danhSachKhoa[id].HocPhi,
+      SoLuongToiDa: parseInt(document.getElementById('sua_kh_SoLuongToiDa').value)||danhSachKhoa[id].SoLuongToiDa,
+      TrangThai: document.getElementById('sua_kh_TrangThai').value,
+    });
+  }
+  toast('Cập nhật khóa học thành công!','success');
+  hideModal('modalSuaKhoa');
+  populateKhoaSelect();
+  renderKhoa();
+}
+
+/* ── XÓA KHOÁ ── */
+function xacNhanXoaKhoa() {
+  if (_delKhoaId && danhSachKhoa[_delKhoaId]) {
+    const ten = danhSachKhoa[_delKhoaId].TenKhoaHoc;
+    delete danhSachKhoa[_delKhoaId];
+    // xóa lớp thuộc khóa
+    Object.keys(danhSachLop).forEach(k=>{ if(danhSachLop[k].MaKhoaHoc===_delKhoaId) delete danhSachLop[k]; });
+    toast('Đã xóa khóa học <strong>' + ten + '</strong>!','success');
+  }
+  hideModal('modalXoaKhoa');
+  populateKhoaSelect();
+  renderKhoa(); renderLop();
+}
+
+/* ── LƯU THÊM LỚP ── */
+function luuThemLop() {
+  const makh  = document.getElementById('lh_MaKhoaHoc').value;
+  const macd  = document.getElementById('lh_MaCapDai').value;
+  const mahlv = document.getElementById('lh_MaHLV').value;
+  const lich  = document.getElementById('lh_LichHoc').value.trim();
+  if (!makh || !macd || !mahlv || !lich) { toast('Vui lòng nhập đầy đủ thông tin bắt buộc!','error'); return; }
+  // Kiểm tra UNIQUE(MaKhoaHoc, MaCapDai)
+  const trung = Object.values(danhSachLop).find(l=>l.MaKhoaHoc===parseInt(makh)&&l.MaCapDai===parseInt(macd));
+  if (trung) { toast('Khóa này đã có lớp cho cấp đai này rồi!','error'); return; }
+  danhSachLop[_nextLopId] = {
+    MaLop: _nextLopId, MaKhoaHoc: parseInt(makh), MaCapDai: parseInt(macd), MaHLV: parseInt(mahlv),
+    LichHoc: lich,
+    SoLuongToiDa: parseInt(document.getElementById('lh_SoLuongToiDa').value)||30,
+    PhongTap: document.getElementById('lh_PhongTap').value.trim()||null,
+  };
+  _nextLopId++;
+  toast('Thêm lớp học thành công!','success');
+  hideModal('modalThemLop');
+  ['lh_MaKhoaHoc','lh_MaCapDai','lh_MaHLV','lh_LichHoc','lh_SoLuongToiDa','lh_PhongTap'].forEach(id=>{ document.getElementById(id).value=''; });
+  renderLop();
+}
+
+/* ── LƯU SỬA LỚP ── */
+function luuSuaLop() {
+  const id   = document.getElementById('sua_lh_Ma').value;
+  const lich = document.getElementById('sua_lh_LichHoc').value.trim();
+  if (!lich) { toast('Lịch học không được để trống!','error'); return; }
+  if (danhSachLop[id]) {
+    Object.assign(danhSachLop[id], {
+      MaKhoaHoc: parseInt(document.getElementById('sua_lh_MaKhoaHoc').value),
+      MaCapDai:  parseInt(document.getElementById('sua_lh_MaCapDai').value),
+      MaHLV:     parseInt(document.getElementById('sua_lh_MaHLV').value),
+      LichHoc:   lich,
+      SoLuongToiDa: parseInt(document.getElementById('sua_lh_SoLuongToiDa').value)||30,
+      PhongTap:  document.getElementById('sua_lh_PhongTap').value.trim()||null,
+    });
+  }
+  toast('Cập nhật lớp học thành công!','success');
+  hideModal('modalSuaLop');
+  renderLop();
+}
+
+/* ── XÓA LỚP ── */
+function xacNhanXoaLop() {
+  if (_delLopId && danhSachLop[_delLopId]) {
+    delete danhSachLop[_delLopId];
+    toast('Đã xóa lớp học!','success');
+  }
+  hideModal('modalXoaLop');
+  renderLop();
+}
+
+/* ── TAB SWITCH ── */
+function switchTab(tab) {
+  document.getElementById('paneKhoa').classList.toggle('show', tab==='khoa');
+  document.getElementById('paneLop').classList.toggle('show', tab==='lop');
+  document.getElementById('tabBtnKhoa').classList.toggle('active', tab==='khoa');
+  document.getElementById('tabBtnLop').classList.toggle('active', tab==='lop');
+  document.getElementById('topbarBread').textContent = tab==='khoa' ? 'Khóa học' : 'Lớp học';
+}
+
+/* ── MODAL HELPERS ── */
+function showModal(id)  { document.getElementById(id).classList.add('show'); }
+function hideModal(id)  { document.getElementById(id).classList.remove('show'); }
+function backdropClose(e,id) { if (e.target===e.currentTarget) hideModal(id); }
+
+/* ── TOAST ── */
+function toast(msg, type='success') {
+  const c = document.getElementById('toastContainer');
+  const icon = type==='error' ? 'fa-times-circle toast-icon-e' : 'fa-check-circle toast-icon-s';
+  const el = document.createElement('div');
+  el.className = `toast-item toast-${type}`;
+  el.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(()=>el.remove(), 3200);
+}
+
+/* ── SIDEBAR ── */
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').style.display='block'; }
+function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display='none'; }
+
+/* ── TOPBAR DATE ── */
+(function(){
+  const days=['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];
+  const now=new Date();
+  document.getElementById('topbarDate').textContent =
+    `${days[now.getDay()]}, ${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
+})();
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', () => {
+  populateKhoaSelect();
+  renderKhoa();
+  renderLop();
+  document.getElementById('searchKhoa').addEventListener('input', renderKhoa);
+  document.getElementById('filterKhoaTT').addEventListener('change', renderKhoa);
+  document.getElementById('searchLop').addEventListener('input', renderLop);
+  document.getElementById('filterLopKhoa').addEventListener('change', renderLop);
+  document.getElementById('filterLopDai').addEventListener('change', renderLop);
+});
+</script>
+</body>
+</html>

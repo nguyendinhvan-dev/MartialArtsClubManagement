@@ -91,10 +91,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "MartialArtsClubManagement API V1");
-        c.RoutePrefix = string.Empty; // UI at http://localhost:5000/
+        c.RoutePrefix = "swagger"; // Move Swagger to /swagger to allow frontend at root
     });
 
 }
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 
