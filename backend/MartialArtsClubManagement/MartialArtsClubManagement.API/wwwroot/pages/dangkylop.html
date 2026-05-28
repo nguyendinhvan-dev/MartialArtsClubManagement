@@ -68,7 +68,7 @@
         </div>
 
         <div class="container mt-4">
-            <div class="row">
+            <div class="row" id="classes-container">
                 <div class="col-md-6 mb-4">
                     <div class="card p-4 shadow-sm border-0" style="border-radius: 12px;">
                         <h4 class="mb-3">Lớp Cơ Bản Khóa 20</h4>
@@ -98,20 +98,20 @@
                         <form>
                             <div class="mb-3">
                                 <label class="form-label">Chọn gói huấn luyện</label>
-                                <select class="form-select">
+                                <select class="form-select" id="package-select">
                                     <option>Gói 10 buổi (1 HLV kèm 1 HV) - 2,000,000 VNĐ</option>
                                     <option>Gói 20 buổi (1 HLV kèm 1 HV) - 3,500,000 VNĐ</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Chọn HLV (Không bắt buộc)</label>
-                                <select class="form-select">
+                                <select class="form-select" id="trainer-select">
                                     <option value="">-- Để trung tâm phân công --</option>
                                     <option>Nguyễn Văn A</option>
                                     <option>Trần Thị B</option>
                                 </select>
                             </div>
-                            <button type="button" class="btn btn-success">Đăng ký gói kèm riêng</button>
+                            <button type="button" class="btn btn-success" onclick="bookPrivateTraining()">Đăng ký gói kèm riêng</button>
                         </form>
                     </div>
                 </div>
@@ -119,6 +119,8 @@
         </div>
     </div>
 
+    <script src="../js/api.js"></script>
     <script src="../js/app.js"></script>
+    <script src="../js/hocvien.js"></script>
 </body>
 </html>
