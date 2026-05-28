@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ - Huấn luyện viên | CLB Võ Thuật</title>
+    
+    <!-- Bootstrap + FontAwesome + Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/huanluyenvien.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-circle"><i class="fas fa-hand-fist"></i></div>
+        <h4>CLB VÕ THUẬT</h4>
+        <small style="color: #AAA;">HỆ THỐNG QUẢN LÝ</small>
+    </div>
+    <div class="sidebar-nav">
+        <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="lich-day.html" class="nav-link"><i class="fas fa-calendar-alt"></i> Lịch dạy</a>
+        <a href="hoc-vien.html" class="nav-link"><i class="fas fa-user-graduate"></i> Học viên</a>
+        <a href="diem-danh.html" class="nav-link"><i class="fas fa-calendar-check"></i> Điểm danh</a>
+        <a href="thi.html" class="nav-link"><i class="fas fa-medal"></i> Kỳ thi</a>
+        <a href="thong-bao.html" class="nav-link"><i class="fas fa-bell"></i> Thông báo</a>
+        <a href="profile.html" class="nav-link active"><i class="fas fa-user-cog"></i> Hồ sơ</a>
+        <a href="doi-mat-khau.html" class="nav-link"><i class="fas fa-key"></i> Đổi mật khẩu</a>
+    </div>
+</div>
+
+<div class="topbar">
+    <div class="topbar-title">HUẤN LUYỆN VIÊN / <span>HỒ SƠ</span></div>
+    <div>
+        <button class="logout-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+    </div>
+</div>
+
+<div class="main-content">
+    <h1 class="page-title">HỒ SƠ CÁ NHÂN</h1>
+    
+    <div class="card">
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <div class="logo-circle" style="width: 100px; height: 100px; font-size: 2.5rem; margin: 0 auto 20px;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h4 id="profileName">Đang tải...</h4>
+                <p class="text-secondary" id="profileEmail">...</p>
+            </div>
+            <div class="col-md-8">
+                <form id="profileForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Mã HLV</label>
+                            <input type="text" class="form-control" id="maHLV" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Họ tên</label>
+                            <input type="text" class="form-control" id="hoTen" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="text" class="form-control" id="soDienThoai">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Chuyên môn</label>
+                            <input type="text" class="form-control" id="chuyenMon">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Ngày vào CLB</label>
+                            <input type="date" class="form-control" id="ngayVaoCLB" readonly>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ</label>
+                        <input type="text" class="form-control" id="diaChi">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Cập nhật hồ sơ
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- Scripts -->
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/main.js"></script>
+<script>
+// Initialize authentication
+initAuth('HuanLuyenVien');
+
+// Load profile data on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadProfileData();
+});
+
+async function loadProfileData() {
+    try {
+        const data = await getHLVProfile();
+        
+        if (data.success) {
+            const profile = data.data;
+            
+            document.getElementById('profileName').textContent = profile.hoTen || 'Không xác định';
+            document.getElementById('profileEmail').textContent = profile.email || 'Không có email';
+            
+            document.getElementById('maHLV').value = profile.maHLV || '';
+            document.getElementById('hoTen').value = profile.hoTen || '';
+            document.getElementById('email').value = profile.email || '';
+            document.getElementById('soDienThoai').value = profile.soDienThoai || '';
+            document.getElementById('chuyenMon').value = profile.chuyenMon || '';
+            document.getElementById('ngayVaoCLB').value = profile.ngayVaoCLB ? profile.ngayVaoCLB.split('T')[0] : '';
+            document.getElementById('diaChi').value = profile.diaChi || '';
+        }
+    } catch (error) {
+        console.error('Error loading profile:', error);
+        showToast('Không thể tải thông tin hồ sơ', 'error');
+    }
+}
+
+// Handle profile form submission
+document.getElementById('profileForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const profileData = {
+        hoTen: document.getElementById('hoTen').value,
+        soDienThoai: document.getElementById('soDienThoai').value,
+        chuyenMon: document.getElementById('chuyenMon').value,
+        diaChi: document.getElementById('diaChi').value
+    };
+    
+    try {
+        const result = await updateHLVProfile(profileData);
+        
+        if (result.success) {
+            showToast('Cập nhật hồ sơ thành công!', 'success');
+            await loadProfileData();
+        } else {
+            showToast('Cập nhật hồ sơ thất bại: ' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        showToast('Lỗi khi cập nhật hồ sơ', 'error');
+    }
+});
+</script>
+</body>
+</html>

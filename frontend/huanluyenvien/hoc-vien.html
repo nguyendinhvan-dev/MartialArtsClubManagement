@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học viên - Huấn luyện viên | CLB Võ Thuật</title>
+    
+    <!-- Bootstrap + FontAwesome + Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/huanluyenvien.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-circle"><i class="fas fa-hand-fist"></i></div>
+        <h4>CLB VÕ THUẬT</h4>
+        <small style="color: #AAA;">HỆ THỐNG QUẢN LÝ</small>
+    </div>
+    <div class="sidebar-nav">
+        <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="lich-day.html" class="nav-link"><i class="fas fa-calendar-alt"></i> Lịch dạy</a>
+        <a href="hoc-vien.html" class="nav-link active"><i class="fas fa-user-graduate"></i> Học viên</a>
+        <a href="diem-danh.html" class="nav-link"><i class="fas fa-calendar-check"></i> Điểm danh</a>
+        <a href="thi.html" class="nav-link"><i class="fas fa-medal"></i> Kỳ thi</a>
+        <a href="thong-bao.html" class="nav-link"><i class="fas fa-bell"></i> Thông báo</a>
+        <a href="profile.html" class="nav-link"><i class="fas fa-user-cog"></i> Hồ sơ</a>
+        <a href="doi-mat-khau.html" class="nav-link"><i class="fas fa-key"></i> Đổi mật khẩu</a>
+    </div>
+</div>
+
+<div class="topbar">
+    <div class="topbar-title">HUẤN LUYỆN VIÊN / <span>HỌC VIÊN</span></div>
+    <div>
+        <button class="logout-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+    </div>
+</div>
+
+<div class="main-content">
+    <h1 class="page-title">QUẢN LÝ HỌC VIÊN</h1>
+    
+    <div class="card">
+        <div class="filter-bar">
+            <input type="text" class="form-control" id="searchStudent" placeholder="Tìm theo tên, email..." style="width: 250px;">
+            <select class="form-select" id="filterClass" style="width: 200px;">
+                <option value="">Tất cả lớp</option>
+            </select>
+            <select class="form-select" id="filterBelt" style="width: 150px;">
+                <option value="">Tất cả đai</option>
+                <option value="Trắng">Trắng</option>
+                <option value="Vàng">Vàng</option>
+                <option value="Xanh lá">Xanh lá</option>
+                <option value="Xanh dương">Xanh dương</option>
+                <option value="Đỏ">Đỏ</option>
+                <option value="Nâu">Nâu</option>
+                <option value="Đen">Đen</option>
+            </select>
+            <button class="btn btn-primary" onclick="loadStudents()">
+                <i class="fas fa-search"></i> Tìm kiếm
+            </button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mã HV</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>SĐT</th>
+                        <th>Cấp đai</th>
+                        <th>Lớp</th>
+                        <th>Ngày tham gia</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                    <tr>
+                        <td colspan="8" class="text-center">Đang tải...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <span id="studentCount" class="small">Hiển thị 0 học viên</span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0" id="pagination">
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Student Detail Modal -->
+<div class="modal-overlay" id="studentModal">
+    <div class="modal-box">
+        <div class="modal-hdr" style="padding: 16px 22px; border-bottom: 1px solid var(--border);">
+            <h5 class="modal-title" style="color: var(--primary);">Chi tiết học viên</h5>
+            <button class="btn-close btn-close-white" onclick="closeStudentModal()"></button>
+        </div>
+        <div class="modal-body" style="padding: 22px;" id="studentModalBody">
+        </div>
+        <div class="modal-ftr" style="padding: 14px 22px; border-top: 1px solid var(--border);">
+            <button class="btn btn-outline" onclick="closeStudentModal()">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- Scripts -->
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/main.js"></script>
+<script>
+// Initialize authentication
+initAuth('HuanLuyenVien');
+
+let allStudents = [];
+let currentPage = 1;
+const itemsPerPage = 10;
+
+// Load students on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadStudents();
+    await loadClassFilter();
+});
+
+async function loadStudents() {
+    try {
+        const classId = document.getElementById('filterClass').value || null;
+        showLoading('studentTableBody');
+        
+        const data = await getHLVStudents(classId);
+        
+        if (data.success) {
+            allStudents = data.data;
+            filterAndRenderStudents();
+        } else {
+            document.getElementById('studentTableBody').innerHTML = 
+                '<tr><td colspan="8" class="text-center">Không thể tải danh sách học viên</td></tr>';
+        }
+    } catch (error) {
+        console.error('Error loading students:', error);
+        document.getElementById('studentTableBody').innerHTML = 
+            '<tr><td colspan="8" class="text-center">Lỗi khi tải danh sách học viên</td></tr>';
+        showToast('Không thể tải danh sách học viên', 'error');
+    }
+}
+
+async function loadClassFilter() {
+    try {
+        const data = await getHLVSchedule();
+        if (data.success && data.data) {
+            const classes = [...new Set(data.data.map(item => item.maLop))];
+            const select = document.getElementById('filterClass');
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls;
+                option.textContent = cls;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading classes:', error);
+    }
+}
+
+function filterAndRenderStudents() {
+    const searchTerm = document.getElementById('searchStudent').value.toLowerCase();
+    const classFilter = document.getElementById('filterClass').value;
+    const beltFilter = document.getElementById('filterBelt').value;
+    
+    let filtered = allStudents.filter(student => {
+        const matchSearch = !searchTerm || 
+            student.hoTen.toLowerCase().includes(searchTerm) ||
+            student.email.toLowerCase().includes(searchTerm);
+        const matchClass = !classFilter || student.maLop === classFilter;
+        const matchBelt = !beltFilter || student.capDai === beltFilter;
+        
+        return matchSearch && matchClass && matchBelt;
+    });
+    
+    document.getElementById('studentCount').textContent = `Hiển thị ${filtered.length} học viên`;
+    
+    // Pagination
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    currentPage = Math.min(currentPage, totalPages) || 1;
+    
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedStudents = filtered.slice(startIndex, startIndex + itemsPerPage);
+    
+    renderStudentTable(paginatedStudents);
+    renderPagination(totalPages);
+}
+
+function renderStudentTable(students) {
+    if (!students || students.length === 0) {
+        document.getElementById('studentTableBody').innerHTML = 
+            '<tr><td colspan="8" class="text-center">Không tìm thấy học viên</td></tr>';
+        return;
+    }
+    
+    const html = students.map(student => `
+        <tr>
+            <td>${student.maHocVien || '—'}</td>
+            <td><strong>${student.hoTen || '—'}</strong></td>
+            <td>${student.email || '—'}</td>
+            <td>${student.soDienThoai || '—'}</td>
+            <td><span class="class-badge">${student.capDai || '—'}</span></td>
+            <td>${student.tenLop || '—'}</td>
+            <td>${student.ngayThamGia ? formatDate(student.ngayThamGia) : '—'}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-info" onclick="viewStudentDetail('${student.maHocVien}')">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+    
+    document.getElementById('studentTableBody').innerHTML = html;
+}
+
+function renderPagination(totalPages) {
+    const pagination = document.getElementById('pagination');
+    if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    
+    // Previous button
+    html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Trước</a>
+    </li>`;
+    
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+            </li>`;
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+            html += `<li class="page-item disabled"><a class="page-link">...</a></li>`;
+        }
+    }
+    
+    // Next button
+    html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Sau</a>
+    </li>`;
+    
+    pagination.innerHTML = html;
+}
+
+function changePage(page) {
+    currentPage = page;
+    filterAndRenderStudents();
+}
+
+function viewStudentDetail(studentId) {
+    const student = allStudents.find(s => s.maHocVien === studentId);
+    if (!student) return;
+    
+    const modalBody = document.getElementById('studentModalBody');
+    modalBody.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Mã học viên:</strong> ${student.maHocVien || '—'}</p>
+                <p><strong>Họ tên:</strong> ${student.hoTen || '—'}</p>
+                <p><strong>Email:</strong> ${student.email || '—'}</p>
+                <p><strong>Số điện thoại:</strong> ${student.soDienThoai || '—'}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Cấp đai:</strong> ${student.capDai || '—'}</p>
+                <p><strong>Lớp:</strong> ${student.tenLop || '—'}</p>
+                <p><strong>Ngày tham gia:</strong> ${student.ngayThamGia ? formatDate(student.ngayThamGia) : '—'}</p>
+                <p><strong>Địa chỉ:</strong> ${student.diaChi || '—'}</p>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('studentModal').classList.add('show');
+}
+
+function closeStudentModal() {
+    document.getElementById('studentModal').classList.remove('show');
+}
+
+// Event listeners
+document.getElementById('searchStudent').addEventListener('input', debounce(() => {
+    currentPage = 1;
+    filterAndRenderStudents();
+}, 300));
+
+document.getElementById('filterClass').addEventListener('change', () => {
+    currentPage = 1;
+    loadStudents();
+});
+
+document.getElementById('filterBelt').addEventListener('change', () => {
+    currentPage = 1;
+    filterAndRenderStudents();
+});
+</script>
+</body>
+</html>

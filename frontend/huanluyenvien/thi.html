@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kỳ thi - Huấn luyện viên | CLB Võ Thuật</title>
+    
+    <!-- Bootstrap + FontAwesome + Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/huanluyenvien.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-circle"><i class="fas fa-hand-fist"></i></div>
+        <h4>CLB VÕ THUẬT</h4>
+        <small style="color: #AAA;">HỆ THỐNG QUẢN LÝ</small>
+    </div>
+    <div class="sidebar-nav">
+        <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="lich-day.html" class="nav-link"><i class="fas fa-calendar-alt"></i> Lịch dạy</a>
+        <a href="hoc-vien.html" class="nav-link"><i class="fas fa-user-graduate"></i> Học viên</a>
+        <a href="diem-danh.html" class="nav-link"><i class="fas fa-calendar-check"></i> Điểm danh</a>
+        <a href="thi.html" class="nav-link active"><i class="fas fa-medal"></i> Kỳ thi</a>
+        <a href="thong-bao.html" class="nav-link"><i class="fas fa-bell"></i> Thông báo</a>
+        <a href="profile.html" class="nav-link"><i class="fas fa-user-cog"></i> Hồ sơ</a>
+        <a href="doi-mat-khau.html" class="nav-link"><i class="fas fa-key"></i> Đổi mật khẩu</a>
+    </div>
+</div>
+
+<div class="topbar">
+    <div class="topbar-title">HUẤN LUYỆN VIÊN / <span>KỲ THI</span></div>
+    <div>
+        <button class="logout-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+    </div>
+</div>
+
+<div class="main-content">
+    <h1 class="page-title">KỲ THI THĂNG ĐAI</h1>
+    
+    <!-- Exam List -->
+    <div class="card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5><i class="fas fa-list"></i> Danh sách kỳ thi</h5>
+            <button class="btn btn-primary btn-sm" onclick="refreshExamList()">
+                <i class="fas fa-sync"></i> Tải lại
+            </button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mã kỳ thi</th>
+                        <th>Tên kỳ thi</th>
+                        <th>Ngày thi</th>
+                        <th>Lớp</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="examListBody">
+                    <tr>
+                        <td colspan="6" class="text-center">Đang tải...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Exam Results -->
+    <div class="card">
+        <h5><i class="fas fa-clipboard-check"></i> Nhập kết quả thi</h5>
+        <div class="filter-bar">
+            <select class="form-select" id="examSelect" style="width: 300px;" onchange="loadExamStudents()">
+                <option value="">Chọn kỳ thi</option>
+            </select>
+        </div>
+        
+        <div id="examResultPanel">
+            <p class="text-secondary">Vui lòng chọn kỳ thi để nhập kết quả</p>
+        </div>
+        
+        <button class="btn btn-success mt-3" onclick="saveExamResults()" id="saveExamBtn" style="display: none;">
+            <i class="fas fa-save"></i> Lưu kết quả
+        </button>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- Scripts -->
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/main.js"></script>
+<script>
+// Initialize authentication
+initAuth('HuanLuyenVien');
+
+let currentExamStudents = [];
+let currentExamId = null;
+
+// Load on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadExamList();
+});
+
+async function loadExamList() {
+    try {
+        showLoading('examListBody');
+        
+        const data = await getExams();
+        
+        if (data.success) {
+            renderExamList(data.data);
+            
+            // Populate exam select
+            const select = document.getElementById('examSelect');
+            select.innerHTML = '<option value="">Chọn kỳ thi</option>';
+            
+            data.data.forEach(exam => {
+                const option = document.createElement('option');
+                option.value = exam.maKyThi;
+                option.textContent = `${exam.tenKyThi} (${formatDate(exam.ngayThi)})`;
+                select.appendChild(option);
+            });
+        } else {
+            document.getElementById('examListBody').innerHTML = 
+                '<tr><td colspan="6" class="text-center">Không thể tải danh sách kỳ thi</td></tr>';
+        }
+    } catch (error) {
+        console.error('Error loading exam list:', error);
+        document.getElementById('examListBody').innerHTML = 
+            '<tr><td colspan="6" class="text-center">Lỗi khi tải danh sách kỳ thi</td></tr>';
+        showToast('Không thể tải danh sách kỳ thi', 'error');
+    }
+}
+
+function renderExamList(exams) {
+    if (!exams || exams.length === 0) {
+        document.getElementById('examListBody').innerHTML = 
+            '<tr><td colspan="6" class="text-center">Không có kỳ thi nào</td></tr>';
+        return;
+    }
+    
+    const html = exams.map(exam => {
+        const statusClass = exam.trangThai === 'Đã hoàn thành' ? 'text-success' : 
+                           exam.trangThai === 'Đang diễn ra' ? 'text-warning' : 'text-info';
+        
+        return `
+            <tr>
+                <td>${exam.maKyThi || '—'}</td>
+                <td><strong>${exam.tenKyThi || '—'}</strong></td>
+                <td>${exam.ngayThi ? formatDate(exam.ngayThi) : '—'}</td>
+                <td>${exam.tenLop || '—'}</td>
+                <td><span class="${statusClass}">${exam.trangThai || 'Chưa bắt đầu'}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-info" onclick="selectExam('${exam.maKyThi}')">
+                        <i class="fas fa-edit"></i> Nhập kết quả
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    document.getElementById('examListBody').innerHTML = html;
+}
+
+function selectExam(examId) {
+    document.getElementById('examSelect').value = examId;
+    loadExamStudents();
+}
+
+async function loadExamStudents() {
+    const examId = document.getElementById('examSelect').value;
+    
+    if (!examId) {
+        document.getElementById('examResultPanel').innerHTML = 
+            '<p class="text-secondary">Vui lòng chọn kỳ thi để nhập kết quả</p>';
+        document.getElementById('saveExamBtn').style.display = 'none';
+        return;
+    }
+    
+    currentExamId = examId;
+    
+    try {
+        showLoading('examResultPanel');
+        
+        // Get exam details including students
+        const data = await getExams();
+        
+        if (data.success) {
+            const exam = data.data.find(e => e.maKyThi === examId);
+            
+            if (exam && exam.hocViens) {
+                currentExamStudents = exam.hocViens;
+                renderExamResultPanel(exam);
+                document.getElementById('saveExamBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('examResultPanel').innerHTML = 
+                    '<p class="text-warning">Kỳ thi này không có học viên đăng ký</p>';
+                document.getElementById('saveExamBtn').style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading exam students:', error);
+        document.getElementById('examResultPanel').innerHTML = 
+            '<div class="alert alert-danger">Lỗi khi tải danh sách học viên</div>';
+        showToast('Không thể tải danh sách học viên', 'error');
+    }
+}
+
+function renderExamResultPanel(exam) {
+    if (!currentExamStudents || currentExamStudents.length === 0) {
+        document.getElementById('examResultPanel').innerHTML = 
+            '<p class="text-warning">Không có học viên tham gia kỳ thi này</p>';
+        return;
+    }
+    
+    let html = `
+        <div class="alert alert-info">
+            <strong>Kỳ thi:</strong> ${exam.tenKyThi}<br>
+            <strong>Ngày thi:</strong> ${formatDate(exam.ngayThi)}<br>
+            <strong>Số học viên:</strong> ${currentExamStudents.length}
+        </div>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Mã HV</th>
+                    <th>Họ tên</th>
+                    <th>Đai hiện tại</th>
+                    <th>Đai thi</th>
+                    <th>Kết quả</th>
+                    <th>Điểm</th>
+                    <th>Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    currentExamStudents.forEach(student => {
+        html += `
+            <tr>
+                <td>${student.maHocVien || '—'}</td>
+                <td><strong>${student.hoTen || '—'}</strong></td>
+                <td><span class="class-badge">${student.daiHienTai || '—'}</span></td>
+                <td><span class="class-badge">${student.daiThi || '—'}</span></td>
+                <td>
+                    <select class="form-select form-select-sm" id="result_${student.maHocVien}">
+                        <option value="">Chưa thi</option>
+                        <option value="Đạt" ${student.ketQua === 'Đạt' ? 'selected' : ''}>Đạt</option>
+                        <option value="Không đạt" ${student.ketQua === 'Không đạt' ? 'selected' : ''}>Không đạt</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" 
+                           id="score_${student.maHocVien}" 
+                           value="${student.diem || ''}" 
+                           min="0" max="10" step="0.5" style="width: 80px;">
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" 
+                           id="note_${student.maHocVien}" 
+                           value="${student.ghiChu || ''}" 
+                           placeholder="Ghi chú">
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table>';
+    document.getElementById('examResultPanel').innerHTML = html;
+}
+
+async function saveExamResults() {
+    if (!currentExamId) {
+        showToast('Vui lòng chọn kỳ thi', 'warning');
+        return;
+    }
+    
+    const results = [];
+    
+    currentExamStudents.forEach(student => {
+        const result = document.getElementById(`result_${student.maHocVien}`).value;
+        const score = document.getElementById(`score_${student.maHocVien}`).value;
+        const note = document.getElementById(`note_${student.maHocVien}`).value;
+        
+        if (result) {
+            results.push({
+                maHocVien: student.maHocVien,
+                ketQua: result,
+                diem: score || null,
+                ghiChu: note
+            });
+        }
+    });
+    
+    if (results.length === 0) {
+        showToast('Vui lòng nhập kết quả cho ít nhất một học viên', 'warning');
+        return;
+    }
+    
+    try {
+        const data = await saveExamResults({
+            maKyThi: currentExamId,
+            ketQua: results
+        });
+        
+        if (data.success) {
+            showToast('Lưu kết quả thi thành công!', 'success');
+            await loadExamList();
+        } else {
+            showToast('Lưu kết quả thi thất bại: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error saving exam results:', error);
+        showToast('Lỗi khi lưu kết quả thi', 'error');
+    }
+}
+
+function refreshExamList() {
+    loadExamList();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch dạy - Huấn luyện viên | CLB Võ Thuật</title>
+    
+    <!-- Bootstrap + FontAwesome + Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/huanluyenvien.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-circle"><i class="fas fa-hand-fist"></i></div>
+        <h4>CLB VÕ THUẬT</h4>
+        <small style="color: #AAA;">HỆ THỐNG QUẢN LÝ</small>
+    </div>
+    <div class="sidebar-nav">
+        <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="lich-day.html" class="nav-link active"><i class="fas fa-calendar-alt"></i> Lịch dạy</a>
+        <a href="hoc-vien.html" class="nav-link"><i class="fas fa-user-graduate"></i> Học viên</a>
+        <a href="diem-danh.html" class="nav-link"><i class="fas fa-calendar-check"></i> Điểm danh</a>
+        <a href="thi.html" class="nav-link"><i class="fas fa-medal"></i> Kỳ thi</a>
+        <a href="thong-bao.html" class="nav-link"><i class="fas fa-bell"></i> Thông báo</a>
+        <a href="profile.html" class="nav-link"><i class="fas fa-user-cog"></i> Hồ sơ</a>
+        <a href="doi-mat-khau.html" class="nav-link"><i class="fas fa-key"></i> Đổi mật khẩu</a>
+    </div>
+</div>
+
+<div class="topbar">
+    <div class="topbar-title">HUẤN LUYỆN VIÊN / <span>LỊCH DẠY</span></div>
+    <div>
+        <button class="logout-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+    </div>
+</div>
+
+<div class="main-content">
+    <h1 class="page-title">LỊCH DẠY</h1>
+    
+    <div class="card">
+        <div class="filter-bar">
+            <select class="form-select" style="width: 200px;" id="weekFilter">
+                <option value="current">Tuần này</option>
+                <option value="next">Tuần tới</option>
+                <option value="month">Tháng này</option>
+            </select>
+            <button class="btn btn-primary" onclick="loadSchedule()">
+                <i class="fas fa-sync"></i> Tải lại
+            </button>
+        </div>
+        
+        <div id="scheduleContainer">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Đang tải lịch dạy...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- Scripts -->
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/main.js"></script>
+<script>
+// Initialize authentication
+initAuth('HuanLuyenVien');
+
+// Load schedule on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadSchedule();
+});
+
+async function loadSchedule() {
+    try {
+        const filter = document.getElementById('weekFilter').value;
+        showLoading('scheduleContainer');
+        
+        const data = await getHLVSchedule();
+        
+        if (data.success) {
+            renderSchedule(data.data);
+        } else {
+            document.getElementById('scheduleContainer').innerHTML = 
+                '<div class="alert alert-warning">Không thể tải lịch dạy</div>';
+        }
+    } catch (error) {
+        console.error('Error loading schedule:', error);
+        document.getElementById('scheduleContainer').innerHTML = 
+            '<div class="alert alert-danger">Lỗi khi tải lịch dạy</div>';
+        showToast('Không thể tải lịch dạy', 'error');
+    }
+}
+
+function renderSchedule(scheduleData) {
+    if (!scheduleData || scheduleData.length === 0) {
+        document.getElementById('scheduleContainer').innerHTML = 
+            '<div class="alert alert-info">Không có lịch dạy trong khoảng thời gian này</div>';
+        return;
+    }
+    
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    
+    let html = '<div class="row">';
+    
+    scheduleData.forEach(item => {
+        const date = new Date(item.ngayDay);
+        const dayName = days[date.getDay()];
+        const dateStr = formatDate(item.ngayDay);
+        
+        html += `
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header" style="background: rgba(192,57,43,0.1); border-bottom: 1px solid var(--border);">
+                        <h5 class="mb-0"><i class="fas fa-calendar-day text-primary"></i> ${dayName}, ${dateStr}</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="text-primary">${item.tenLop || 'Không xác định'}</h6>
+                        <p class="mb-1"><i class="fas fa-clock me-2"></i>${item.gioBatDau} - ${item.gioKetThuc}</p>
+                        <p class="mb-1"><i class="fas fa-map-marker-alt me-2"></i>${item.phongDay || 'Chưa xác định'}</p>
+                        <p class="mb-1"><i class="fas fa-users me-2"></i>${item.soHocVien || 0} học viên</p>
+                        <p class="mb-0"><i class="fas fa-tag me-2"></i>${item.trinhDo || 'Không xác định'}</p>
+                    </div>
+                    <div class="card-footer" style="border-top: 1px solid var(--border);">
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="viewClassDetail('${item.maLop}')">
+                            <i class="fas fa-eye"></i> Chi tiết
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="goToAttendance('${item.maLop}', '${item.ngayDay}')">
+                            <i class="fas fa-check-circle"></i> Điểm danh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    document.getElementById('scheduleContainer').innerHTML = html;
+}
+
+function viewClassDetail(classId) {
+    // Navigate to class detail or show modal
+    showToast('Xem chi tiết lớp: ' + classId, 'info');
+}
+
+function goToAttendance(classId, date) {
+    window.location.href = `diem-danh.html?classId=${classId}&date=${date}`;
+}
+
+// Handle filter change
+document.getElementById('weekFilter').addEventListener('change', loadSchedule);
+</script>
+</body>
+</html>
