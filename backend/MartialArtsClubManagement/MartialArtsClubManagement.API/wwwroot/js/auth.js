@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function handleLogin() {
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
-    
+
     if (!usernameInput || !passwordInput) return;
 
     const TenDangNhap = usernameInput.value.trim();
@@ -20,26 +20,26 @@ async function handleLogin() {
     }
 
     const body = {
-        Username: TenDangNhap,
+        Email: TenDangNhap,
         Password: MatKhau
     };
 
     try {
         const result = await apiCall('/auth/login', 'POST', body);
-        
+
         console.log('Login API result:', result);
-        
+
         if (result && result.success && result.data && result.data.success) {
             const payload = result.data.data;
-            const token = payload?.token;
-            const role = payload?.role;
+            const token = payload?.token || payload?.Token;
+            const role = payload?.role || payload?.Role;
 
             if (token) {
                 localStorage.setItem('token', token);
                 if (role) localStorage.setItem('role', role);
 
                 const roleLower = role ? role.toLowerCase() : '';
-                
+
                 // Force admin redirect if user is admin
                 if (roleLower === 'admin' || roleLower === 'quantri' || roleLower === 'quantrivien') {
                     window.location.href = '/admin/dashboard.html';
@@ -111,8 +111,8 @@ function toast(msg, type = 'success') {
     el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${msg}`;
     document.body.appendChild(el);
     setTimeout(() => {
-      el.style.opacity = '0';
-      el.style.transition = 'opacity .3s';
-      setTimeout(() => el.remove(), 300);
+        el.style.opacity = '0';
+        el.style.transition = 'opacity .3s';
+        setTimeout(() => el.remove(), 300);
     }, 3000);
 }
