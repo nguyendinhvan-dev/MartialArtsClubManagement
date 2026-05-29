@@ -100,14 +100,14 @@
     .card-box-title i { color:var(--primary); }
 
     /* TABLE */
-    .table { color:#ddd; margin:0; }
-    .table thead th { background:#252525; color:var(--primary); text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; padding:13px 16px; border-bottom:1px solid var(--border); font-weight:600; white-space:nowrap; }
-    .table tbody tr { transition:background .15s; }
-    .table tbody tr:hover { background:rgba(255,255,255,.03); }
-    .table td { padding:12px 16px; border-bottom:1px solid #252525; vertical-align:middle; font-size:.83rem; }
+    .table { color:#333333; margin:0; background:#ffffff; border-collapse:collapse; }
+    .table thead th { background:#f5f5f5; color:#C0392B; text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; padding:13px 16px; border-bottom:1px solid #ddd; font-weight:600; white-space:nowrap; }
+    .table tbody tr { transition:background .15s; background:#ffffff; }
+    .table tbody tr:hover { background:#f9f9f9; }
+    .table td { padding:12px 16px; border-bottom:1px solid #eee; vertical-align:middle; font-size:.83rem; color:#333333; }
     .table tbody tr:last-child td { border-bottom:none; }
-    .td-main { font-weight:600; font-size:.85rem; }
-    .td-sub  { color:var(--text-secondary); font-size:.72rem; margin-top:1px; }
+    .td-main { font-weight:600; font-size:.85rem; color:#000000; }
+    .td-sub  { color:#666666; font-size:.72rem; margin-top:1px; }
 
     /* STATUS */
     .status { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:.7rem; font-weight:600; white-space:nowrap; }
@@ -256,7 +256,6 @@
     <a href="sukien.html" class="nav-link"><i class="fas fa-bullhorn"></i><span>Thông báo &amp; Sự kiện</span></a>
 
     <div class="nav-section-label">Hệ thống</div>
-    <a href="taikhoan.html" class="nav-link"><i class="fas fa-users-cog"></i><span>Tài khoản Admin</span></a>
     <a href="caidat.html" class="nav-link"><i class="fas fa-cog"></i><span>Cài đặt hệ thống</span></a>
   </nav>
   <div class="sidebar-footer">
@@ -522,7 +521,7 @@
       <div class="confirm-desc">Bạn sẽ được chuyển về trang đăng nhập.</div>
       <div class="confirm-btns">
         <button class="btn-outline" onclick="hideModal('logoutModal')">Hủy</button>
-        <button class="btn-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+        <button class="btn-danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
       </div>
     </div>
   </div>
@@ -538,6 +537,7 @@
 /* ── MODAL HELPERS ── */
 function showModal(id) { document.getElementById(id).classList.add('show'); }
 function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+function doLogout() { hideModal('logoutModal'); logout(); }
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); });
 });
@@ -559,39 +559,66 @@ function toast(msg, type = 'success') {
 document.getElementById('topbarDate').textContent =
   new Date().toLocaleDateString('vi-VN', { weekday:'short', year:'numeric', month:'short', day:'numeric' });
 
-/* ── DỮ LIỆU MẪU ── */
+/* ── CẤU HÌNH API ── */
+const API_BASE = '/api/admin';
 
-// DangKyLop (join sẵn tên học viên & lớp để hiển thị)
-const DANG_KY = [
-  { MaDangKy:1, MaHocVien:1, TenHocVien:'Nguyễn Đình Văn',  MaLop:1, TenLop:'Lớp Đai Trắng – Khóa 5' },
-  { MaDangKy:2, MaHocVien:3, TenHocVien:'Nguyễn Đăng Thắng', MaLop:1, TenLop:'Lớp Đai Trắng – Khóa 5' },
-  { MaDangKy:3, MaHocVien:2, TenHocVien:'Trần Nhật Hoàng',   MaLop:2, TenLop:'Lớp Đai Vàng – Khóa 5'  },
-];
-
-// DiemDanh (bám sát cột SQL: MaDiemDanh, MaDangKy, NgayHoc, TrangThai, GhiChu)
-let data = [
-  { MaDiemDanh:1, MaDangKy:1, NgayHoc:'2026-03-03', TrangThai:'CóMặt',         GhiChu:'' },
-  { MaDiemDanh:2, MaDangKy:1, NgayHoc:'2026-03-05', TrangThai:'VắngPhép',      GhiChu:'Bận việc gia đình' },
-  { MaDiemDanh:3, MaDangKy:2, NgayHoc:'2026-03-03', TrangThai:'CóMặt',         GhiChu:'' },
-  { MaDiemDanh:4, MaDangKy:3, NgayHoc:'2026-03-04', TrangThai:'CóMặt',         GhiChu:'' },
-  { MaDiemDanh:5, MaDangKy:1, NgayHoc:'2026-03-07', TrangThai:'VắngKhôngPhép', GhiChu:'' },
-  { MaDiemDanh:6, MaDangKy:2, NgayHoc:'2026-03-05', TrangThai:'CóMặt',         GhiChu:'' },
-  { MaDiemDanh:7, MaDangKy:3, NgayHoc:'2026-03-06', TrangThai:'VắngPhép',      GhiChu:'Ốm' },
-  { MaDiemDanh:8, MaDangKy:1, NgayHoc:'2026-03-10', TrangThai:'CóMặt',         GhiChu:'' },
-  { MaDiemDanh:9, MaDangKy:2, NgayHoc:'2026-03-10', TrangThai:'CóMặt',         GhiChu:'' },
-  { MaDiemDanh:10,MaDangKy:3, NgayHoc:'2026-03-11', TrangThai:'VắngKhôngPhép', GhiChu:'' },
-  { MaDiemDanh:11,MaDangKy:1, NgayHoc:'2026-03-12', TrangThai:'CóMặt',         GhiChu:'' },
-  { MaDiemDanh:12,MaDangKy:2, NgayHoc:'2026-03-12', TrangThai:'CóMặt',         GhiChu:'' },
-];
-
-let nextId = data.length + 1;
-let filtered = [...data];
+/* ── DỮ LIỆU ── */
+let data = [];
+let dangKyList = [];
+let nextId = 1;
+let filtered = [];
 const PAGE_SIZE = 10;
 let currentPage = 1;
 
+/* ── LOAD DATA ── */
+async function loadData() {
+  try {
+    const res = await fetch(`${API_BASE}/diemdanh`);
+    const result = await res.json();
+    if (result.success) {
+      data = result.data.map(d => ({
+        MaDiemDanh: d.maDiemDanh,
+        MaDangKy: d.maDangKy,
+        TenHocVien: d.tenHocVien,
+        NgayHoc: d.ngayHoc ? d.ngayHoc.split('T')[0] : null,
+        TrangThai: d.trangThai,
+        GhiChu: d.ghiChu
+      }));
+      filtered = [...data];
+      renderTable();
+      updateStats();
+      console.log('Loaded attendance data:', data.length, 'records');
+    } else {
+      toast('Lỗi tải dữ liệu điểm danh!', 'error');
+      console.error('API error:', result.message);
+    }
+  } catch (error) {
+    console.error('Error loading attendance:', error);
+    toast('Lỗi tải dữ liệu điểm danh!', 'error');
+  }
+}
+
+async function loadDangKy() {
+  try {
+    const res = await fetch(`${API_BASE}/dangkylop`);
+    const result = await res.json();
+    if (result.success) {
+      dangKyList = result.data.map(d => ({
+        MaDangKy: d.maDangKy,
+        MaHocVien: d.maHocVien,
+        TenHocVien: d.tenHocVien,
+        MaLop: d.maLop,
+        TenLop: d.tenLop
+      }));
+    }
+  } catch (error) {
+    console.error('Error loading registrations:', error);
+  }
+}
+
 /* ── HELPER: join DangKy ── */
 function getDK(maDangKy) {
-  return DANG_KY.find(x => x.MaDangKy === maDangKy) || { TenHocVien:'—', TenLop:'—' };
+  return dangKyList.find(x => x.MaDangKy === maDangKy) || { TenHocVien:'—', TenLop:'—' };
 }
 
 function fmt(d) { if (!d) return '—'; return d.split('-').reverse().join('/'); }
@@ -624,7 +651,7 @@ function renderTable() {
       <td style="color:var(--text-muted);font-size:.78rem;">${r.MaDiemDanh}</td>
       <td>
         <div class="td-main">${dk.TenHocVien}</div>
-        <div class="td-sub">MaHV: ${DANG_KY.find(x=>x.MaDangKy===r.MaDangKy)?.MaHocVien || '—'}</div>
+        <div class="td-sub">MaHV: ${dk.MaHocVien || '—'}</div>
       </td>
       <td><div class="td-sub">${dk.TenLop}</div></td>
       <td style="color:var(--text-muted);font-size:.78rem;">${r.MaDangKy}</td>
@@ -688,7 +715,8 @@ function resetFilter() {
 /* ── FILTER LOP (populate) ── */
 function populateLopFilter() {
   const sel = document.getElementById('filterLop');
-  const unique = [...new Map(DANG_KY.map(x => [x.MaLop, x])).values()];
+  sel.innerHTML = '<option value="">Tất cả lớp</option>';
+  const unique = [...new Map(dangKyList.map(x => [x.MaLop, x])).values()];
   unique.forEach(dk => {
     const opt = document.createElement('option');
     opt.value = dk.MaLop;
@@ -700,8 +728,8 @@ function populateLopFilter() {
 /* ── POPULATE DANG KY SELECT (modal Thêm) ── */
 function populateDangKySelect() {
   const sel = document.getElementById('t_MaDangKy');
-  sel.innerHTML = '';
-  DANG_KY.forEach(dk => {
+  sel.innerHTML = '<option value="">-- Chọn đăng ký --</option>';
+  dangKyList.forEach(dk => {
     const opt = document.createElement('option');
     opt.value = dk.MaDangKy;
     opt.textContent = `#${dk.MaDangKy} – ${dk.TenHocVien} (${dk.TenLop})`;
@@ -736,42 +764,67 @@ function openSua(id) {
   showModal('modalSua');
 }
 
-function luuSua() {
+async function luuSua() {
   const id = parseInt(document.getElementById('s_MaDiemDanh').value);
-  const r  = data.find(x => x.MaDiemDanh === id);
   const ngayHoc = document.getElementById('s_NgayHoc').value;
   if (!ngayHoc) { toast('NgayHoc không được để trống!', 'error'); return; }
-  if (r) {
-    r.NgayHoc   = ngayHoc;
-    r.TrangThai = document.getElementById('s_TrangThai').value;
-    r.GhiChu    = document.getElementById('s_GhiChu').value.trim();
+
+  try {
+    const res = await fetch(`${API_BASE}/diemdanh/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        trangThai: document.getElementById('s_TrangThai').value,
+        ghiChu: document.getElementById('s_GhiChu').value.trim()
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      toast('Cập nhật điểm danh <strong>#' + id + '</strong> thành công!', 'success');
+      hideModal('modalSua');
+      loadData();
+    } else {
+      toast('Lỗi cập nhật: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error updating attendance:', error);
+    toast('Lỗi cập nhật điểm danh!', 'error');
   }
-  applyFilter();
-  hideModal('modalSua');
-  toast('Cập nhật điểm danh <strong>#' + id + '</strong> thành công!', 'success');
 }
 
 /* ── THÊM ── */
-function themDiemDanh() {
+async function themDiemDanh() {
   const maDangKy = parseInt(document.getElementById('t_MaDangKy').value);
   const ngayHoc  = document.getElementById('t_NgayHoc').value;
   if (!ngayHoc) { toast('Vui lòng chọn NgayHoc!', 'error'); return; }
-  // Check unique(MaDangKy, NgayHoc)
-  if (data.find(x => x.MaDangKy === maDangKy && x.NgayHoc === ngayHoc)) {
-    toast('Đã tồn tại bản ghi điểm danh cho học viên này trong ngày!', 'error'); return;
+  if (!maDangKy) { toast('Vui lòng chọn học viên!', 'error'); return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/diemdanh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        maDangKy: maDangKy,
+        ngayHoc: ngayHoc,
+        trangThai: document.getElementById('t_TrangThai').value,
+        ghiChu: document.getElementById('t_GhiChu').value.trim()
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      toast('Đã thêm bản ghi điểm danh!', 'success');
+      hideModal('modalThem');
+      document.getElementById('t_NgayHoc').value = '';
+      document.getElementById('t_GhiChu').value = '';
+      document.getElementById('t_MaDangKy').value = '';
+      loadData();
+    } else {
+      toast('Lỗi thêm: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error adding attendance:', error);
+    toast('Lỗi thêm điểm danh!', 'error');
   }
-  data.unshift({
-    MaDiemDanh: nextId++,
-    MaDangKy:   maDangKy,
-    NgayHoc:    ngayHoc,
-    TrangThai:  document.getElementById('t_TrangThai').value,
-    GhiChu:     document.getElementById('t_GhiChu').value.trim(),
-  });
-  applyFilter();
-  hideModal('modalThem');
-  document.getElementById('t_NgayHoc').value = '';
-  document.getElementById('t_GhiChu').value  = '';
-  toast('Đã thêm bản ghi điểm danh!', 'success');
 }
 
 /* ── XÓA ── */
@@ -785,22 +838,38 @@ function openXoa(id) {
   showModal('modalXoa');
 }
 
-function xoa(id) {
-  data = data.filter(x => x.MaDiemDanh !== id);
-  applyFilter();
-  toast('Đã xóa bản ghi điểm danh!', 'success');
+async function xoa(id) {
+  try {
+    const res = await fetch(`${API_BASE}/diemdanh/${id}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (result.success) {
+      toast('Đã xóa bản ghi điểm danh!', 'success');
+      loadData();
+    } else {
+      toast('Lỗi xóa: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting attendance:', error);
+    toast('Lỗi xóa bản ghi điểm danh!', 'error');
+  }
 }
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
-  populateLopFilter();
-  populateDangKySelect();
-  renderTable();
+  loadData();
+  loadDangKy().then(() => {
+    populateLopFilter();
+    populateDangKySelect();
+  });
   ['searchDD','filterTrangThai','filterLop','filterNgay'].forEach(id => {
     document.getElementById(id).addEventListener('input',  applyFilter);
     document.getElementById(id).addEventListener('change', applyFilter);
   });
 });
 </script>
+
+<!-- Auth JS for logout functionality -->
+<script src="/js/auth.js"></script>
+
 </body>
 </html>

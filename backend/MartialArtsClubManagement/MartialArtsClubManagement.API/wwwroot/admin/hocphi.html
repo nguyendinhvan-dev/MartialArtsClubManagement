@@ -100,33 +100,33 @@
     .card-box-title i { color:var(--primary); }
 
     /* ── TABLE — màu chữ rõ hơn ── */
-    .table { color:#e0e0e0; margin:0; }   /* trắng nhạt thay vì #ddd */
+    .table { color:#333333; margin:0; background:#ffffff; border-collapse:collapse; }
     .table thead th {
-      background:#252525;
-      color:var(--primary);
+      background:#f5f5f5;
+      color:#C0392B;
       text-transform:uppercase;
       font-size:.72rem;
       letter-spacing:.5px;
       padding:13px 16px;
-      border-bottom:1px solid var(--border);
+      border-bottom:1px solid #ddd;
       font-weight:600;
       white-space:nowrap;
     }
-    .table tbody tr { transition:background .15s; }
-    .table tbody tr:hover { background:rgba(255,255,255,.04); }
+    .table tbody tr { transition:background .15s; background:#ffffff; }
+    .table tbody tr:hover { background:#f9f9f9; }
     .table td {
       padding:12px 16px;
-      border-bottom:1px solid #2a2a2a;
+      border-bottom:1px solid #eee;
       vertical-align:middle;
-      font-size:.84rem;        /* tăng nhẹ từ .83 */
-      color:#e0e0e0;           /* ← fix: đặt rõ màu trên từng td */
+      font-size:.84rem;
+      color:#333333;
     }
     .table tbody tr:last-child td { border-bottom:none; }
 
-    /* td-main: tên chính — trắng tươi */
-    .td-main { font-weight:600; font-size:.86rem; color:#ffffff; }
-    /* td-sub: thông tin phụ — đủ sáng để đọc được */
-    .td-sub  { font-size:.73rem; color:#c0c0c0; margin-top:2px; }
+    /* td-main: tên chính — đen */
+    .td-main { font-weight:600; font-size:.86rem; color:#000000; }
+    /* td-sub: thông tin phụ — xám đậm */
+    .td-sub  { font-size:.73rem; color:#666666; margin-top:2px; }
     /* mã số nhạt hơn một chút */
     .td-id   { color:#999; font-size:.78rem; }
 
@@ -273,7 +273,6 @@
     <a href="sukien.html"   class="nav-link"><i class="fas fa-bullhorn"></i><span>Thông báo &amp; Sự kiện</span></a>
 
     <div class="nav-section-label">Hệ thống</div>
-    <a href="taikhoan.html" class="nav-link"><i class="fas fa-users-cog"></i><span>Tài khoản Admin</span></a>
     <a href="caidat.html"   class="nav-link"><i class="fas fa-cog"></i><span>Cài đặt hệ thống</span></a>
   </nav>
   <div class="sidebar-footer">
@@ -624,7 +623,7 @@
       <div class="confirm-desc">Bạn sẽ được chuyển về trang đăng nhập.</div>
       <div class="confirm-btns">
         <button class="btn-outline" onclick="hideModal('logoutModal')">Hủy</button>
-        <button style="background:#c0392b;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:.83rem;font-weight:600;cursor:pointer;font-family:'Montserrat',sans-serif;">Đăng xuất</button>
+        <button style="background:#c0392b;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:.83rem;font-weight:600;cursor:pointer;font-family:'Montserrat',sans-serif;" onclick="doLogout()">Đăng xuất</button>
       </div>
     </div>
   </div>
@@ -636,9 +635,85 @@
      SCRIPT
 ══════════════════════════════════════ -->
 <script>
+const API_BASE = '/api/admin';
+
+/* ── LOAD DATA ── */
+async function loadDataLop(trangThai = null) {
+  try {
+    const url = trangThai ? `${API_BASE}/hocphi/lop?trangThai=${trangThai}` : `${API_BASE}/hocphi/lop`;
+    const res = await fetch(url);
+    const result = await res.json();
+    if (result.success) {
+      dataLop = result.data.map(d => ({
+        MaDangKy: d.maDangKy,
+        MaHocVien: d.maHocVien,
+        TenHocVien: d.tenHocVien,
+        MaLop: d.maLop,
+        TenKhoaHoc: d.tenKhoaHoc,
+        LichHoc: d.lichHoc,
+        HocPhi: d.hocPhi,
+        NgayDangKy: d.ngayDangKy ? d.ngayDangKy.split('T')[0] : null,
+        TrangThaiThanhToan: d.trangThaiThanhToan,
+        NgayThanhToan: d.ngayThanhToan
+      }));
+      filteredLop = [...dataLop];
+      renderLop();
+      updateStatsLop();
+    }
+  } catch (error) {
+    console.error('Error loading class fees:', error);
+    toast('Lỗi tải dữ liệu học phí lớp!', 'error');
+  }
+}
+
+async function loadDataKem(trangThai = null) {
+  try {
+    const url = trangThai ? `${API_BASE}/hocphi/kem?trangThai=${trangThai}` : `${API_BASE}/hocphi/kem`;
+    const res = await fetch(url);
+    const result = await res.json();
+    if (result.success) {
+      dataKem = result.data.map(d => ({
+        MaDangKyKem: d.maDangKyKem,
+        MaHocVien: d.maHocVien,
+        TenHocVien: d.tenHocVien,
+        MaGoi: d.maGoi,
+        TenGoi: d.tenGoi,
+        SoBuoi: d.soBuoi,
+        HocPhi: d.hocPhi,
+        MaHlv: d.maHlv,
+        TenHuanLuyenVien: d.tenHuanLuyenVien,
+        NgayDangKy: d.ngayDangKy ? d.ngayDangKy.split('T')[0] : null,
+        TrangThaiThanhToan: d.trangThaiThanhToan,
+        NgayThanhToan: d.ngayThanhToan
+      }));
+      filteredKem = [...dataKem];
+      renderKem();
+      updateStatsKem();
+    }
+  } catch (error) {
+    console.error('Error loading tutoring fees:', error);
+    toast('Lỗi tải dữ liệu học phí dạy kèm!', 'error');
+  }
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch(`${API_BASE}/hocphi/thongke`);
+    const result = await res.json();
+    if (result.success) {
+      const stats = result.data;
+      document.getElementById('statDaThu').textContent = fmtMoney(stats.tongDoanhThuDaThu);
+      document.getElementById('statChuaThu').textContent = fmtMoney(stats.tongDoanhThuChuaThu);
+    }
+  } catch (error) {
+    console.error('Error loading stats:', error);
+  }
+}
+
 /* ── MODAL ── */
 function showModal(id){ document.getElementById(id).classList.add('show'); }
 function hideModal(id){ document.getElementById(id).classList.remove('show'); }
+function doLogout(){ hideModal('logoutModal'); logout(); }
 document.querySelectorAll('.modal-overlay').forEach(o=>{
   o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('show'); });
 });
@@ -676,15 +751,8 @@ function switchTab(tab){
 /* ════════════════════════════════════
    DATA — DangKyLop (join HocVien, LopHoc, KhoaHoc, HocPhi)
 ════════════════════════════════════ */
-let dataLop = [
-  { MaDangKy:1, MaHocVien:1, TenHocVien:'Nguyễn Đình Văn',   MaLop:1, TenLop:'Lớp Đai Trắng – Khóa 5', HocPhi:1200000, NgayDangKy:'2026-02-28', TrangThaiThanhToan:'DaThanhToan',   NgayThanhToan:'2026-02-28T09:00' },
-  { MaDangKy:2, MaHocVien:3, TenHocVien:'Nguyễn Đăng Thắng', MaLop:1, TenLop:'Lớp Đai Trắng – Khóa 5', HocPhi:1200000, NgayDangKy:'2026-02-28', TrangThaiThanhToan:'DaThanhToan',   NgayThanhToan:'2026-02-28T10:00' },
-  { MaDangKy:3, MaHocVien:2, TenHocVien:'Trần Nhật Hoàng',   MaLop:2, TenLop:'Lớp Đai Vàng – Khóa 5',  HocPhi:1200000, NgayDangKy:'2026-02-28', TrangThaiThanhToan:'DaThanhToan',   NgayThanhToan:'2026-02-28T11:00' },
-  { MaDangKy:4, MaHocVien:4, TenHocVien:'Lê Thị Mai',        MaLop:1, TenLop:'Lớp Đai Trắng – Khóa 5', HocPhi:1200000, NgayDangKy:'2026-03-01', TrangThaiThanhToan:'ChuaThanhToan', NgayThanhToan:null },
-  { MaDangKy:5, MaHocVien:5, TenHocVien:'Phạm Văn Dũng',     MaLop:2, TenLop:'Lớp Đai Vàng – Khóa 5',  HocPhi:1200000, NgayDangKy:'2026-03-02', TrangThaiThanhToan:'ChuaThanhToan', NgayThanhToan:null },
-  { MaDangKy:6, MaHocVien:6, TenHocVien:'Hoàng Thị Lan',     MaLop:1, TenLop:'Lớp Đai Trắng – Khóa 5', HocPhi:1200000, NgayDangKy:'2026-03-03', TrangThaiThanhToan:'MienGiam',      NgayThanhToan:'2026-03-03T08:00' },
-  { MaDangKy:7, MaHocVien:7, TenHocVien:'Võ Minh Khoa',      MaLop:2, TenLop:'Lớp Đai Vàng – Khóa 5',  HocPhi:1200000, NgayDangKy:'2026-03-04', TrangThaiThanhToan:'ChuaThanhToan', NgayThanhToan:null },
-];
+let dataLop = [];
+let dataKem = [];
 
 let filteredLop = [...dataLop];
 const PAGE_SIZE = 8;
@@ -783,26 +851,37 @@ function openSuaLop(id){
   document.getElementById('sl_NgayThanhToan').value   = r.NgayThanhToan||'';
   showModal('modalSuaLop');
 }
-function luuSuaLop(){
+async function luuSuaLop(){
   const id=parseInt(document.getElementById('sl_MaDangKy').value);
-  const r=dataLop.find(x=>x.MaDangKy===id); if(!r)return;
-  r.TrangThaiThanhToan = document.getElementById('sl_TrangThai').value;
-  r.NgayThanhToan      = document.getElementById('sl_NgayThanhToan').value||null;
-  applyFilterLop(); updateStatsLop();
-  hideModal('modalSuaLop');
-  toast('Cập nhật thanh toán <strong>#'+id+'</strong> thành công!','success');
+  const trangThai = document.getElementById('sl_TrangThai').value;
+  const ngayThanhToan = document.getElementById('sl_NgayThanhToan').value||null;
+  
+  try {
+    const res = await fetch(`${API_BASE}/hocphi/lop/${id}/thanhtoan`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        trangThaiThanhToan: trangThai
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      loadDataLop();
+      hideModal('modalSuaLop');
+      toast('Cập nhật thanh toán <strong>#'+id+'</strong> thành công!','success');
+    } else {
+      toast('Lỗi cập nhật: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error updating payment:', error);
+    toast('Lỗi cập nhật thanh toán!', 'error');
+  }
 }
 
 /* ════════════════════════════════════
    DATA — DangKyKem
 ════════════════════════════════════ */
-let dataKem = [
-  { MaDangKyKem:1, MaHocVien:1, TenHocVien:'Nguyễn Đình Văn',   MaGoi:1, TenGoi:'Gói kèm 8 buổi',  SoBuoi:8,  HocPhi:800000,  MaHLV:null, TenHLV:'—',                 NgayDangKy:'2026-02-25T08:00', TrangThaiPhanCong:'ChoPhanCong', NgayBatDau:null,         TrangThaiThanhToan:'ChuaThanhToan', NgayThanhToan:null },
-  { MaDangKyKem:2, MaHocVien:2, TenHocVien:'Trần Nhật Hoàng',   MaGoi:2, TenGoi:'Gói kèm 12 buổi', SoBuoi:12, HocPhi:1100000, MaHLV:1,    TenHLV:'Trần Minh Tuấn',    NgayDangKy:'2026-02-26T09:00', TrangThaiPhanCong:'DaPhanCong',  NgayBatDau:'2026-03-10', TrangThaiThanhToan:'DaThanhToan',   NgayThanhToan:'2026-03-10T10:00' },
-  { MaDangKyKem:3, MaHocVien:4, TenHocVien:'Lê Thị Mai',        MaGoi:1, TenGoi:'Gói kèm 8 buổi',  SoBuoi:8,  HocPhi:800000,  MaHLV:null, TenHLV:'—',                 NgayDangKy:'2026-03-01T07:30', TrangThaiPhanCong:'ChoPhanCong', NgayBatDau:null,         TrangThaiThanhToan:'ChuaThanhToan', NgayThanhToan:null },
-  { MaDangKyKem:4, MaHocVien:5, TenHocVien:'Phạm Văn Dũng',     MaGoi:2, TenGoi:'Gói kèm 12 buổi', SoBuoi:12, HocPhi:1100000, MaHLV:2,    TenHLV:'Lê Thị Hoa',        NgayDangKy:'2026-03-05T08:00', TrangThaiPhanCong:'DaPhanCong',  NgayBatDau:'2026-03-15', TrangThaiThanhToan:'ChuaThanhToan', NgayThanhToan:null },
-];
-
+// dataKem already declared above with empty array
 let filteredKem=[...dataKem];
 let pageKem=1;
 
@@ -893,19 +972,30 @@ function openSuaKem(id){
   document.getElementById('sk_NgayThanhToan').value   = r.NgayThanhToan||'';
   showModal('modalSuaKem');
 }
-function luuSuaKem(){
+async function luuSuaKem(){
   const id=parseInt(document.getElementById('sk_MaDangKyKem').value);
-  const r=dataKem.find(x=>x.MaDangKyKem===id); if(!r)return;
-  const maHLV=document.getElementById('sk_MaHLV').value;
-  r.MaHLV              = maHLV?parseInt(maHLV):null;
-  r.TenHLV             = maHLV==='1'?'Trần Minh Tuấn':maHLV==='2'?'Lê Thị Hoa':'—';
-  r.TrangThaiPhanCong  = document.getElementById('sk_TrangThaiPC').value;
-  r.NgayBatDau         = document.getElementById('sk_NgayBatDau').value||null;
-  r.TrangThaiThanhToan = document.getElementById('sk_TrangThaiTT').value;
-  r.NgayThanhToan      = document.getElementById('sk_NgayThanhToan').value||null;
-  applyFilterKem(); updateStatsKem();
-  hideModal('modalSuaKem');
-  toast('Cập nhật gói kèm <strong>#'+id+'</strong> thành công!','success');
+  const trangThaiThanhToan = document.getElementById('sk_TrangThaiTT').value;
+  
+  try {
+    const res = await fetch(`${API_BASE}/hocphi/kem/${id}/thanhtoan`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        trangThaiThanhToan: trangThaiThanhToan
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      loadDataKem();
+      hideModal('modalSuaKem');
+      toast('Cập nhật gói kèm <strong>#'+id+'</strong> thành công!','success');
+    } else {
+      toast('Lỗi cập nhật: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error updating tutoring payment:', error);
+    toast('Lỗi cập nhật thanh toán!', 'error');
+  }
 }
 
 /* ── SHARED PAGINATION ── */
@@ -923,10 +1013,9 @@ function renderPagin(containerId, cur, total, cb){
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded',()=>{
-  updateStatsLop();
-  renderLop();
-  renderKem();
-  document.getElementById('badgeKem').textContent = dataKem.filter(r=>r.TrangThaiPhanCong==='ChoPhanCong').length;
+  loadDataLop();
+  loadDataKem();
+  loadStats();
   ['searchLop','filterLopTT'].forEach(id=>{
     document.getElementById(id).addEventListener('input',applyFilterLop);
     document.getElementById(id).addEventListener('change',applyFilterLop);
@@ -937,5 +1026,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 </script>
+
+<!-- Auth JS for logout functionality -->
+<script src="/js/auth.js"></script>
+
 </body>
 </html>

@@ -221,7 +221,6 @@
     <a href="thangdai.html" class="nav-link" data-page="thangdai"><i class="fas fa-trophy"></i><span>Kỳ thi thăng đai</span></a>
     <a href="sukien.html" class="nav-link" data-page="sukien"><i class="fas fa-bullhorn"></i><span>Thông báo &amp; Sự kiện</span></a>
     <div class="nav-section-label">Hệ thống</div>
-    <a href="taikhoan.html" class="nav-link" data-page="taikhoan"><i class="fas fa-users-cog"></i><span>Tài khoản Admin</span></a>
     <a href="caidat.html" class="nav-link active" data-page="caidat"><i class="fas fa-cog"></i><span>Cài đặt hệ thống</span></a>
   </nav>
   <div class="sidebar-footer">
@@ -233,7 +232,7 @@
       </div>
     </div>
     <div class="sidebar-divider"></div>
-    <div class="logout-link" onclick="showModal('logoutModal')"><i class="fas fa-sign-out-alt"></i><a href="landingpage.html"><span>Đăng xuất</span></div>
+    <div class="logout-link" onclick="showModal('logoutModal')"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></div>
   </div>
 </div>
 <div id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;" onclick="closeSidebar()"></div>
@@ -819,7 +818,7 @@
   function showModal(id) { const el=document.getElementById(id); if(el) el.classList.add('show'); }
   function hideModal(id) { const el=document.getElementById(id); if(el) el.classList.remove('show'); }
   function backdropClose(e,id) { if(e.target.id===id) hideModal(id); }
-  function doLogout() { hideModal('logoutModal'); alert('Đã đăng xuất!\n(Demo: thay bằng redirect thực tế)'); }
+  function doLogout() { hideModal('logoutModal'); logout(); }
 
   /* ============================================================ SIDEBAR / NOTIF */
   function toggleSidebar() {
@@ -859,6 +858,9 @@
     renderBeltConfig();
   });
 </script>
+
+<!-- Auth JS for logout functionality -->
+<script src="/js/auth.js"></script>
 
 <!-- CSS for pwd-strength (dùng lại từ taikhoan) -->
 <style>

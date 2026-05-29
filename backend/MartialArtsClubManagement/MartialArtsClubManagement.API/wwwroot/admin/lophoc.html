@@ -102,14 +102,14 @@
     .card-box-title i { color:var(--primary); }
 
     /* TABLE */
-    .table { color:#ddd; margin:0; }
-    .table thead th { background:#252525; color:var(--primary); text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; padding:13px 16px; border-bottom:1px solid var(--border); font-weight:600; white-space:nowrap; }
-    .table tbody tr { transition:background .15s; }
-    .table tbody tr:hover { background:rgba(255,255,255,.03); }
-    .table td { padding:12px 16px; border-bottom:1px solid #252525; vertical-align:middle; font-size:.83rem; }
+    .table { color:#333333; margin:0; background:#ffffff; border-collapse:collapse; }
+    .table thead th { background:#f5f5f5; color:#C0392B; text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; padding:13px 16px; border-bottom:1px solid #ddd; font-weight:600; white-space:nowrap; }
+    .table tbody tr { transition:background .15s; background:#ffffff; }
+    .table tbody tr:hover { background:#f9f9f9; }
+    .table td { padding:12px 16px; border-bottom:1px solid #eee; vertical-align:middle; font-size:.83rem; color:#333333; }
     .table tbody tr:last-child td { border-bottom:none; }
-    .td-main { font-weight:600; font-size:.85rem; }
-    .td-sub  { color:var(--text-secondary); font-size:.72rem; margin-top:1px; }
+    .td-main { font-weight:600; font-size:.85rem; color:#000000; }
+    .td-sub  { color:#666666; font-size:.72rem; margin-top:1px; }
 
     /* TOOLBAR */
     .table-toolbar { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
@@ -244,7 +244,6 @@
     <a href="thangdai.html" class="nav-link"><i class="fas fa-trophy"></i><span>Kỳ thi thăng đai</span></a>
     <a href="sukien.html" class="nav-link"><i class="fas fa-bullhorn"></i><span>Thông báo &amp; Sự kiện</span></a>
     <div class="nav-section-label">Hệ thống</div>
-    <a href="taikhoan.html" class="nav-link"><i class="fas fa-users-cog"></i><span>Tài khoản Admin</span></a>
     <a href="caidat.html" class="nav-link"><i class="fas fa-cog"></i><span>Cài đặt hệ thống</span></a>
   </nav>
   <div class="sidebar-footer">
@@ -415,7 +414,7 @@
       <div class="confirm-desc">Bạn có chắc muốn đăng xuất khỏi hệ thống Karate UTE không?</div>
       <div class="confirm-btns">
         <button class="btn-outline" onclick="hideModal('logoutModal')"><i class="fas fa-times"></i> Hủy</button>
-        <button class="btn-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+        <button class="btn-danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
       </div>
     </div>
   </div>
@@ -712,6 +711,41 @@
   </div>
 </div>
 
+<!-- ═══════════ MODAL: XEM HỌC VIÊN THEO LỚP ═══════════ -->
+<div class="modal-overlay" id="modalXemHocVienLop" onclick="backdropClose(event,'modalXemHocVienLop')">
+  <div class="modal-box" style="max-width:600px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" style="color:#27ae60;"><i class="fas fa-users" style="color:#27ae60;"></i> Danh sách học viên</div>
+      <button class="modal-close" onclick="hideModal('modalXemHocVienLop')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="info-grid">
+        <div><div class="info-label">Lớp học</div><div class="info-value" id="xhvl_TenLop">—</div></div>
+        <div><div class="info-label">Khóa học</div><div class="info-value" id="xhvl_TenKhoaHoc">—</div></div>
+        <div><div class="info-label">Số học viên</div><div class="info-value" id="xhvl_SoLuong">—</div></div>
+      </div>
+      <div style="margin-top:18px;">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Mã HV</th>
+                <th>Tên học viên</th>
+                <th>Ngày đăng ký</th>
+                <th>Trạng thái TT</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyHocVienLop"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-outline" onclick="hideModal('modalXemHocVienLop')"><i class="fas fa-times"></i> Đóng</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ MODAL: XEM LỚP HỌC ═══════════ -->
 <div class="modal-overlay" id="modalXemLop" onclick="backdropClose(event,'modalXemLop')">
   <div class="modal-box" style="max-width:480px;">
@@ -968,7 +1002,7 @@ function renderLop() {
           <td>${l.PhongTap||'—'}</td>
           <td>${l.SoLuongToiDa} HV</td>
           <td><div style="display:flex;gap:4px;">
-            <button class="action-btn view" title="Xem" onclick="openViewLop(${l.MaLop})"><i class="fas fa-eye"></i></button>
+            <button class="action-btn view" title="Xem học viên" onclick="openViewHocVienLop(${l.MaLop})"><i class="fas fa-users"></i></button>
             <button class="action-btn edit" title="Sửa" onclick="openEditLop(${l.MaLop})"><i class="fas fa-pen"></i></button>
             <button class="action-btn del"  title="Xóa" onclick="openDelLop(${l.MaLop})"><i class="fas fa-trash-alt"></i></button>
           </div></td>
@@ -1078,6 +1112,43 @@ function openDelLop(id) {
   const cd = capDaiMap[l?.MaCapDai]||{ten:'—'};
   document.getElementById('xoa_TenLop').textContent = cd.ten + ' – ' + (danhSachKhoa[l?.MaKhoaHoc]?.TenKhoaHoc||'');
   showModal('modalXoaLop');
+}
+
+/* ── XEM HỌC VIÊN THEO LỚP ── */
+async function openViewHocVienLop(maLop) {
+  const l = danhSachLop[maLop];
+  if (!l) return;
+
+  document.getElementById('xhvl_TenLop').textContent = l.TenLop || '—';
+  document.getElementById('xhvl_TenKhoaHoc').textContent = danhSachKhoa[l.MaKhoaHoc]?.TenKhoaHoc || '—';
+  document.getElementById('tbodyHocVienLop').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;">Đang tải...</td></tr>';
+  showModal('modalXemHocVienLop');
+
+  try {
+    const res = await fetch(`${API_BASE}/dangkylop/by-lop/${maLop}`);
+    const result = await res.json();
+
+    if (result.success) {
+      const students = result.data;
+      document.getElementById('xhvl_SoLuong').textContent = students.length + ' học viên';
+
+      document.getElementById('tbodyHocVienLop').innerHTML = students.length === 0
+        ? '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">Chưa có học viên nào đăng ký lớp này</td></tr>'
+        : students.map(s => `
+            <tr>
+              <td><span style="color:var(--text-muted);font-size:.78rem;">#${s.maHocVien}</span></td>
+              <td><strong>${s.tenHocVien||'—'}</strong></td>
+              <td>${fmtDate(s.ngayDangKy)}</td>
+              <td><span class="badge-kh badge-${s.trangThaiThanhToan === 'DaThanhToan' ? 'DangHoc' : 'ChuaMo'}">${s.trangThaiThanhToan === 'DaThanhToan' ? 'Đã TT' : 'Chưa TT'}</span></td>
+            </tr>
+          `).join('');
+    } else {
+      document.getElementById('tbodyHocVienLop').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:#e74c3c;">Lỗi: ' + result.message + '</td></tr>';
+    }
+  } catch (error) {
+    console.error('Error loading students:', error);
+    document.getElementById('tbodyHocVienLop').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:#e74c3c;">Lỗi tải danh sách học viên!</td></tr>';
+  }
 }
 
 /* ── LƯU THÊM KHOÁ ── */
@@ -1307,6 +1378,7 @@ function switchTab(tab) {
 function showModal(id)  { document.getElementById(id).classList.add('show'); }
 function hideModal(id)  { document.getElementById(id).classList.remove('show'); }
 function backdropClose(e,id) { if (e.target===e.currentTarget) hideModal(id); }
+function doLogout() { hideModal('logoutModal'); logout(); }
 
 /* ── TOAST ── */
 function toast(msg, type='success') {
@@ -1343,5 +1415,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('filterLopDai').addEventListener('change', renderLop);
 });
 </script>
+
+<!-- Auth JS for logout functionality -->
+<script src="/js/auth.js"></script>
+
 </body>
 </html>

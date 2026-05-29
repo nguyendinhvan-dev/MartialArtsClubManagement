@@ -97,14 +97,14 @@
     .card-box-title i { color:var(--primary); }
 
     /* ── TABLE ── */
-    .table { color:#ddd; margin:0; }
-    .table thead th { background:#252525; color:var(--primary); text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; padding:13px 16px; border-bottom:1px solid var(--border); font-weight:600; white-space:nowrap; }
-    .table tbody tr { transition:background .15s; }
-    .table tbody tr:hover { background:rgba(255,255,255,.03); }
-    .table td { padding:12px 16px; border-bottom:1px solid #252525; vertical-align:middle; font-size:.83rem; }
+    .table { color:#333333; margin:0; background:#ffffff; border-collapse:collapse; }
+    .table thead th { background:#f5f5f5; color:#C0392B; text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; padding:13px 16px; border-bottom:1px solid #ddd; font-weight:600; white-space:nowrap; }
+    .table tbody tr { transition:background .15s; background:#ffffff; }
+    .table tbody tr:hover { background:#f9f9f9; }
+    .table td { padding:12px 16px; border-bottom:1px solid #eee; vertical-align:middle; font-size:.83rem; color:#333333; }
     .table tbody tr:last-child td { border-bottom:none; }
-    .td-main { font-weight:600; font-size:.85rem; }
-    .td-sub  { color:var(--text-secondary); font-size:.72rem; margin-top:1px; }
+    .td-main { font-weight:600; font-size:.85rem; color:#000000; }
+    .td-sub  { color:#666666; font-size:.72rem; margin-top:1px; }
 
     /* ── TOOLBAR ── */
     .table-toolbar { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
@@ -234,7 +234,6 @@
     <a href="thangdai.html" class="nav-link"><i class="fas fa-trophy"></i><span>Kỳ thi thăng đai</span></a>
     <a href="sukien.html" class="nav-link active"><i class="fas fa-bullhorn"></i><span>Thông báo &amp; Sự kiện</span></a>
     <div class="nav-section-label">Hệ thống</div>
-    <a href="taikhoan.html" class="nav-link"><i class="fas fa-users-cog"></i><span>Tài khoản Admin</span></a>
     <a href="caidat.html" class="nav-link"><i class="fas fa-cog"></i><span>Cài đặt hệ thống</span></a>
   </nav>
   <div class="sidebar-footer">
@@ -385,7 +384,7 @@
       <div class="confirm-desc">Bạn có chắc muốn đăng xuất khỏi hệ thống Karate UTE không?</div>
       <div class="confirm-btns">
         <button class="btn-outline" onclick="hideModal('logoutModal')"><i class="fas fa-times"></i> Hủy</button>
-        <button class="btn-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+        <button class="btn-danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
       </div>
     </div>
   </div>
@@ -422,6 +421,22 @@
         <div>
           <label class="form-label">Ngày đăng</label>
           <input type="datetime-local" class="form-control" id="them_NgayDang">
+        </div>
+        <div class="form-section-title">Người nhận</div>
+        <div>
+          <label class="form-label">Gửi tới <span style="color:var(--primary)">*</span></label>
+          <select class="form-select" id="them_NguoiNhan" onchange="toggleLopSelect('them')">
+            <option value="TatCa">👥 Tất cả</option>
+            <option value="HocVien">🎓 Học viên</option>
+            <option value="HuanLuyenVien">👨‍🏫 Huấn luyện viên</option>
+            <option value="Lop">🏫 Lớp cụ thể</option>
+          </select>
+        </div>
+        <div id="them_LopContainer" style="display:none;">
+          <label class="form-label">Chọn lớp <span style="color:var(--primary)">*</span></label>
+          <select class="form-select" id="them_MaLop">
+            <option value="">-- Chọn lớp --</option>
+          </select>
         </div>
       </div>
     </div>
@@ -464,6 +479,22 @@
         <div>
           <label class="form-label">Nội dung <span style="color:var(--primary)">*</span></label>
           <textarea class="form-control" id="sua_NoiDung"></textarea>
+        </div>
+        <div class="form-section-title">Người nhận</div>
+        <div>
+          <label class="form-label">Gửi tới <span style="color:var(--primary)">*</span></label>
+          <select class="form-select" id="sua_NguoiNhan" onchange="toggleLopSelect('sua')">
+            <option value="TatCa">👥 Tất cả</option>
+            <option value="HocVien">🎓 Học viên</option>
+            <option value="HuanLuyenVien">👨‍🏫 Huấn luyện viên</option>
+            <option value="Lop">🏫 Lớp cụ thể</option>
+          </select>
+        </div>
+        <div id="sua_LopContainer" style="display:none;">
+          <label class="form-label">Chọn lớp <span style="color:var(--primary)">*</span></label>
+          <select class="form-select" id="sua_MaLop">
+            <option value="">-- Chọn lớp --</option>
+          </select>
         </div>
       </div>
     </div>
@@ -587,33 +618,46 @@
      SCRIPTS
 ================================================================= -->
 <script>
-/* ── DỮ LIỆU MẪU — bám cột SQL: ThongBao + DangKySuKien ── */
+/* ── CẤU HÌNH API ── */
+const API_BASE = '/api/admin';
 
-/* ThongBao */
-const danhSachTB = {
-  1: { MaThongBao:1, MaTaiKhoanTao:1, TenNguoiDang:'Nguyễn Văn Admin', TieuDe:'Lịch tập tháng 5 năm 2026', NoiDung:'Kính gửi toàn thể học viên,\n\nLịch tập tháng 5/2026 dự kiến giữ nguyên như tháng trước:\n- Thứ 2, 4, 6: 17:00 – 18:30 (Phòng A)\n- Thứ 3, 5, 7: 17:00 – 18:30 (Phòng B)\n\nMọi thắc mắc vui lòng liên hệ Ban quản lý CLB.\n\nTrân trọng.', LoaiThongBao:'ThongBao', NgayDang:'2026-05-01T08:00:00' },
-  2: { MaThongBao:2, MaTaiKhoanTao:1, TenNguoiDang:'Nguyễn Văn Admin', TieuDe:'Kỳ thi thăng đai cuối Khóa 5 – 25/05/2026', NoiDung:'CLB thông báo kỳ thi thăng đai cuối Khóa 5 sẽ diễn ra vào ngày 25/05/2026 tại Phòng A.\n\nHọc viên đủ điều kiện sẽ được thông báo riêng. Mọi câu hỏi liên hệ huấn luyện viên phụ trách.', LoaiThongBao:'ThongBao', NgayDang:'2026-05-03T09:30:00' },
-  3: { MaThongBao:3, MaTaiKhoanTao:1, TenNguoiDang:'Nguyễn Văn Admin', TieuDe:'Giao lưu Karate liên CLB – 15/06/2026', NoiDung:'CLB Karate UTE tổ chức buổi giao lưu Karate liên CLB vào ngày 15/06/2026.\n\nThời gian: 08:00 – 12:00\nĐịa điểm: Nhà thi đấu UTE, 54 Nguyễn Văn Bảo\n\nHọc viên quan tâm vui lòng đăng ký tham gia trước ngày 10/06/2026.', LoaiThongBao:'SuKien', NgayDang:'2026-05-05T10:00:00' },
-  4: { MaThongBao:4, MaTaiKhoanTao:2, TenNguoiDang:'Trần Minh Tuấn', TieuDe:'Buổi học bổ sung thứ Bảy 17/05', NoiDung:'Do lịch thi cuối kỳ, sẽ có buổi học bổ sung vào thứ Bảy 17/05/2026 lúc 15:00 – 16:30 tại Phòng A.\n\nHọc viên lớp Đai Trắng vui lòng sắp xếp tham dự.', LoaiThongBao:'ThongBao', NgayDang:'2026-05-07T14:00:00' },
-  5: { MaThongBao:5, MaTaiKhoanTao:1, TenNguoiDang:'Nguyễn Văn Admin', TieuDe:'Hội trại Karate hè 2026', NoiDung:'CLB tổ chức Hội trại Karate hè 2026 dành cho toàn bộ học viên.\n\nThời gian: 20-22/07/2026\nĐịa điểm: Khu du lịch Hồ Tuyền Lâm, Đà Lạt\nChi phí: 800.000đ/người (bao gồm xe, ăn, ở)\n\nĐăng ký trước 30/06/2026. Số lượng có hạn!', LoaiThongBao:'SuKien', NgayDang:'2026-05-08T08:30:00' },
-};
-
-/* DangKySuKien — MaThongBao → mảng đăng ký */
-const dangKyMap = {
-  3: [
-    { MaDangKySuKien:1, MaThongBao:3, MaHocVien:1, HoTen:'Nguyễn Đình Văn',   NgayDangKy:'2026-05-06T09:15:00' },
-    { MaDangKySuKien:2, MaThongBao:3, MaHocVien:2, HoTen:'Trần Nhật Hoàng',   NgayDangKy:'2026-05-06T11:00:00' },
-  ],
-  5: [
-    { MaDangKySuKien:3, MaThongBao:5, MaHocVien:1, HoTen:'Nguyễn Đình Văn',   NgayDangKy:'2026-05-09T08:45:00' },
-    { MaDangKySuKien:4, MaThongBao:5, MaHocVien:3, HoTen:'Nguyễn Đăng Thắng', NgayDangKy:'2026-05-09T10:30:00' },
-    { MaDangKySuKien:5, MaThongBao:5, MaHocVien:2, HoTen:'Trần Nhật Hoàng',   NgayDangKy:'2026-05-09T14:00:00' },
-  ]
-};
-
-let _currentViewId   = null;
+/* ── DỮ LIỆU ── */
+let danhSachTB = [];
+let dangKyMap = {};
+let _currentViewId = null;
 let _currentDeleteId = null;
-let _nextId = 6;
+let _nextId = 1;
+
+/* ── LOAD DATA ── */
+async function loadData() {
+  try {
+    const res = await fetch(`${API_BASE}/thongbao`);
+    const result = await res.json();
+    if (result.success) {
+      danhSachTB = result.data.reduce((acc, t) => {
+        acc[t.maThongBao] = {
+          MaThongBao: t.maThongBao,
+          MaTaiKhoanTao: t.maTaiKhoanTao,
+          TenNguoiDang: t.tenNguoiDang || 'Admin',
+          TieuDe: t.tieuDe,
+          NoiDung: t.noiDung,
+          LoaiThongBao: t.loaiThongBao,
+          NgayDang: t.ngayDang,
+          NguoiNhan: t.nguoiNhan,
+          MaLop: t.maLop
+        };
+        return acc;
+      }, {});
+      renderTable();
+      updateStats();
+    } else {
+      toast('Lỗi tải dữ liệu thông báo!', 'error');
+    }
+  } catch (error) {
+    console.error('Error loading notifications:', error);
+    toast('Lỗi tải dữ liệu thông báo!', 'error');
+  }
+}
 
 /* ── FORMAT DATE ── */
 function fmtDatetime(s) {
@@ -781,38 +825,113 @@ function openEdit(id) {
   document.getElementById('sua_Loai').value      = t.LoaiThongBao;
   document.getElementById('sua_TieuDe').value    = t.TieuDe;
   document.getElementById('sua_NoiDung').value   = t.NoiDung||'';
+  document.getElementById('sua_NguoiNhan').value = t.NguoiNhan || 'TatCa';
+  document.getElementById('sua_MaLop').value     = t.MaLop || '';
+  toggleLopSelect('sua');
   showModal('modalSua');
 }
 
-function luuSua() {
+function toggleLopSelect(prefix) {
+  const nguoiNhan = document.getElementById(prefix + '_NguoiNhan').value;
+  const lopContainer = document.getElementById(prefix + '_LopContainer');
+  lopContainer.style.display = nguoiNhan === 'Lop' ? 'block' : 'none';
+}
+
+async function loadLopSelect() {
+  try {
+    const res = await fetch('/api/admin/lophoc');
+    const result = await res.json();
+    if (result.success) {
+      const opts = result.data.map(l => `<option value="${l.maLop}">${l.tenLop}</option>`).join('');
+      document.getElementById('them_MaLop').innerHTML = '<option value="">-- Chọn lớp --</option>' + opts;
+      document.getElementById('sua_MaLop').innerHTML = '<option value="">-- Chọn lớp --</option>' + opts;
+    }
+  } catch (error) {
+    console.error('Error loading classes:', error);
+  }
+}
+
+async function luuSua() {
   const id    = parseInt(document.getElementById('sua_Ma').value);
   const loai  = document.getElementById('sua_Loai').value;
   const tieu  = document.getElementById('sua_TieuDe').value.trim();
   const noi   = document.getElementById('sua_NoiDung').value.trim();
+  const nguoiNhan = document.getElementById('sua_NguoiNhan').value;
+  const maLop = nguoiNhan === 'Lop' ? document.getElementById('sua_MaLop').value : null;
   if (!tieu || !noi) { toast('Vui lòng điền đầy đủ tiêu đề và nội dung', 'error'); return; }
-  danhSachTB[id] = { ...danhSachTB[id], LoaiThongBao:loai, TieuDe:tieu, NoiDung:noi };
-  hideModal('modalSua');
-  renderTable();
-  updateStats();
-  toast('Đã cập nhật bài đăng thành công', 'success');
+  if (nguoiNhan === 'Lop' && !maLop) { toast('Vui lòng chọn lớp khi gửi thông báo cho lớp', 'error'); return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/thongbao/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tieuDe: tieu,
+        noiDung: noi,
+        loaiThongBao: loai,
+        nguoiNhan: nguoiNhan,
+        maLop: maLop ? parseInt(maLop) : null
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      toast('Đã cập nhật bài đăng thành công', 'success');
+      hideModal('modalSua');
+      loadData();
+    } else {
+      toast('Lỗi cập nhật: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error updating notification:', error);
+    toast('Lỗi cập nhật thông báo!', 'error');
+  }
 }
 
 /* ── THÊM MỚI ── */
-function luuThem() {
+async function luuThem() {
   const loai  = document.getElementById('them_Loai').value;
   const tieu  = document.getElementById('them_TieuDe').value.trim();
   const noi   = document.getElementById('them_NoiDung').value.trim();
   const ngay  = document.getElementById('them_NgayDang').value || new Date().toISOString().slice(0,16);
+  const nguoiNhan = document.getElementById('them_NguoiNhan').value;
+  const maLop = nguoiNhan === 'Lop' ? document.getElementById('them_MaLop').value : null;
+  
+  // Get current user's account ID from localStorage
+  const maTaiKhoanTao = localStorage.getItem('maTaiKhoan') ? parseInt(localStorage.getItem('maTaiKhoan')) : 1;
+  
   if (!tieu || !noi) { toast('Vui lòng điền đầy đủ tiêu đề và nội dung', 'error'); return; }
-  const id = _nextId++;
-  danhSachTB[id] = { MaThongBao:id, MaTaiKhoanTao:1, TenNguoiDang:'Nguyễn Văn Admin', TieuDe:tieu, NoiDung:noi, LoaiThongBao:loai, NgayDang:ngay };
-  // Reset
-  ['them_TieuDe','them_NoiDung','them_NgayDang'].forEach(f => { const el=document.getElementById(f); if(el) el.value=''; });
-  document.getElementById('them_Loai').value = 'ThongBao';
-  hideModal('modalThem');
-  renderTable();
-  updateStats();
-  toast('Đã đăng bài thành công', 'success');
+  if (nguoiNhan === 'Lop' && !maLop) { toast('Vui lòng chọn lớp khi gửi thông báo cho lớp', 'error'); return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/thongbao`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        maTaiKhoanTao: maTaiKhoanTao,
+        tieuDe: tieu,
+        noiDung: noi,
+        loaiThongBao: loai,
+        ngayDang: ngay,
+        nguoiNhan: nguoiNhan,
+        maLop: maLop ? parseInt(maLop) : null
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      toast('Đã đăng bài thành công', 'success');
+      hideModal('modalThem');
+      ['them_TieuDe','them_NoiDung','them_NgayDang','them_MaLop'].forEach(f => { const el=document.getElementById(f); if(el) el.value=''; });
+      document.getElementById('them_Loai').value = 'ThongBao';
+      document.getElementById('them_NguoiNhan').value = 'TatCa';
+      document.getElementById('them_LopContainer').style.display = 'none';
+      loadData();
+    } else {
+      toast('Lỗi thêm: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error adding notification:', error);
+    toast('Lỗi thêm thông báo!', 'error');
+  }
 }
 
 /* ── XÓA ── */
@@ -822,20 +941,32 @@ function openXoa(id) {
   showModal('modalXoa');
 }
 
-function xacNhanXoa() {
-  delete danhSachTB[_currentDeleteId];
-  delete dangKyMap[_currentDeleteId];
-  _currentDeleteId = null;
-  hideModal('modalXoa');
-  renderTable();
-  updateStats();
-  toast('Đã xóa bài đăng', 'error');
+async function xacNhanXoa() {
+  if (!_currentDeleteId) return;
+  try {
+    const res = await fetch(`${API_BASE}/thongbao/${_currentDeleteId}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (result.success) {
+      toast('Đã xóa bài đăng', 'error');
+      delete danhSachTB[_currentDeleteId];
+      delete dangKyMap[_currentDeleteId];
+      _currentDeleteId = null;
+      hideModal('modalXoa');
+      loadData();
+    } else {
+      toast('Lỗi xóa: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting notification:', error);
+    toast('Lỗi xóa thông báo!', 'error');
+  }
 }
 
 /* ── MODAL HELPERS (giữ nguyên) ── */
 function showModal(id) { const el=document.getElementById(id); if(el) el.classList.add('show'); }
 function hideModal(id) { const el=document.getElementById(id); if(el) el.classList.remove('show'); }
 function backdropClose(e, id) { if(e.target.id===id) hideModal(id); }
+function doLogout() { hideModal('logoutModal'); logout(); }
 
 /* ── SIDEBAR MOBILE (giữ nguyên) ── */
 function toggleSidebar() {
@@ -883,10 +1014,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('searchTB').addEventListener('input', renderTable);
   document.getElementById('filterLoai').addEventListener('change', renderTable);
 
-  renderTable();
-  updateStats();
+  // Load class list for recipient selection
+  loadLopSelect();
+
+  // Load data from API
+  loadData();
 });
 </script>
+
+<!-- Auth JS for logout functionality -->
+<script src="/js/auth.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
