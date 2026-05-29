@@ -381,6 +381,7 @@
           <thead>
             <tr>
               <th style="width:50px;">Mã</th>
+              <th>Tên lớp</th>
               <th>Khóa học</th>
               <th>Cấp đai</th>
               <th>Huấn luyện viên</th>
@@ -586,6 +587,10 @@
     <div class="modal-body">
       <div style="display:grid;gap:14px;">
         <div>
+          <label class="form-label">Tên lớp <span style="color:var(--primary)">*</span></label>
+          <input type="text" class="form-control" id="lh_TenLop" placeholder="VD: Lớp Đai Trắng Ca 1">
+        </div>
+        <div>
           <label class="form-label">Khóa học <span style="color:var(--primary)">*</span></label>
           <select class="form-control" id="lh_MaKhoaHoc">
             <option value="">-- Chọn khóa học --</option>
@@ -609,9 +614,6 @@
             <label class="form-label">Huấn luyện viên <span style="color:var(--primary)">*</span></label>
             <select class="form-control" id="lh_MaHLV">
               <option value="">-- Chọn HLV --</option>
-              <option value="1">Trần Minh Tuấn</option>
-              <option value="2">Lê Thị Hoa</option>
-              <option value="3">Nguyễn Duy Khang</option>
             </select>
           </div>
         </div>
@@ -621,13 +623,17 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div>
+            <label class="form-label">Học phí <span style="color:var(--primary)">*</span></label>
+            <input type="number" class="form-control" id="lh_HocPhi" placeholder="0" min="0">
+          </div>
+          <div>
             <label class="form-label">Sĩ số tối đa</label>
             <input type="number" class="form-control" id="lh_SoLuongToiDa" placeholder="30" min="1">
           </div>
-          <div>
-            <label class="form-label">Phòng tập</label>
-            <input type="text" class="form-control" id="lh_PhongTap" placeholder="VD: Phòng A">
-          </div>
+        </div>
+        <div>
+          <label class="form-label">Phòng tập</label>
+          <input type="text" class="form-control" id="lh_PhongTap" placeholder="VD: Phòng A">
         </div>
       </div>
     </div>
@@ -653,6 +659,10 @@
           <input type="text" class="form-control" id="sua_lh_Ma_show" readonly>
         </div>
         <div>
+          <label class="form-label">Tên lớp <span style="color:var(--primary)">*</span></label>
+          <input type="text" class="form-control" id="sua_lh_TenLop">
+        </div>
+        <div>
           <label class="form-label">Khóa học</label>
           <select class="form-control" id="sua_lh_MaKhoaHoc"></select>
         </div>
@@ -672,9 +682,6 @@
           <div>
             <label class="form-label">Huấn luyện viên</label>
             <select class="form-control" id="sua_lh_MaHLV">
-              <option value="1">Trần Minh Tuấn</option>
-              <option value="2">Lê Thị Hoa</option>
-              <option value="3">Nguyễn Duy Khang</option>
             </select>
           </div>
         </div>
@@ -684,13 +691,17 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div>
+            <label class="form-label">Học phí <span style="color:var(--primary)">*</span></label>
+            <input type="number" class="form-control" id="sua_lh_HocPhi" min="0">
+          </div>
+          <div>
             <label class="form-label">Sĩ số tối đa</label>
             <input type="number" class="form-control" id="sua_lh_SoLuongToiDa" min="1">
           </div>
-          <div>
-            <label class="form-label">Phòng tập</label>
-            <input type="text" class="form-control" id="sua_lh_PhongTap">
-          </div>
+        </div>
+        <div>
+          <label class="form-label">Phòng tập</label>
+          <input type="text" class="form-control" id="sua_lh_PhongTap">
         </div>
       </div>
     </div>
@@ -743,15 +754,14 @@
 
 <!-- ═══════════ SCRIPTS ═══════════ -->
 <script>
-/* ── DỮ LIỆU MẪU: KhoaHoc ── */
-const danhSachKhoa = {
-  1: { MaKhoaHoc:1, TenKhoaHoc:'Khóa 5 – 2026', NgayKhaiGiang:'2026-03-01', NgayKetThuc:'2026-05-31', HocPhi:1200000, SoLuongToiDa:60, TrangThai:'DangHoc' },
-  2: { MaKhoaHoc:2, TenKhoaHoc:'Khóa 6 – 2026', NgayKhaiGiang:'2026-06-01', NgayKetThuc:'2026-08-31', HocPhi:1200000, SoLuongToiDa:60, TrangThai:'DangTuyenSinh' },
-  3: { MaKhoaHoc:3, TenKhoaHoc:'Khóa 7 – 2026', NgayKhaiGiang:'2026-09-01', NgayKetThuc:'2026-11-30', HocPhi:1300000, SoLuongToiDa:80, TrangThai:'ChuaMo' },
-  4: { MaKhoaHoc:4, TenKhoaHoc:'Khóa 4 – 2025', NgayKhaiGiang:'2025-09-01', NgayKetThuc:'2025-11-30', HocPhi:1100000, SoLuongToiDa:50, TrangThai:'DaKetThuc' },
-};
+/* ── API CONFIGURATION ── */
+const API_BASE = '/api/admin';
 
-/* ── DỮ LIỆU MẪU: LopHoc (JOIN KhoaHoc + CapDai + HuanLuyenVien) ── */
+/* ── DỮ LIỆU MẪU: KhoaHoc (sẽ được thay bằng API sau) ── */
+let danhSachKhoa = {};
+let danhSachHLV = {};
+
+/* ── DỮ LIỆU LopHoc từ API ── */
 const capDaiMap = {
   1:{ten:'Đai Trắng',   key:'white'},
   2:{ten:'Đai Vàng',    key:'yellow'},
@@ -761,18 +771,124 @@ const capDaiMap = {
   6:{ten:'Đai Đỏ',      key:'red'},
   7:{ten:'Đai Đen',     key:'black'},
 };
-const hlvMap = { 1:'Trần Minh Tuấn', 2:'Lê Thị Hoa', 3:'Nguyễn Duy Khang' };
 
-const danhSachLop = {
-  1: { MaLop:1, MaKhoaHoc:1, MaCapDai:1, MaHLV:1, LichHoc:'Thứ 2,4,6 – 17:00-18:30', SoLuongToiDa:25, PhongTap:'Phòng A' },
-  2: { MaLop:2, MaKhoaHoc:1, MaCapDai:2, MaHLV:2, LichHoc:'Thứ 3,5,7 – 17:00-18:30', SoLuongToiDa:20, PhongTap:'Phòng B' },
-  3: { MaLop:3, MaKhoaHoc:2, MaCapDai:1, MaHLV:3, LichHoc:'Thứ 2,4,6 – 18:30-20:00', SoLuongToiDa:30, PhongTap:'Phòng A' },
-  4: { MaLop:4, MaKhoaHoc:2, MaCapDai:4, MaHLV:1, LichHoc:'Thứ 3,5,7 – 18:30-20:00', SoLuongToiDa:15, PhongTap:'Phòng C' },
-};
-
+let danhSachLop = {};
+let hlvMap = {};
 let _nextKhoaId = 5, _nextLopId = 5;
 let _curKhoaId = null, _curLopId = null;
 let _delKhoaId = null, _delLopId = null;
+
+/* ── LOAD DATA FROM API ── */
+async function loadKhoaHoc() {
+  console.log('Loading courses data...');
+  try {
+    console.log('Fetching from:', `${API_BASE}/khoahoc`);
+    const res = await fetch(`${API_BASE}/khoahoc`);
+    console.log('Response status:', res.status);
+    const result = await res.json();
+    console.log('Response data:', result);
+    if (result.success) {
+      danhSachKhoa = {};
+      result.data.forEach(k => {
+        danhSachKhoa[k.maKhoaHoc] = {
+          MaKhoaHoc: k.maKhoaHoc,
+          TenKhoaHoc: k.tenKhoaHoc,
+          NgayKhaiGiang: k.ngayKhaiGiang ? k.ngayKhaiGiang.split('T')[0] : null,
+          NgayKetThuc: k.ngayKetThuc ? k.ngayKetThuc.split('T')[0] : null,
+          HocPhi: k.hocPhi,
+          SoLuongToiDa: k.soLuongToiDa,
+          TrangThai: k.trangThai
+        };
+      });
+      console.log('Processed courses:', danhSachKhoa);
+      renderKhoa();
+      populateKhoaSelect();
+    } else {
+      console.error('API returned success=false:', result.message);
+      toast('Lỗi: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error loading courses:', error);
+    toast('Lỗi tải dữ liệu khóa học! ' + error.message, 'error');
+  }
+}
+
+async function loadLopHoc() {
+  console.log('Loading classes data...');
+  try {
+    console.log('Fetching from:', `${API_BASE}/lophoc`);
+    const res = await fetch(`${API_BASE}/lophoc`);
+    console.log('Response status:', res.status);
+    const result = await res.json();
+    console.log('Response data:', result);
+    if (result.success) {
+      danhSachLop = {};
+      result.data.forEach(l => {
+        danhSachLop[l.maLop] = {
+          MaLop: l.maLop,
+          MaKhoaHoc: l.maKhoaHoc,
+          TenKhoaHoc: l.tenKhoaHoc,
+          MaCapDai: l.maCapDai,
+          TenCapDai: l.tenCapDai,
+          MaHLV: l.maHlv,
+          TenHuanLuyenVien: l.tenHuanLuyenVien,
+          TenLop: l.tenLop,
+          LichHoc: l.lichHoc,
+          HocPhi: l.hocPhi,
+          SoLuongToiDa: l.soLuongToiDa,
+          PhongTap: l.phongTap
+        };
+      });
+      console.log('Processed classes:', danhSachLop);
+      renderLop();
+      populateHLVSelect();
+    } else {
+      console.error('API returned success=false:', result.message);
+      toast('Lỗi: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error loading classes:', error);
+    toast('Lỗi tải dữ liệu lớp học! ' + error.message, 'error');
+  }
+}
+
+async function loadHLV() {
+  console.log('Loading trainers data...');
+  try {
+    const res = await fetch(`${API_BASE}/huanluyenvien`);
+    const result = await res.json();
+    console.log('Trainers API response:', result);
+    if (result.success) {
+      danhSachHLV = {};
+      result.data.forEach(h => {
+        danhSachHLV[h.maHlv] = {
+          MaHLV: h.maHlv,
+          TenHuanLuyenVien: h.tenHuanLuyenVien,
+          Email: h.email,
+          SoDienThoai: h.soDienThoai,
+          ChuyenMon: h.chuyenMon,
+          NgayVaoCLB: h.ngayVaoClb ? h.ngayVaoClb.split('T')[0] : null,
+          DangHoatDong: h.dangHoatDong
+        };
+      });
+      console.log('Processed trainers:', danhSachHLV);
+      populateHLVSelect();
+    } else {
+      console.error('Trainers API returned error:', result.message);
+    }
+  } catch (error) {
+    console.error('Error loading trainers:', error);
+  }
+}
+
+function populateHLVSelect() {
+  console.log('Populating HLV select, danhSachHLV:', danhSachHLV);
+  const opts = Object.values(danhSachHLV).map(h =>
+    `<option value="${h.MaHLV}">${h.TenHuanLuyenVien}</option>`).join('');
+  console.log('HLV options:', opts);
+  document.getElementById('lh_MaHLV').innerHTML = '<option value="">-- Chọn HLV --</option>' + opts;
+  document.getElementById('sua_lh_MaHLV').innerHTML = opts;
+}
 
 /* ── HELPERS ── */
 function fmtDate(d) {
@@ -835,12 +951,13 @@ function renderLop() {
   });
 
   document.getElementById('tbodyLop').innerHTML = rows.length===0
-    ? `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">Không tìm thấy lớp học nào</td></tr>`
+    ? `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">Không tìm thấy lớp học nào</td></tr>`
     : rows.map(l => {
         const cd = capDaiMap[l.MaCapDai]||{ten:'—',key:'white'};
         const kh = danhSachKhoa[l.MaKhoaHoc];
         return `<tr>
           <td><span style="color:var(--text-muted);font-size:.78rem;">#${l.MaLop}</span></td>
+          <td><strong>${l.TenLop||'—'}</strong></td>
           <td>
             <div class="td-main">${kh?.TenKhoaHoc||'—'}</div>
             <div class="td-sub"><span class="badge-kh badge-${kh?.TrangThai||''}">${ttLabel[kh?.TrangThai]||'—'}</span></div>
@@ -944,10 +1061,12 @@ function openEditLop(id) {
   const l = danhSachLop[id]; if (!l) return;
   document.getElementById('sua_lh_Ma').value          = id;
   document.getElementById('sua_lh_Ma_show').value     = 'L' + String(l.MaLop).padStart(3,'0');
+  document.getElementById('sua_lh_TenLop').value      = l.TenLop || '';
   document.getElementById('sua_lh_MaKhoaHoc').value   = l.MaKhoaHoc;
   document.getElementById('sua_lh_MaCapDai').value    = l.MaCapDai;
   document.getElementById('sua_lh_MaHLV').value       = l.MaHLV;
   document.getElementById('sua_lh_LichHoc').value     = l.LichHoc;
+  document.getElementById('sua_lh_HocPhi').value      = l.HocPhi || 0;
   document.getElementById('sua_lh_SoLuongToiDa').value= l.SoLuongToiDa;
   document.getElementById('sua_lh_PhongTap').value    = l.PhongTap||'';
   showModal('modalSuaLop');
@@ -962,117 +1081,217 @@ function openDelLop(id) {
 }
 
 /* ── LƯU THÊM KHOÁ ── */
-function luuThemKhoa() {
+async function luuThemKhoa() {
   const ten = document.getElementById('kh_Ten').value.trim();
   const nd  = document.getElementById('kh_NgayKhaiGiang').value;
   const nkt = document.getElementById('kh_NgayKetThuc').value;
   const hp  = document.getElementById('kh_HocPhi').value;
   if (!ten || !nd || !nkt || !hp) { toast('Vui lòng nhập đầy đủ thông tin bắt buộc!','error'); return; }
   if (nd >= nkt) { toast('Ngày kết thúc phải sau ngày khai giảng!','error'); return; }
-  danhSachKhoa[_nextKhoaId] = {
-    MaKhoaHoc: _nextKhoaId, TenKhoaHoc: ten,
-    NgayKhaiGiang: nd, NgayKetThuc: nkt,
-    HocPhi: parseInt(hp),
-    SoLuongToiDa: parseInt(document.getElementById('kh_SoLuongToiDa').value)||100,
-    TrangThai: document.getElementById('kh_TrangThai').value,
-  };
-  _nextKhoaId++;
-  toast('Thêm khóa học <strong>' + ten + '</strong> thành công!','success');
-  hideModal('modalThemKhoa');
-  ['kh_Ten','kh_NgayKhaiGiang','kh_NgayKetThuc','kh_HocPhi','kh_SoLuongToiDa'].forEach(id=>{ document.getElementById(id).value=''; });
-  populateKhoaSelect();
-  renderKhoa();
+
+  try {
+    const res = await fetch(`${API_BASE}/khoahoc`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tenKhoaHoc: ten,
+        ngayKhaiGiang: nd,
+        ngayKetThuc: nkt,
+        hocPhi: parseInt(hp),
+        soLuongToiDa: parseInt(document.getElementById('kh_SoLuongToiDa').value)||100,
+        trangThai: document.getElementById('kh_TrangThai').value
+      })
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      toast('Thêm khóa học <strong>' + ten + '</strong> thành công!','success');
+      hideModal('modalThemKhoa');
+      ['kh_Ten','kh_NgayKhaiGiang','kh_NgayKetThuc','kh_HocPhi','kh_SoLuongToiDa'].forEach(id=>{ document.getElementById(id).value=''; });
+      await loadKhoaHoc();
+      populateKhoaSelect();
+    } else {
+      toast(result.message || 'Lỗi thêm khóa học!', 'error');
+    }
+  } catch (error) {
+    console.error('Error adding course:', error);
+    toast('Lỗi thêm khóa học! ' + error.message, 'error');
+  }
 }
 
 /* ── LƯU SỬA KHOÁ ── */
-function luuSuaKhoa() {
+async function luuSuaKhoa() {
   const id  = document.getElementById('sua_kh_Ma').value;
   const ten = document.getElementById('sua_kh_Ten').value.trim();
   const nd  = document.getElementById('sua_kh_NgayKhaiGiang').value;
   const nkt = document.getElementById('sua_kh_NgayKetThuc').value;
   if (!ten) { toast('Tên khóa học không được để trống!','error'); return; }
-  if (nd && nkt && nd >= nkt) { toast('Ngày kết thúc phải sau ngày khai giảng!','error'); return; }
-  if (danhSachKhoa[id]) {
-    Object.assign(danhSachKhoa[id], {
-      TenKhoaHoc: ten,
-      NgayKhaiGiang: nd,
-      NgayKetThuc: nkt,
-      HocPhi: parseInt(document.getElementById('sua_kh_HocPhi').value)||danhSachKhoa[id].HocPhi,
-      SoLuongToiDa: parseInt(document.getElementById('sua_kh_SoLuongToiDa').value)||danhSachKhoa[id].SoLuongToiDa,
-      TrangThai: document.getElementById('sua_kh_TrangThai').value,
+
+  try {
+    const res = await fetch(`${API_BASE}/khoahoc/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tenKhoaHoc: ten,
+        ngayKhaiGiang: nd,
+        ngayKetThuc: nkt,
+        hocPhi: parseInt(document.getElementById('sua_kh_HocPhi').value),
+        soLuongToiDa: parseInt(document.getElementById('sua_kh_SoLuongToiDa').value),
+        trangThai: document.getElementById('sua_kh_TrangThai').value
+      })
     });
+    const result = await res.json();
+
+    if (result.success) {
+      toast('Cập nhật khóa học thành công!','success');
+      hideModal('modalSuaKhoa');
+      await loadKhoaHoc();
+      populateKhoaSelect();
+    } else {
+      toast(result.message || 'Lỗi cập nhật khóa học!', 'error');
+    }
+  } catch (error) {
+    console.error('Error updating course:', error);
+    toast('Lỗi cập nhật khóa học! ' + error.message, 'error');
   }
-  toast('Cập nhật khóa học thành công!','success');
-  hideModal('modalSuaKhoa');
-  populateKhoaSelect();
-  renderKhoa();
 }
 
 /* ── XÓA KHOÁ ── */
-function xacNhanXoaKhoa() {
-  if (_delKhoaId && danhSachKhoa[_delKhoaId]) {
-    const ten = danhSachKhoa[_delKhoaId].TenKhoaHoc;
-    delete danhSachKhoa[_delKhoaId];
-    // xóa lớp thuộc khóa
-    Object.keys(danhSachLop).forEach(k=>{ if(danhSachLop[k].MaKhoaHoc===_delKhoaId) delete danhSachLop[k]; });
-    toast('Đã xóa khóa học <strong>' + ten + '</strong>!','success');
+async function xacNhanXoaKhoa() {
+  if (!_delKhoaId) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/khoahoc/${_delKhoaId}`, {
+      method: 'DELETE'
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      const ten = danhSachKhoa[_delKhoaId]?.TenKhoaHoc || 'Khóa học';
+      toast('Đã xóa khóa học <strong>' + ten + '</strong>!','success');
+      await loadKhoaHoc();
+      populateKhoaSelect();
+    } else {
+      toast(result.message || 'Lỗi xóa khóa học!', 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting course:', error);
+    toast('Lỗi xóa khóa học! ' + error.message, 'error');
   }
   hideModal('modalXoaKhoa');
-  populateKhoaSelect();
-  renderKhoa(); renderLop();
 }
 
 /* ── LƯU THÊM LỚP ── */
-function luuThemLop() {
+async function luuThemLop() {
   const makh  = document.getElementById('lh_MaKhoaHoc').value;
   const macd  = document.getElementById('lh_MaCapDai').value;
   const mahlv = document.getElementById('lh_MaHLV').value;
+  const tenlop = document.getElementById('lh_TenLop').value.trim();
   const lich  = document.getElementById('lh_LichHoc').value.trim();
-  if (!makh || !macd || !mahlv || !lich) { toast('Vui lòng nhập đầy đủ thông tin bắt buộc!','error'); return; }
-  // Kiểm tra UNIQUE(MaKhoaHoc, MaCapDai)
-  const trung = Object.values(danhSachLop).find(l=>l.MaKhoaHoc===parseInt(makh)&&l.MaCapDai===parseInt(macd));
-  if (trung) { toast('Khóa này đã có lớp cho cấp đai này rồi!','error'); return; }
-  danhSachLop[_nextLopId] = {
-    MaLop: _nextLopId, MaKhoaHoc: parseInt(makh), MaCapDai: parseInt(macd), MaHLV: parseInt(mahlv),
-    LichHoc: lich,
-    SoLuongToiDa: parseInt(document.getElementById('lh_SoLuongToiDa').value)||30,
-    PhongTap: document.getElementById('lh_PhongTap').value.trim()||null,
-  };
-  _nextLopId++;
-  toast('Thêm lớp học thành công!','success');
-  hideModal('modalThemLop');
-  ['lh_MaKhoaHoc','lh_MaCapDai','lh_MaHLV','lh_LichHoc','lh_SoLuongToiDa','lh_PhongTap'].forEach(id=>{ document.getElementById(id).value=''; });
-  renderLop();
+  const hocphi = document.getElementById('lh_HocPhi').value;
+
+  console.log('Form values:', { makh, macd, mahlv, tenlop, lich, hocphi });
+  console.log('Parsed values:', {
+    maKhoaHoc: parseInt(makh),
+    maCapDai: parseInt(macd),
+    maHlv: parseInt(mahlv),
+    hocPhi: parseFloat(hocphi)
+  });
+
+  if (!makh || !macd || !mahlv || !tenlop || !lich || !hocphi) { toast('Vui lòng nhập đầy đủ thông tin bắt buộc!','error'); return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/lophoc`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        maKhoaHoc: parseInt(makh),
+        maCapDai: parseInt(macd),
+        maHlv: parseInt(mahlv),
+        tenLop: tenlop,
+        lichHoc: lich,
+        hocPhi: parseFloat(hocphi),
+        soLuongToiDa: parseInt(document.getElementById('lh_SoLuongToiDa').value) || 30,
+        phongTap: document.getElementById('lh_PhongTap').value.trim() || null
+      })
+    });
+    const result = await res.json();
+    console.log('API response:', result);
+
+    if (result.success) {
+      toast('Thêm lớp học thành công!','success');
+      hideModal('modalThemLop');
+      ['lh_MaKhoaHoc','lh_MaCapDai','lh_MaHLV','lh_TenLop','lh_LichHoc','lh_HocPhi','lh_SoLuongToiDa','lh_PhongTap'].forEach(id=>{ document.getElementById(id).value=''; });
+      await loadLopHoc();
+    } else {
+      toast(result.message || 'Lỗi thêm lớp học!','error');
+    }
+  } catch (error) {
+    console.error('Error adding class:', error);
+    toast('Lỗi thêm lớp học!','error');
+  }
 }
 
 /* ── LƯU SỬA LỚP ── */
-function luuSuaLop() {
-  const id   = document.getElementById('sua_lh_Ma').value;
-  const lich = document.getElementById('sua_lh_LichHoc').value.trim();
-  if (!lich) { toast('Lịch học không được để trống!','error'); return; }
-  if (danhSachLop[id]) {
-    Object.assign(danhSachLop[id], {
-      MaKhoaHoc: parseInt(document.getElementById('sua_lh_MaKhoaHoc').value),
-      MaCapDai:  parseInt(document.getElementById('sua_lh_MaCapDai').value),
-      MaHLV:     parseInt(document.getElementById('sua_lh_MaHLV').value),
-      LichHoc:   lich,
-      SoLuongToiDa: parseInt(document.getElementById('sua_lh_SoLuongToiDa').value)||30,
-      PhongTap:  document.getElementById('sua_lh_PhongTap').value.trim()||null,
+async function luuSuaLop() {
+  const id     = document.getElementById('sua_lh_Ma').value;
+  const tenlop = document.getElementById('sua_lh_TenLop').value.trim();
+  const lich   = document.getElementById('sua_lh_LichHoc').value.trim();
+  const hocphi = document.getElementById('sua_lh_HocPhi').value;
+
+  if (!tenlop || !lich || !hocphi) { toast('Vui lòng nhập đầy đủ thông tin bắt buộc!','error'); return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/lophoc/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        maKhoaHoc: parseInt(document.getElementById('sua_lh_MaKhoaHoc').value),
+        maCapDai: parseInt(document.getElementById('sua_lh_MaCapDai').value),
+        maHlv: parseInt(document.getElementById('sua_lh_MaHLV').value),
+        tenLop: tenlop,
+        lichHoc: lich,
+        hocPhi: parseFloat(hocphi),
+        soLuongToiDa: parseInt(document.getElementById('sua_lh_SoLuongToiDa').value) || 30,
+        phongTap: document.getElementById('sua_lh_PhongTap').value.trim() || null
+      })
     });
+    const result = await res.json();
+
+    if (result.success) {
+      toast('Cập nhật lớp học thành công!','success');
+      hideModal('modalSuaLop');
+      await loadLopHoc();
+    } else {
+      toast(result.message || 'Lỗi cập nhật lớp học!','error');
+    }
+  } catch (error) {
+    console.error('Error updating class:', error);
+    toast('Lỗi cập nhật lớp học!','error');
   }
-  toast('Cập nhật lớp học thành công!','success');
-  hideModal('modalSuaLop');
-  renderLop();
 }
 
 /* ── XÓA LỚP ── */
-function xacNhanXoaLop() {
-  if (_delLopId && danhSachLop[_delLopId]) {
-    delete danhSachLop[_delLopId];
-    toast('Đã xóa lớp học!','success');
+async function xacNhanXoaLop() {
+  if (!_delLopId) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/lophoc/${_delLopId}`, {
+      method: 'DELETE'
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      toast('Đã xóa lớp học!','success');
+      await loadLopHoc();
+    } else {
+      toast(result.message || 'Lỗi xóa lớp học!','error');
+    }
+  } catch (error) {
+    console.error('Error deleting class:', error);
+    toast('Lỗi xóa lớp học!','error');
   }
   hideModal('modalXoaLop');
-  renderLop();
 }
 
 /* ── TAB SWITCH ── */
@@ -1114,9 +1333,9 @@ function closeSidebar()  { document.getElementById('sidebar').classList.remove('
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
-  populateKhoaSelect();
-  renderKhoa();
-  renderLop();
+  loadKhoaHoc();
+  loadLopHoc();
+  loadHLV();
   document.getElementById('searchKhoa').addEventListener('input', renderKhoa);
   document.getElementById('filterKhoaTT').addEventListener('change', renderKhoa);
   document.getElementById('searchLop').addEventListener('input', renderLop);
