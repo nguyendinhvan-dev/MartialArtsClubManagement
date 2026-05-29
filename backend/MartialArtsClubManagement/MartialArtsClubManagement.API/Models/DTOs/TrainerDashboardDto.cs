@@ -48,7 +48,6 @@ namespace MartialArtsClubManagement.API.Models.DTOs
     public class TrainerKyThiDto
     {
         public int MaKyThi { get; set; }
-        public string TenKyThi { get; set; } = null!;
         public DateOnly NgayThi { get; set; }
         public int MaKhoaHoc { get; set; }
         public string? TenKhoaHoc { get; set; }
@@ -108,7 +107,6 @@ namespace MartialArtsClubManagement.API.Models.DTOs
 
     public class CreateTrainerKyThiDto
     {
-        public string TenKyThi { get; set; } = null!;
         public DateOnly NgayThi { get; set; }
         public int MaKhoaHoc { get; set; }
         public string? MoTa { get; set; }
@@ -116,7 +114,6 @@ namespace MartialArtsClubManagement.API.Models.DTOs
 
     public class UpdateTrainerKyThiDto
     {
-        public string TenKyThi { get; set; } = null!;
         public DateOnly NgayThi { get; set; }
         public int MaKhoaHoc { get; set; }
         public string TrangThai { get; set; } = null!;

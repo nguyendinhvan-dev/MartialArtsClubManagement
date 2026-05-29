@@ -11,5 +11,6 @@ namespace MartialArtsClubManagement.API.Models.DTOs
         public string Token { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
+        public int MaTaiKhoan { get; set; }
     }
 }

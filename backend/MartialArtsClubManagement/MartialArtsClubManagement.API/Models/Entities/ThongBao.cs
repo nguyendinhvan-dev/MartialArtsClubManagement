@@ -15,6 +15,10 @@ public partial class ThongBao
 
     public string LoaiThongBao { get; set; } = null!;
 
+    public string NguoiNhan { get; set; } = "TatCa"; // TatCa, HocVien, HuanLuyenVien, Lop
+
+    public int? MaLop { get; set; } // Nếu NguoiNhan = "Lop" thì chỉ định lớp cụ thể
+
     public DateTime NgayDang { get; set; }
 
     public virtual ICollection<DangKySuKien> DangKySuKiens { get; set; } = new List<DangKySuKien>();

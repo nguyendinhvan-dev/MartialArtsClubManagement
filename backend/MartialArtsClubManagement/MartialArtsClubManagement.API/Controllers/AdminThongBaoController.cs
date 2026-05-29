@@ -33,6 +33,8 @@ namespace MartialArtsClubManagement.API.Controllers
                     TieuDe = t.TieuDe,
                     NoiDung = t.NoiDung,
                     LoaiThongBao = t.LoaiThongBao,
+                    NguoiNhan = t.NguoiNhan,
+                    MaLop = t.MaLop,
                     NgayDang = t.NgayDang
                 })
                 .ToListAsync();
@@ -68,6 +70,8 @@ namespace MartialArtsClubManagement.API.Controllers
                     TieuDe = t.TieuDe,
                     NoiDung = t.NoiDung,
                     LoaiThongBao = t.LoaiThongBao,
+                    NguoiNhan = t.NguoiNhan,
+                    MaLop = t.MaLop,
                     NgayDang = t.NgayDang
                 }
             });
@@ -80,9 +84,25 @@ namespace MartialArtsClubManagement.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(new ApiResponse<object> { Success = false, Message = "Dữ liệu không hợp lệ" });
 
+            // MaTaiKhoanTao is required - must be the actual logged-in user's account
+            if (dto.MaTaiKhoanTao <= 0)
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Tài khoản người tạo là bắt buộc" });
+
             var taiKhoanExists = await _context.TaiKhoans.AnyAsync(t => t.MaTaiKhoan == dto.MaTaiKhoanTao);
             if (!taiKhoanExists)
                 return BadRequest(new ApiResponse<object> { Success = false, Message = "Tài khoản người tạo không tồn tại" });
+
+            // Validate MaLop if NguoiNhan is "Lop"
+            if (dto.NguoiNhan == "Lop" && (!dto.MaLop.HasValue || dto.MaLop.Value <= 0))
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Vui lòng chọn lớp học khi gửi thông báo cho lớp" });
+
+            var lopExists = true;
+            if (dto.MaLop.HasValue)
+            {
+                lopExists = await _context.LopHocs.AnyAsync(l => l.MaLop == dto.MaLop.Value);
+                if (!lopExists)
+                    return BadRequest(new ApiResponse<object> { Success = false, Message = "Lớp học không tồn tại" });
+            }
 
             var newThongBao = new ThongBao
             {
@@ -90,6 +110,8 @@ namespace MartialArtsClubManagement.API.Controllers
                 TieuDe = dto.TieuDe,
                 NoiDung = dto.NoiDung,
                 LoaiThongBao = dto.LoaiThongBao,
+                NguoiNhan = dto.NguoiNhan,
+                MaLop = dto.MaLop,
                 NgayDang = DateTime.UtcNow
             };
 
@@ -115,9 +137,23 @@ namespace MartialArtsClubManagement.API.Controllers
             if (thongBao == null)
                 return NotFound(new ApiResponse<object> { Success = false, Message = "Không tìm thấy thông báo" });
 
+            // Validate MaLop if NguoiNhan is "Lop"
+            if (dto.NguoiNhan == "Lop" && (!dto.MaLop.HasValue || dto.MaLop.Value <= 0))
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Vui lòng chọn lớp học khi gửi thông báo cho lớp" });
+
+            var lopExists = true;
+            if (dto.MaLop.HasValue)
+            {
+                lopExists = await _context.LopHocs.AnyAsync(l => l.MaLop == dto.MaLop.Value);
+                if (!lopExists)
+                    return BadRequest(new ApiResponse<object> { Success = false, Message = "Lớp học không tồn tại" });
+            }
+
             thongBao.TieuDe = dto.TieuDe;
             thongBao.NoiDung = dto.NoiDung;
             thongBao.LoaiThongBao = dto.LoaiThongBao;
+            thongBao.NguoiNhan = dto.NguoiNhan;
+            thongBao.MaLop = dto.MaLop;
 
             _context.ThongBaos.Update(thongBao);
             await _context.SaveChangesAsync();

@@ -71,7 +71,8 @@ public class AuthService : IAuthService
         {
             Token = tokenString,
             Role = user.VaiTro,
-            Message = "Đăng nhập thành công"
+            Message = "Đăng nhập thành công",
+            MaTaiKhoan = user.MaTaiKhoan
         };
     }
 }

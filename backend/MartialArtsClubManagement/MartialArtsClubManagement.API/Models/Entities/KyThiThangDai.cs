@@ -13,8 +13,6 @@ public partial class KyThiThangDai
 
     public string? MoTa { get; set; }
 
-    public string TenKyThi { get; set; } = null!;
-
     public string TrangThai { get; set; } = null!;
 
     public virtual ICollection<KetQuaThi> KetQuaThis { get; set; } = new List<KetQuaThi>();

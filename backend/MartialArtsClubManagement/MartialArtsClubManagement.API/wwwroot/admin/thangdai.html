@@ -638,47 +638,79 @@
      SCRIPTS
 ================================================================= -->
 <script>
-/* ── DỮ LIỆU MẪU — bám cột SQL: KyThiThangDai + KetQuaThi ── */
-const khoaHocMap = {
-  1: 'Khóa 5 – 2026',
-  2: 'Khóa 6 – 2026'
-};
+/* ── CẤU HÌNH ── */
+const API_BASE = '/api/admin';
 
-const capDaiList = [
-  { MaCapDai:1, TenCapDai:'Đai Trắng',      MauSac:'white',  cls:'belt-white' },
-  { MaCapDai:2, TenCapDai:'Đai Vàng',        MauSac:'yellow', cls:'belt-yellow' },
-  { MaCapDai:3, TenCapDai:'Đai Cam',         MauSac:'orange', cls:'belt-orange' },
-  { MaCapDai:4, TenCapDai:'Đai Xanh lá',    MauSac:'green',  cls:'belt-green' },
-  { MaCapDai:5, TenCapDai:'Đai Xanh dương', MauSac:'blue',   cls:'belt-blue' },
-  { MaCapDai:6, TenCapDai:'Đai Đỏ',         MauSac:'red',    cls:'belt-red' },
-  { MaCapDai:7, TenCapDai:'Đai Đen',         MauSac:'black',  cls:'belt-black' },
-];
-
-/* KyThiThangDai */
-const danhSachKyThi = {
-  1: { MaKyThi:1, MaKhoaHoc:1, NgayThi:'2026-05-25', MoTa:'Kỳ thi thăng đai cuối Khóa 5', TrangThai:'SapDienRa' },
-  2: { MaKyThi:2, MaKhoaHoc:1, NgayThi:'2026-02-10', MoTa:'Kỳ thi thăng đai giữa Khóa 5', TrangThai:'DaDienRa' },
-};
-
-/* KetQuaThi — MaKyThi → mảng kết quả */
-const ketQuaThiMap = {
-  2: [
-    { MaKetQua:1, MaKyThi:2, MaHocVien:1, HoTen:'Nguyễn Đình Văn',   DiemSo:8.5, DaDat:1, MaCapDaiMoi:2 },
-    { MaKetQua:2, MaKyThi:2, MaHocVien:2, HoTen:'Trần Nhật Hoàng',   DiemSo:6.0, DaDat:1, MaCapDaiMoi:3 },
-    { MaKetQua:3, MaKyThi:2, MaHocVien:3, HoTen:'Nguyễn Đăng Thắng', DiemSo:4.5, DaDat:0, MaCapDaiMoi:null },
-  ]
-};
-
-/* Danh sách học viên (giả lập để nhập kết quả) */
-const hocVienList = [
-  { MaHocVien:1, HoTen:'Nguyễn Đình Văn',   CapDaiHienTai:'Đai Trắng' },
-  { MaHocVien:2, HoTen:'Trần Nhật Hoàng',   CapDaiHienTai:'Đai Vàng' },
-  { MaHocVien:3, HoTen:'Nguyễn Đăng Thắng', CapDaiHienTai:'Đai Trắng' },
-];
-
-let _currentViewId   = null;
+/* ── DỮ LIỆU ── */
+let danhSachKyThi = {};
+let ketQuaThiMap = {};
+let khoaHocMap = {};
+let capDaiList = [];
+let hocVienList = [];
+let _currentViewId = null;
 let _currentDeleteId = null;
-let _nextId = 3;
+
+/* ── LOAD DATA ── */
+async function loadData() {
+  try {
+    // Load kỳ thi
+    const kyThiRes = await fetch(`${API_BASE}/thangdai/kythi`);
+    const kyThiResult = await kyThiRes.json();
+    if (kyThiResult.success) {
+      danhSachKyThi = {};
+      kyThiResult.data.forEach(k => {
+        danhSachKyThi[k.maKyThi] = {
+          MaKyThi: k.maKyThi,
+          MaKhoaHoc: k.maKhoaHoc,
+          TenKhoaHoc: k.tenKhoaHoc,
+          NgayThi: k.ngayThi ? k.ngayThi.split('T')[0] : null,
+          MoTa: k.moTa,
+          TrangThai: k.trangThai
+        };
+        if (k.tenKhoaHoc) khoaHocMap[k.maKhoaHoc] = k.tenKhoaHoc;
+      });
+    }
+
+    // Load cấp đai
+    const capDaiRes = await fetch(`${API_BASE}/capdai`);
+    const capDaiResult = await capDaiRes.json();
+    if (capDaiResult.success) {
+      capDaiList = capDaiResult.data.map(c => ({
+        MaCapDai: c.maCapDai,
+        TenCapDai: c.tenCapDai,
+        MauSac: c.mauSac,
+        ThuTu: c.thuTu
+      }));
+    }
+
+    renderTable();
+    updateStats();
+  } catch (error) {
+    console.error('Error loading data:', error);
+    toast('Lỗi tải dữ liệu!', 'error');
+  }
+}
+
+async function loadKetQuaThi(maKyThi) {
+  try {
+    const res = await fetch(`${API_BASE}/thangdai/kythi/${maKyThi}/ketqua`);
+    const result = await res.json();
+    if (result.success) {
+      ketQuaThiMap[maKyThi] = result.data.map(k => ({
+        MaKetQua: k.maKetQua,
+        MaKyThi: k.maKyThi,
+        MaHocVien: k.maHocVien,
+        TenHocVien: k.tenHocVien,
+        DiemSo: k.diemSo,
+        DaDat: k.daDat,
+        MaCapDaiMoi: k.maCapDaiMoi,
+        TenCapDaiMoi: k.tenCapDaiMoi
+      }));
+    }
+  } catch (error) {
+    console.error('Error loading exam results:', error);
+  }
+}
 
 /* ── FORMAT DATE ── */
 function fmtDate(d) {
@@ -885,7 +917,7 @@ function autoResult(maHV) {
     : '<span style="color:#e74c3c;font-size:.75rem;font-weight:700;">✗ Không đạt</span>';
 }
 
-function luuKetQua() {
+async function luuKetQua() {
   const id  = _currentViewId;
   const arr = [];
   let valid = true;
@@ -897,12 +929,9 @@ function luuKetQua() {
     if (isNaN(diem) || diem < 0 || diem > 10) { valid = false; return; }
     const daiMoi = parseInt(document.getElementById(`dai_${hv.MaHocVien}`).value)||null;
     arr.push({
-      MaKetQua: Date.now() + hv.MaHocVien,
-      MaKyThi: id,
       MaHocVien: hv.MaHocVien,
-      HoTen: hv.HoTen,
       DiemSo: diem,
-      DaDat: diem >= 5 ? 1 : 0,
+      DaDat: diem >= 5,
       MaCapDaiMoi: diem >= 5 ? daiMoi : null
     });
   });
@@ -910,11 +939,26 @@ function luuKetQua() {
   if (!valid) { toast('Điểm số không hợp lệ (0–10)', 'error'); return; }
   if (!arr.length) { toast('Chưa nhập điểm cho học viên nào', 'error'); return; }
 
-  ketQuaThiMap[id] = arr;
-  hideModal('modalNhapKetQua');
-  renderTable();
-  updateStats();
-  toast('Đã lưu kết quả thi thành công', 'success');
+  try {
+    for (const item of arr) {
+      const res = await fetch(`${API_BASE}/thangdai/kythi/${id}/ketqua`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
+      const result = await res.json();
+      if (!result.success) {
+        toast(result.message || 'Lỗi lưu kết quả thi!', 'error');
+        return;
+      }
+    }
+    hideModal('modalNhapKetQua');
+    await loadData();
+    toast('Đã lưu kết quả thi thành công', 'success');
+  } catch (error) {
+    console.error('Error saving exam results:', error);
+    toast('Lỗi lưu kết quả thi!', 'error');
+  }
 }
 
 /* ── CHỈNH SỬA ── */
@@ -929,24 +973,42 @@ function openEditKyThi(id) {
   showModal('modalSuaKyThi');
 }
 
-function luuSuaKyThi() {
+async function luuSuaKyThi() {
   const id    = parseInt(document.getElementById('sua_MaKyThi').value);
   const khoa  = document.getElementById('sua_MaKhoaHoc').value;
   const ngay  = document.getElementById('sua_NgayThi').value;
   const moTa  = document.getElementById('sua_MoTa').value.trim();
   const tt    = document.getElementById('sua_TrangThai').value;
 
-  if (!khoa || !ngay) { toast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error'); return; }
+  if (!khoa || !ngay || !tt) { toast('Vui lòng điền đầy đủ thông tin!', 'error'); return; }
 
-  danhSachKyThi[id] = { ...danhSachKyThi[id], MaKhoaHoc:parseInt(khoa), NgayThi:ngay, MoTa:moTa, TrangThai:tt };
-  hideModal('modalSuaKyThi');
-  renderTable();
-  updateStats();
-  toast('Đã cập nhật kỳ thi thành công', 'success');
+  try {
+    const res = await fetch(`${API_BASE}/thangdai/kythi/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        maKhoaHoc: parseInt(khoa),
+        ngayThi: ngay,
+        moTa: moTa,
+        trangThai: tt
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      toast('Cập nhật kỳ thi thành công!', 'success');
+      hideModal('modalSuaKyThi');
+      await loadData();
+    } else {
+      toast(result.message || 'Lỗi cập nhật kỳ thi!', 'error');
+    }
+  } catch (error) {
+    console.error('Error updating exam:', error);
+    toast('Lỗi cập nhật kỳ thi!', 'error');
+  }
 }
 
 /* ── THÊM MỚI ── */
-function luuThemKyThi() {
+async function luuThemKyThi() {
   const khoa = document.getElementById('them_MaKhoaHoc').value;
   const ngay = document.getElementById('them_NgayThi').value;
   const moTa = document.getElementById('them_MoTa').value.trim();
@@ -954,20 +1016,29 @@ function luuThemKyThi() {
 
   if (!khoa || !ngay) { toast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error'); return; }
 
-  const id = _nextId++;
-  danhSachKyThi[id] = { MaKyThi:id, MaKhoaHoc:parseInt(khoa), NgayThi:ngay, MoTa:moTa, TrangThai:tt };
-
-  // Reset form
-  ['them_MaKhoaHoc','them_NgayThi','them_MoTa'].forEach(f => {
-    const el = document.getElementById(f);
-    if (el) el.value = '';
-  });
-  document.getElementById('them_TrangThai').value = 'SapDienRa';
-
-  hideModal('modalThemKyThi');
-  renderTable();
-  updateStats();
-  toast('Đã thêm kỳ thi thành công', 'success');
+  try {
+    const res = await fetch(`${API_BASE}/thangdai/kythi`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        maKhoaHoc: parseInt(khoa),
+        ngayThi: ngay,
+        moTa: moTa,
+        trangThai: tt
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      toast('Thêm kỳ thi thành công!', 'success');
+      hideModal('modalThemKyThi');
+      await loadData();
+    } else {
+      toast(result.message || 'Lỗi thêm kỳ thi!', 'error');
+    }
+  } catch (error) {
+    console.error('Error adding exam:', error);
+    toast('Lỗi thêm kỳ thi!', 'error');
+  }
 }
 
 /* ── XÓA ── */
@@ -979,14 +1050,24 @@ function openXoaKyThi(id) {
   showModal('modalXoaKyThi');
 }
 
-function xacNhanXoaKyThi() {
-  delete danhSachKyThi[_currentDeleteId];
-  delete ketQuaThiMap[_currentDeleteId];
+async function xacNhanXoaKyThi() {
+  try {
+    const res = await fetch(`${API_BASE}/thangdai/kythi/${_currentDeleteId}`, {
+      method: 'DELETE'
+    });
+    const result = await res.json();
+    if (result.success) {
+      toast('Đã xóa kỳ thi thành công!', 'success');
+      hideModal('modalXoaKyThi');
+      await loadData();
+    } else {
+      toast(result.message || 'Lỗi xóa kỳ thi!', 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting exam:', error);
+    toast('Lỗi xóa kỳ thi!', 'error');
+  }
   _currentDeleteId = null;
-  hideModal('modalXoaKyThi');
-  renderTable();
-  updateStats();
-  toast('Đã xóa kỳ thi', 'error');
 }
 
 /* ── MODAL HELPERS (giữ nguyên) ── */
@@ -1030,8 +1111,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('searchKyThi').addEventListener('input', renderTable);
   document.getElementById('filterTrangThai').addEventListener('change', renderTable);
 
-  renderTable();
-  updateStats();
+  loadData();
 });
 </script>
 

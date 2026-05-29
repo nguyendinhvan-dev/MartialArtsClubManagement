@@ -228,7 +228,6 @@ namespace MartialArtsClubManagement.API.Controllers
                     .Select(k => new
                     {
                         k.MaKyThi,
-                        k.TenKyThi,
                         k.NgayThi,
                         k.MoTa,
                         k.TrangThai

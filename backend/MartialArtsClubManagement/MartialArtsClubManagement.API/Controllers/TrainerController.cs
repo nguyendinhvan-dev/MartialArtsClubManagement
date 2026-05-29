@@ -498,7 +498,6 @@ namespace MartialArtsClubManagement.API.Controllers
                 .Select(k => new TrainerKyThiDto
                 {
                     MaKyThi = k.MaKyThi,
-                    TenKyThi = k.TenKyThi,
                     NgayThi = k.NgayThi,
                     MaKhoaHoc = k.MaKhoaHoc,
                     TenKhoaHoc = k.MaKhoaHocNavigation != null ? k.MaKhoaHocNavigation.TenKhoaHoc : null,
@@ -542,7 +541,6 @@ namespace MartialArtsClubManagement.API.Controllers
 
             var newKyThi = new KyThiThangDai
             {
-                TenKyThi = dto.TenKyThi,
                 NgayThi = dto.NgayThi,
                 MaKhoaHoc = dto.MaKhoaHoc,
                 TrangThai = "SapDienRa",
@@ -586,7 +584,6 @@ namespace MartialArtsClubManagement.API.Controllers
                 return NotFound(new ApiResponse<object> { Success = false, Message = "Không tìm thấy kỳ thi" });
             }
 
-            kyThi.TenKyThi = dto.TenKyThi;
             kyThi.NgayThi = dto.NgayThi;
             kyThi.MaKhoaHoc = dto.MaKhoaHoc;
             kyThi.TrangThai = dto.TrangThai;

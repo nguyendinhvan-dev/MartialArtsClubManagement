@@ -17,7 +17,7 @@ namespace MartialArtsClubManagement.API.Models.DTOs
         public int MaKhoaHoc { get; set; }
         public DateOnly NgayThi { get; set; }
         public string? MoTa { get; set; }
-        public string TrangThai { get; set; } = "Sắp diễn ra";
+        public string TrangThai { get; set; } = "SapDienRa";
     }
 
     public class UpdateAdminKyThiThangDaiDto
@@ -63,5 +63,13 @@ namespace MartialArtsClubManagement.API.Models.DTOs
         public int ThuTuDaiHienTai { get; set; }
         public int? SoThangHienTai { get; set; }
         public int ThoiGianToiThieuThang { get; set; }
+    }
+
+    public class AdminHocVienSimpleDto
+    {
+        public int MaHocVien { get; set; }
+        public string? HoTen { get; set; }
+        public int? MaCapDaiHienTai { get; set; }
+        public string? TenCapDaiHienTai { get; set; }
     }
 }
