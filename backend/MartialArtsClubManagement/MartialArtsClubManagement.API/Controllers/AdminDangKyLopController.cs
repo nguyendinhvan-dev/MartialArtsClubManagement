@@ -232,23 +232,40 @@ namespace MartialArtsClubManagement.API.Controllers
             if (!dangKyExists)
                 return NotFound(new ApiResponse<object> { Success = false, Message = "Không tìm thấy đăng ký lớp" });
 
-            var newDiemDanh = new DiemDanh
+            try
             {
-                MaDangKy = maDangKy,
-                NgayHoc = dto.NgayHoc,
-                TrangThai = dto.TrangThai,
-                GhiChu = dto.GhiChu
-            };
+                // Use raw SQL to avoid potential trigger/cascade issues
+                var sql = @"
+                    IF EXISTS (SELECT 1 FROM DiemDanh WHERE MaDangKy = @maDangKy AND NgayHoc = @ngayHoc)
+                        UPDATE DiemDanh 
+                        SET TrangThai = @trangThai, GhiChu = @ghiChu
+                        WHERE MaDangKy = @maDangKy AND NgayHoc = @ngayHoc
+                    ELSE
+                        INSERT INTO DiemDanh (MaDangKy, NgayHoc, TrangThai, GhiChu)
+                        VALUES (@maDangKy, @ngayHoc, @trangThai, @ghiChu)";
 
-            _context.DiemDanhs.Add(newDiemDanh);
-            await _context.SaveChangesAsync();
+                var parameters = new[]
+                {
+                    new Microsoft.Data.SqlClient.SqlParameter("@maDangKy", maDangKy),
+                    new Microsoft.Data.SqlClient.SqlParameter("@ngayHoc", dto.NgayHoc),
+                    new Microsoft.Data.SqlClient.SqlParameter("@trangThai", dto.TrangThai),
+                    new Microsoft.Data.SqlClient.SqlParameter("@ghiChu", (object?)dto.GhiChu ?? DBNull.Value)
+                };
 
-            return Ok(new ApiResponse<int>
+                await _context.Database.ExecuteSqlRawAsync(sql, parameters);
+
+                return Ok(new ApiResponse<int>
+                {
+                    Success = true,
+                    Message = "Thêm điểm danh thành công",
+                    Data = 0
+                });
+            }
+            catch (Exception ex)
             {
-                Success = true,
-                Message = "Thêm điểm danh thành công",
-                Data = newDiemDanh.MaDiemDanh
-            });
+                // Log the error and return a more detailed message
+                return BadRequest(new ApiResponse<object> { Success = false, Message = $"Lỗi khi lưu điểm danh: {ex.Message}" });
+            }
         }
     }
 }

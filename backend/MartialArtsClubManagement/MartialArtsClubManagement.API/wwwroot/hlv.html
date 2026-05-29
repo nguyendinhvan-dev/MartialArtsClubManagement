@@ -281,11 +281,11 @@
         <div class="card"><h5>📢 Thông báo hệ thống</h5><div id="sysNotifications" class="alert alert-dark">Đang tải...</div></div>
     </div>
 
-    <!-- Quản lý lớp (CRUD) -->
+    <!-- Quản lý lớp (View only, edit and unregister) -->
     <div id="classes" class="section">
         <h1 class="page-title">LỚP HỌC</h1>
         <div class="card">
-            <div class="d-flex justify-content-between mb-3"><h5>Danh sách lớp</h5><button class="btn btn-primary btn-sm" onclick="openClassModal()"><i class="fas fa-plus"></i> Thêm lớp</button></div>
+            <div class="d-flex justify-content-between mb-3"><h5>Danh sách lớp</h5></div>
             <table class="table"><thead><tr><th>Mã lớp</th><th>Tên lớp</th><th>Lịch học</th><th>Phòng</th><th>Si số</th><th>Thao tác</th></tr></thead><tbody id="classListBody"></tbody></table>
         </div>
     </div>
@@ -309,11 +309,10 @@
         </div>
     </div>
 
-    <!-- KỲ THI & KẾT QUẢ -->
+    <!-- KỲ THI & KẾT QUẢ (View only) -->
     <div id="exams" class="section">
         <h1 class="page-title">KỲ THI & KẾT QUẢ</h1>
-        <div class="card"><div class="d-flex justify-content-between"><h5>Danh sách kỳ thi</h5><button class="btn btn-primary btn-sm" onclick="openExamModal()">+ Tạo kỳ thi</button></div><table class="table mt-2"><thead><tr><th>Kỳ thi</th><th>Ngày</th><th>Lớp</th><th>Thao tác</th></tr></thead><tbody id="examListBody"></tbody></table></div>
-        <div class="card mt-3"><h5>Nhập kết quả thi</h5><select id="examSelect" class="form-select mb-2" onchange="loadExamStudents()"><option>Chọn kỳ thi</option></select><div id="examResultPanel"></div><button class="btn btn-success mt-2" onclick="saveExamResults()">Lưu kết quả</button></div>
+        <div class="card"><div class="d-flex justify-content-between"><h5>Danh sách kỳ thi</h5></div><table class="table mt-2"><thead><tr><th>Kỳ thi</th><th>Ngày</th><th>Lớp</th><th>Thao tác</th></tr></thead><tbody id="examListBody"></tbody></table></div>
     </div>
 
     <!-- SỰ KIỆN -->
