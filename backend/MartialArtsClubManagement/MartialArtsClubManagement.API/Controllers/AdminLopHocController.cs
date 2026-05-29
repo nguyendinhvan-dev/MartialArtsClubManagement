@@ -36,7 +36,9 @@ namespace MartialArtsClubManagement.API.Controllers
                     MaHlv = l.MaHlv,
                     TenHuanLuyenVien = l.MaHlvNavigation != null && l.MaHlvNavigation.MaTaiKhoanNavigation != null 
                                        ? l.MaHlvNavigation.MaTaiKhoanNavigation.HoTen : null,
+                    TenLop = l.TenLop,
                     LichHoc = l.LichHoc,
+                    HocPhi = l.HocPhi,
                     SoLuongToiDa = l.SoLuongToiDa,
                     PhongTap = l.PhongTap
                 })
@@ -78,7 +80,9 @@ namespace MartialArtsClubManagement.API.Controllers
                 TenCapDai = l.MaCapDaiNavigation?.TenCapDai,
                 MaHlv = l.MaHlv,
                 TenHuanLuyenVien = l.MaHlvNavigation?.MaTaiKhoanNavigation?.HoTen,
+                TenLop = l.TenLop,
                 LichHoc = l.LichHoc,
+                HocPhi = l.HocPhi,
                 SoLuongToiDa = l.SoLuongToiDa,
                 PhongTap = l.PhongTap
             };
@@ -99,16 +103,26 @@ namespace MartialArtsClubManagement.API.Controllers
                 return BadRequest(new ApiResponse<object> { Success = false, Message = "Dữ liệu không hợp lệ" });
             }
 
-            // Optional: validate KhoaHoc, CapDai, HLV exists
+            // Validate KhoaHoc exists
             var khoaHocExists = await _context.KhoaHocs.AnyAsync(k => k.MaKhoaHoc == dto.MaKhoaHoc);
             if (!khoaHocExists) return BadRequest(new ApiResponse<object> { Success = false, Message = "Khóa học không tồn tại" });
+
+            // Validate CapDai exists
+            var capDaiExists = await _context.CapDais.AnyAsync(c => c.MaCapDai == dto.MaCapDai);
+            if (!capDaiExists) return BadRequest(new ApiResponse<object> { Success = false, Message = "Cấp đai không tồn tại" });
+
+            // Validate HLV exists
+            var hlvExists = await _context.HuanLuyenViens.AnyAsync(h => h.MaHlv == dto.MaHlv);
+            if (!hlvExists) return BadRequest(new ApiResponse<object> { Success = false, Message = "Huấn luyện viên không tồn tại" });
 
             var newLopHoc = new LopHoc
             {
                 MaKhoaHoc = dto.MaKhoaHoc,
                 MaCapDai = dto.MaCapDai,
                 MaHlv = dto.MaHlv,
+                TenLop = dto.TenLop,
                 LichHoc = dto.LichHoc,
+                HocPhi = dto.HocPhi,
                 SoLuongToiDa = dto.SoLuongToiDa,
                 PhongTap = dto.PhongTap
             };
@@ -138,10 +152,24 @@ namespace MartialArtsClubManagement.API.Controllers
                 return NotFound(new ApiResponse<object> { Success = false, Message = "Không tìm thấy lớp học" });
             }
 
+            // Validate KhoaHoc exists
+            var khoaHocExists = await _context.KhoaHocs.AnyAsync(k => k.MaKhoaHoc == dto.MaKhoaHoc);
+            if (!khoaHocExists) return BadRequest(new ApiResponse<object> { Success = false, Message = "Khóa học không tồn tại" });
+
+            // Validate CapDai exists
+            var capDaiExists = await _context.CapDais.AnyAsync(c => c.MaCapDai == dto.MaCapDai);
+            if (!capDaiExists) return BadRequest(new ApiResponse<object> { Success = false, Message = "Cấp đai không tồn tại" });
+
+            // Validate HLV exists
+            var hlvExists = await _context.HuanLuyenViens.AnyAsync(h => h.MaHlv == dto.MaHlv);
+            if (!hlvExists) return BadRequest(new ApiResponse<object> { Success = false, Message = "Huấn luyện viên không tồn tại" });
+
             lopHoc.MaKhoaHoc = dto.MaKhoaHoc;
             lopHoc.MaCapDai = dto.MaCapDai;
             lopHoc.MaHlv = dto.MaHlv;
+            lopHoc.TenLop = dto.TenLop;
             lopHoc.LichHoc = dto.LichHoc;
+            lopHoc.HocPhi = dto.HocPhi;
             lopHoc.SoLuongToiDa = dto.SoLuongToiDa;
             lopHoc.PhongTap = dto.PhongTap;
 
