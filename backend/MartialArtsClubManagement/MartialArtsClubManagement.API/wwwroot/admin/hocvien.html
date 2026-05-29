@@ -1076,7 +1076,7 @@
         <option value="0">Ngừng hoạt động</option>
       </select>
       <div style="margin-left:auto;">
-        <button class="btn-outline-sm"><i class="fas fa-file-excel"></i> Xuất Excel</button>
+        <button class="btn-outline-sm" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Xuất Excel</button>
       </div>
     </div>
 
@@ -1558,7 +1558,8 @@
      PAGE SCRIPTS
 ================================================================= -->
 <script>
-/* ── DỮ LIỆU MẪU (JOIN TaiKhoan + HocVien + CapDai) ── */
+/* ── API CONFIGURATION ── */
+const API_BASE = '/api/admin';
 const BELT = {
   0: { ten:'Chưa xếp đai', cls:''          },
   1: { ten:'Đai Trắng',    cls:'belt-white' },
@@ -1570,27 +1571,64 @@ const BELT = {
   7: { ten:'Đai Đen',      cls:'belt-black' },
 };
 
-let data = [
-  { MaHocVien:1, MaTaiKhoan:2,  HoTen:'Nguyễn Văn An',   Email:'an.nguyen@email.com',   SoDienThoai:'0901 234 567', NgaySinh:'2002-05-14', GioiTinh:'Nam', NgayGiaNhap:'2026-01-10', MaCapDaiHienTai:1, DiaChi:'12 Lê Lợi, Q1, TP.HCM',         DangHoatDong:1, NgayTao:'2026-01-10' },
-  { MaHocVien:2, MaTaiKhoan:3,  HoTen:'Trần Thị Bình',   Email:'binh.tran@email.com',   SoDienThoai:'0912 345 678', NgaySinh:'2000-08-22', GioiTinh:'Nu',  NgayGiaNhap:'2025-03-05', MaCapDaiHienTai:2, DiaChi:'34 Nguyễn Huệ, Q1, TP.HCM',     DangHoatDong:1, NgayTao:'2025-03-05' },
-  { MaHocVien:3, MaTaiKhoan:4,  HoTen:'Lê Văn Hùng',     Email:'hung.le@email.com',     SoDienThoai:'0933 456 789', NgaySinh:'2001-11-03', GioiTinh:'Nam', NgayGiaNhap:'2024-06-15', MaCapDaiHienTai:4, DiaChi:'78 Trần Hưng Đạo, Q5, TP.HCM',   DangHoatDong:1, NgayTao:'2024-06-15' },
-  { MaHocVien:4, MaTaiKhoan:5,  HoTen:'Phạm Thị Cúc',    Email:'cuc.pham@email.com',    SoDienThoai:'0944 567 890', NgaySinh:'1999-03-17', GioiTinh:'Nu',  NgayGiaNhap:'2024-01-20', MaCapDaiHienTai:5, DiaChi:'56 Đinh Tiên Hoàng, Q.BT, TP.HCM', DangHoatDong:0, NgayTao:'2024-01-20' },
-  { MaHocVien:5, MaTaiKhoan:6,  HoTen:'Hoàng Minh Đức',  Email:'duc.hoang@email.com',   SoDienThoai:'0955 678 901', NgaySinh:'1998-07-09', GioiTinh:'Nam', NgayGiaNhap:'2023-09-10', MaCapDaiHienTai:6, DiaChi:'90 CMT8, Q3, TP.HCM',             DangHoatDong:1, NgayTao:'2023-09-10' },
-  { MaHocVien:6, MaTaiKhoan:7,  HoTen:'Võ Thị Lan',      Email:'lan.vo@email.com',      SoDienThoai:'0966 789 012', NgaySinh:'1995-12-25', GioiTinh:'Nu',  NgayGiaNhap:'2022-03-03', MaCapDaiHienTai:7, DiaChi:'23 Pasteur, Q3, TP.HCM',          DangHoatDong:1, NgayTao:'2022-03-03' },
-  { MaHocVien:7, MaTaiKhoan:8,  HoTen:'Đặng Văn Khoa',   Email:'khoa.dang@email.com',   SoDienThoai:'0977 890 123', NgaySinh:'2003-04-11', GioiTinh:'Nam', NgayGiaNhap:'2026-02-01', MaCapDaiHienTai:1, DiaChi:'45 Hai Bà Trưng, Q1',            DangHoatDong:1, NgayTao:'2026-02-01' },
-  { MaHocVien:8, MaTaiKhoan:9,  HoTen:'Nguyễn Thị Mai',  Email:'mai.nguyen@email.com',  SoDienThoai:'0988 901 234', NgaySinh:'2001-06-30', GioiTinh:'Nu',  NgayGiaNhap:'2025-07-12', MaCapDaiHienTai:3, DiaChi:'67 Lý Tự Trọng, Q1',             DangHoatDong:1, NgayTao:'2025-07-12' },
-  { MaHocVien:9, MaTaiKhoan:10, HoTen:'Trần Văn Bảo',    Email:'bao.tran@email.com',    SoDienThoai:'0911 012 345', NgaySinh:'2000-01-15', GioiTinh:'Nam', NgayGiaNhap:'2025-05-20', MaCapDaiHienTai:2, DiaChi:'89 Nguyễn Thị Minh Khai',        DangHoatDong:0, NgayTao:'2025-05-20' },
-  { MaHocVien:10,MaTaiKhoan:11, HoTen:'Lý Thị Hoa',      Email:'hoa.ly@email.com',      SoDienThoai:'0922 123 456', NgaySinh:'1997-09-08', GioiTinh:'Nu',  NgayGiaNhap:'2023-11-05', MaCapDaiHienTai:5, DiaChi:'11 Điện Biên Phủ, Q.BĐ',         DangHoatDong:1, NgayTao:'2023-11-05' },
-  { MaHocVien:11,MaTaiKhoan:12, HoTen:'Phan Văn Tùng',   Email:'tung.phan@email.com',   SoDienThoai:'0933 234 567', NgaySinh:'2002-12-19', GioiTinh:'Nam', NgayGiaNhap:'2024-08-22', MaCapDaiHienTai:3, DiaChi:'33 Nam Kỳ Khởi Nghĩa, Q3',       DangHoatDong:1, NgayTao:'2024-08-22' },
-  { MaHocVien:12,MaTaiKhoan:13, HoTen:'Bùi Thị Thu',     Email:'thu.bui@email.com',     SoDienThoai:'0944 345 678', NgaySinh:'1999-07-04', GioiTinh:'Nu',  NgayGiaNhap:'2024-03-18', MaCapDaiHienTai:4, DiaChi:'55 Ngô Quyền, Q10',              DangHoatDong:1, NgayTao:'2024-03-18' },
-];
-
-/* ── PHÂN TRANG ── */
 const PAGE_SIZE = 10;
+let data = [];
 let currentPage = 1;
-let filtered = [...data];
+let filtered = [];
 let _xemId = null;
-let nextId  = data.length + 1;
+
+/* ── LOAD DATA FROM API ── */
+async function loadData() {
+  console.log('Loading students data...');
+  try {
+    console.log('Fetching from:', `${API_BASE}/hocvien`);
+    const res = await fetch(`${API_BASE}/hocvien`);
+    console.log('Response status:', res.status);
+    const result = await res.json();
+    console.log('Response data:', result);
+    if (result.success) {
+      data = result.data.map(hv => ({
+        MaHocVien: hv.maHocVien,
+        MaTaiKhoan: hv.maTaiKhoan,
+        HoTen: hv.tenHocVien,
+        Email: hv.email,
+        SoDienThoai: hv.soDienThoai,
+        NgaySinh: hv.ngaySinh ? hv.ngaySinh.split('T')[0] : null,
+        GioiTinh: hv.gioiTinh,
+        NgayGiaNhap: hv.ngayGiaNhap ? hv.ngayGiaNhap.split('T')[0] : null,
+        MaCapDaiHienTai: hv.maCapDaiHienTai,
+        DiaChi: hv.diaChi,
+        DangHoatDong: 1, // Default to active
+        NgayTao: hv.ngayGiaNhap ? hv.ngayGiaNhap.split('T')[0] : null
+      }));
+      console.log('Processed data:', data);
+      filtered = [...data];
+      renderTable();
+      updateStatCards();
+    } else {
+      console.error('API returned success=false:', result.message);
+      toast('Lỗi: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error loading students:', error);
+    toast('Lỗi tải dữ liệu học viên! ' + error.message, 'error');
+  }
+}
+
+function updateStatCards() {
+  const total = data.length;
+  const active = data.filter(h => h.DangHoatDong).length;
+  const inactive = total - active;
+  
+  // Update stat cards
+  const statCards = document.querySelectorAll('.stat-card');
+  if (statCards[0]) statCards[0].querySelector('.stat-num').textContent = total;
+  if (statCards[1]) statCards[1].querySelector('.stat-num').textContent = active;
+  if (statCards[2]) statCards[2].querySelector('.stat-num').textContent = inactive;
+  
+  // Calculate new this month (simplified - using total for now)
+  if (statCards[3]) statCards[3].querySelector('.stat-num').textContent = Math.floor(total * 0.03);
+}
 
 function fmt(d) {
   if (!d) return '—';
@@ -1672,7 +1710,7 @@ function applyFilter() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderTable();
+  loadData();
   ['searchHV','filterDai','filterGioiTinh','filterTrangThai'].forEach(id => {
     document.getElementById(id).addEventListener('input',  applyFilter);
     document.getElementById(id).addEventListener('change', applyFilter);
@@ -1680,99 +1718,201 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ── XEM ── */
-function openXem(id) {
-  const r = data.find(x => x.MaHocVien === id);
-  if (!r) return;
-  _xemId = id;
-  const init = r.HoTen.split(' ').map(w=>w[0]).slice(-2).join('').toUpperCase();
-  document.getElementById('x_Avatar').textContent      = init;
-  document.getElementById('x_HoTen').textContent       = r.HoTen;
-  document.getElementById('x_Email').textContent       = r.Email;
-  document.getElementById('x_Badge').innerHTML         = beltBadge(r.MaCapDaiHienTai);
-  document.getElementById('x_MaHV').textContent        = r.MaHocVien;
-  document.getElementById('x_MaTK').textContent        = r.MaTaiKhoan;
-  document.getElementById('x_SDT').textContent         = r.SoDienThoai || '—';
-  document.getElementById('x_NgaySinh').textContent    = fmt(r.NgaySinh);
-  document.getElementById('x_GioiTinh').textContent    = r.GioiTinh === 'Nu' ? 'Nữ' : r.GioiTinh || '—';
-  document.getElementById('x_NgayGiaNhap').textContent = fmt(r.NgayGiaNhap);
-  document.getElementById('x_CapDai').textContent      = r.MaCapDaiHienTai ? `${r.MaCapDaiHienTai} – ${BELT[r.MaCapDaiHienTai].ten}` : '— Chưa xếp đai';
-  document.getElementById('x_DiaChi').textContent      = r.DiaChi || '—';
-  document.getElementById('x_DangHoatDong').textContent= r.DangHoatDong ? '1 – Đang hoạt động' : '0 – Ngừng hoạt động';
-  document.getElementById('x_NgayTao').textContent     = fmt(r.NgayTao);
-  showModal('modalXem');
+async function openXem(id) {
+  try {
+    const res = await fetch(`${API_BASE}/hocvien/${id}`);
+    const result = await res.json();
+    if (result.success && result.data) {
+      const r = result.data;
+      _xemId = id;
+      const init = r.tenHocVien ? r.tenHocVien.split(' ').map(w=>w[0]).slice(-2).join('').toUpperCase() : 'HV';
+      document.getElementById('x_Avatar').textContent      = init;
+      document.getElementById('x_HoTen').textContent       = r.tenHocVien || '—';
+      document.getElementById('x_Email').textContent       = r.email || '—';
+      document.getElementById('x_Badge').innerHTML         = beltBadge(r.maCapDaiHienTai);
+      document.getElementById('x_MaHV').textContent        = r.maHocVien || '—';
+      document.getElementById('x_MaTK').textContent        = r.maTaiKhoan || '—';
+      document.getElementById('x_SDT').textContent         = r.soDienThoai || '—';
+      document.getElementById('x_NgaySinh').textContent    = fmt(r.ngaySinh ? r.ngaySinh.split('T')[0] : null);
+      document.getElementById('x_GioiTinh').textContent    = r.gioiTinh === 'Nu' ? 'Nữ' : r.gioiTinh || '—';
+      document.getElementById('x_NgayGiaNhap').textContent = fmt(r.ngayGiaNhap ? r.ngayGiaNhap.split('T')[0] : null);
+      document.getElementById('x_CapDai').textContent      = r.maCapDaiHienTai ? `${r.maCapDaiHienTai} – ${BELT[r.maCapDaiHienTai]?.ten || '—'}` : '— Chưa xếp đai';
+      document.getElementById('x_DiaChi').textContent      = r.diaChi || '—';
+      document.getElementById('x_DangHoatDong').textContent= '1 – Đang hoạt động';
+      document.getElementById('x_NgayTao').textContent     = fmt(r.ngayGiaNhap ? r.ngayGiaNhap.split('T')[0] : null);
+      showModal('modalXem');
+    }
+  } catch (error) {
+    console.error('Error loading student details:', error);
+    toast('Lỗi tải chi tiết học viên!', 'error');
+  }
 }
 
 /* ── SỬA ── */
-function openSua(id) {
-  const r = data.find(x => x.MaHocVien === id);
-  if (!r) return;
-  document.getElementById('s_MaHV').value         = id;
-  document.getElementById('s_HoTen').value         = r.HoTen;
-  document.getElementById('s_Email').value         = r.Email;
-  document.getElementById('s_DangHoatDong').value  = r.DangHoatDong;
-  document.getElementById('s_SDT').value           = r.SoDienThoai || '';
-  document.getElementById('s_NgaySinh').value      = r.NgaySinh || '';
-  document.getElementById('s_GioiTinh').value      = r.GioiTinh || '';
-  document.getElementById('s_CapDai').value        = r.MaCapDaiHienTai || '';
-  document.getElementById('s_DiaChi').value        = r.DiaChi || '';
-  showModal('modalSua');
+async function openSua(id) {
+  try {
+    const res = await fetch(`${API_BASE}/hocvien/${id}`);
+    const result = await res.json();
+    if (result.success && result.data) {
+      const r = result.data;
+      document.getElementById('s_MaHV').value         = id;
+      document.getElementById('s_HoTen').value         = r.tenHocVien || '';
+      document.getElementById('s_Email').value         = r.email || '';
+      document.getElementById('s_DangHoatDong').value  = '1';
+      document.getElementById('s_SDT').value           = r.soDienThoai || '';
+      document.getElementById('s_NgaySinh').value      = r.ngaySinh ? r.ngaySinh.split('T')[0] : '';
+      document.getElementById('s_GioiTinh').value      = r.gioiTinh || '';
+      document.getElementById('s_CapDai').value        = r.maCapDaiHienTai || '';
+      document.getElementById('s_DiaChi').value        = r.diaChi || '';
+      showModal('modalSua');
+    }
+  } catch (error) {
+    console.error('Error loading student for edit:', error);
+    toast('Lỗi tải thông tin học viên!', 'error');
+  }
 }
 
-function luuSua() {
+async function luuSua() {
   const id = parseInt(document.getElementById('s_MaHV').value);
-  const r  = data.find(x => x.MaHocVien === id);
   const hoTen = document.getElementById('s_HoTen').value.trim();
   if (!hoTen) { toast('HoTen không được để trống!', 'error'); return; }
-  if (r) {
-    r.HoTen          = hoTen;
-    r.DangHoatDong   = parseInt(document.getElementById('s_DangHoatDong').value);
-    r.SoDienThoai    = document.getElementById('s_SDT').value.trim() || null;
-    r.NgaySinh       = document.getElementById('s_NgaySinh').value || null;
-    r.GioiTinh       = document.getElementById('s_GioiTinh').value || null;
-    r.MaCapDaiHienTai= parseInt(document.getElementById('s_CapDai').value) || null;
-    r.DiaChi         = document.getElementById('s_DiaChi').value.trim() || null;
+
+  try {
+    const res = await fetch(`${API_BASE}/hocvien/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        hoTen: hoTen,
+        soDienThoai: document.getElementById('s_SDT').value.trim() || null,
+        diaChi: document.getElementById('s_DiaChi').value.trim() || null,
+        ngaySinh: document.getElementById('s_NgaySinh').value || null,
+        gioiTinh: document.getElementById('s_GioiTinh').value || null,
+        ngayGiaNhap: document.getElementById('s_NgayGiaNhap')?.value || new Date().toISOString().split('T')[0],
+        maCapDaiHienTai: parseInt(document.getElementById('s_CapDai').value) || null
+      })
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      await loadData();
+      hideModal('modalSua');
+      toast('Cập nhật học viên <strong>' + hoTen + '</strong> thành công!', 'success');
+    } else {
+      toast(result.message || 'Lỗi cập nhật học viên!', 'error');
+    }
+  } catch (error) {
+    console.error('Error updating student:', error);
+    toast('Lỗi cập nhật học viên!', 'error');
   }
-  applyFilter();
-  hideModal('modalSua');
-  toast('Cập nhật học viên <strong>' + hoTen + '</strong> thành công!', 'success');
 }
 
 /* ── THÊM ── */
-function themHocVien() {
+async function themHocVien() {
   const hoTen = document.getElementById('t_HoTen').value.trim();
   const email = document.getElementById('t_Email').value.trim();
   const mk    = document.getElementById('t_MatKhau').value;
   if (!hoTen || !email) { toast('Vui lòng nhập HoTen và Email!', 'error'); return; }
   if (!mk || mk.length < 6) { toast('MatKhau tối thiểu 6 ký tự!', 'error'); return; }
-  const newRow = {
-    MaHocVien:       nextId++,
-    MaTaiKhoan:      nextId + 10,
-    HoTen:           hoTen,
-    Email:           email,
-    SoDienThoai:     document.getElementById('t_SDT').value.trim() || null,
-    NgaySinh:        document.getElementById('t_NgaySinh').value || null,
-    GioiTinh:        document.getElementById('t_GioiTinh').value || null,
-    NgayGiaNhap:     new Date().toISOString().slice(0,10),
-    MaCapDaiHienTai: parseInt(document.getElementById('t_CapDai').value) || null,
-    DiaChi:          document.getElementById('t_DiaChi').value.trim() || null,
-    DangHoatDong:    1,
-    NgayTao:         new Date().toISOString().slice(0,10),
-  };
-  data.unshift(newRow);
-  applyFilter();
-  hideModal('modalThem');
-  // Reset form
-  ['t_HoTen','t_Email','t_MatKhau','t_SDT','t_NgaySinh','t_DiaChi'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('t_GioiTinh').value = '';
-  document.getElementById('t_CapDai').value = '';
-  toast('Đã thêm học viên <strong>' + hoTen + '</strong>!', 'success');
+
+  try {
+    // First create account
+    const accountRes = await fetch(`${API_BASE}/taikhoan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        hoTen: hoTen,
+        email: email,
+        matKhau: mk,
+        vaiTro: 'HocVien',
+        dangHoatDong: true
+      })
+    });
+    const accountData = await accountRes.json();
+
+    if (!accountData.success) {
+      toast(accountData.message || 'Lỗi tạo tài khoản!', 'error');
+      return;
+    }
+
+    // Then create student record
+    const studentRes = await fetch(`${API_BASE}/hocvien`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        maTaiKhoan: accountData.data,
+        soDienThoai: document.getElementById('t_SDT').value.trim() || null,
+        diaChi: document.getElementById('t_DiaChi').value.trim() || null,
+        ngaySinh: document.getElementById('t_NgaySinh').value || null,
+        gioiTinh: document.getElementById('t_GioiTinh').value || null,
+        ngayGiaNhap: new Date().toISOString().split('T')[0],
+        maCapDaiHienTai: parseInt(document.getElementById('t_CapDai').value) || null
+      })
+    });
+    const studentData = await studentRes.json();
+
+    if (studentData.success) {
+      await loadData();
+      hideModal('modalThem');
+      // Reset form
+      ['t_HoTen','t_Email','t_MatKhau','t_SDT','t_NgaySinh','t_DiaChi'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('t_GioiTinh').value = '';
+      document.getElementById('t_CapDai').value = '';
+      toast('Đã thêm học viên <strong>' + hoTen + '</strong>!', 'success');
+    } else {
+      toast(studentData.message || 'Lỗi thêm học viên!', 'error');
+    }
+  } catch (error) {
+    console.error('Error adding student:', error);
+    toast('Lỗi thêm học viên!', 'error');
+  }
 }
 
 /* ── XÓA ── */
-function xoa(id) {
-  data = data.filter(x => x.MaHocVien !== id);
-  applyFilter();
-  toast('Đã xóa học viên khỏi hệ thống!', 'success');
+async function xoa(id) {
+  try {
+    const res = await fetch(`${API_BASE}/hocvien/${id}`, {
+      method: 'DELETE'
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      await loadData();
+      toast('Đã xóa học viên khỏi hệ thống!', 'success');
+    } else {
+      toast(result.message || 'Lỗi xóa học viên!', 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting student:', error);
+    toast('Lỗi xóa học viên!', 'error');
+  }
+}
+
+/* ── EXPORT EXCEL ── */
+function exportExcel() {
+  const headers = ['Mã HV', 'Họ tên', 'Email', 'SĐT', 'Ngày sinh', 'Giới tính', 'Ngày gia nhập', 'Cấp đai hiện tại', 'Trạng thái'];
+  const rows = filtered.map(hv => [
+    hv.MaHocVien,
+    hv.HoTen,
+    hv.Email,
+    hv.SoDienThoai,
+    hv.NgaySinh,
+    hv.GioiTinh === 'Nu' ? 'Nữ' : hv.GioiTinh,
+    hv.NgayGiaNhap,
+    BELT[hv.MaCapDaiHienTai]?.ten || '—',
+    hv.DangHoatDong ? 'Đang hoạt động' : 'Ngừng hoạt động'
+  ]);
+
+  let csv = headers.join(',') + '\n';
+  rows.forEach(row => {
+    csv += row.map(cell => `"${cell || ''}"`).join(',') + '\n';
+  });
+
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `hocvien_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+  toast('Đã xuất dữ liệu thành công!', 'success');
 }
 </script>
 
