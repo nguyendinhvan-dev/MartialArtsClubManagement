@@ -78,24 +78,15 @@
                                     <th>Nội dung</th>
                                     <th>Loại</th>
                                     <th class="text-end">Số tiền</th>
+                                    <th class="text-end">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody id="payment-tbody">
-                                <tr>
-                                    <td>Lớp Cơ Bản Khóa 20 (Tháng 5)</td>
-                                    <td>Học phí lớp</td>
-                                    <td class="text-end fw-bold">500,000 đ</td>
-                                </tr>
-                                <tr>
-                                    <td>Gói Kèm Riêng 10 buổi</td>
-                                    <td>Kèm riêng</td>
-                                    <td class="text-end fw-bold">2,000,000 đ</td>
-                                </tr>
                             </tbody>
                             <tfoot class="border-top">
                                 <tr>
-                                    <td colspan="2" class="fw-bold">Tổng cộng:</td>
-                                    <td class="text-end fw-bold text-danger fs-5" id="payment-total">2,500,000 đ</td>
+                                    <td colspan="3" class="fw-bold">Tổng cộng:</td>
+                                    <td class="text-end fw-bold text-danger fs-5" id="payment-total">0 đ</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -106,21 +97,21 @@
                     <div class="card p-4 shadow-sm border-0" style="border-radius: 12px;">
                         <h4 class="mb-3">Phương thức thanh toán</h4>
                         <div class="form-check mb-3 p-3 border rounded text-center">
-                            <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="momo" checked>
+                            <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="momo" value="MoMo" checked>
                             <label class="form-check-label fw-bold d-flex align-items-center justify-content-center" for="momo">
                                 <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" height="30" class="me-2">
                                 Ví MoMo
                             </label>
                         </div>
                         <div class="form-check mb-3 p-3 border rounded text-center">
-                            <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="vnpay">
+                            <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="vnpay" value="VNPAY">
                             <label class="form-check-label fw-bold d-flex align-items-center justify-content-center" for="vnpay">
                                 <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png" alt="VNPAY" height="30" class="me-2">
                                 VNPAY
                             </label>
                         </div>
                         <div class="form-check mb-4 p-3 border rounded text-center">
-                            <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="bank">
+                            <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="bank" value="ChuyenKhoan">
                             <label class="form-check-label fw-bold d-flex align-items-center justify-content-center" for="bank">
                                 <i class="fa-solid fa-building-columns fs-4 me-2 text-primary"></i>
                                 Chuyển khoản ngân hàng
@@ -134,7 +125,7 @@
     </div>
 
     <script src="../js/api.js"></script>
-    <script src="../js/api.js"></script><script src="../js/auth.js"></script><script src="../js/student.js"></script>
-    <script src="../js/hocvien.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/student.js"></script>
 </body>
 </html>
