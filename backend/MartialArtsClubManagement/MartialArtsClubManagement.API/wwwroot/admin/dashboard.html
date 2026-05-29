@@ -1112,7 +1112,7 @@
         <div class="card-box-title">
           <i class="fas fa-user-graduate"></i> Danh sách Học viên
         </div>
-        <button class="btn-primary-sm" onclick="showModal('modalThemHocVien')">
+        <button class="btn-primary-sm" onclick="window.location.href='hocvien.html'">
           <i class="fas fa-plus"></i> Thêm học viên
         </button>
       </div>
@@ -1166,9 +1166,9 @@
               <td><div class="td-sub">10/01/2026</div></td>
               <td><span class="status status-active"><span class="status-dot"></span>Đang học</span></td>
               <td style="text-align:center;white-space:nowrap;vertical-align:middle;"><div style="display:flex;gap:5px;justify-content:center;align-items:center;">
-                <button class="action-btn btn-view" title="Xem" onclick="openViewHocVien(1)"><i class="fas fa-eye"></i></button>
-                <button class="action-btn btn-edit" title="Sửa" onclick="openEditHocVien(1)"><i class="fas fa-pen"></i></button>
-                <button class="action-btn btn-delete" title="Xóa" onclick="openDeleteModal('Nguyễn Văn An', function(){ xoaHocVien(1); })"><i class="fas fa-trash"></i></button>
+                <button class="action-btn btn-view" title="Xem" onclick="window.location.href='hocvien.html'"><i class="fas fa-eye"></i></button>
+                <button class="action-btn btn-edit" title="Sửa" onclick="window.location.href='hocvien.html'"><i class="fas fa-pen"></i></button>
+                <button class="action-btn btn-delete" title="Xóa" onclick="window.location.href='hocvien.html'"><i class="fas fa-trash"></i></button>
               </div></td>
             </tr>
             <tr data-dai="Vàng" data-status="active">
@@ -1847,20 +1847,162 @@
      PAGE-SPECIFIC SCRIPTS — thêm script riêng của từng trang bên dưới
 ================================================================= -->
 <script>
-  /* ── DỮ LIỆU MẪU học viên (giả lập backend) ── */
-  const danhSachHV = {
-    1: { MaHV:1, HoTen:'Nguyễn Văn An',   Email:'an.nguyen@email.com',   SDT:'0901 234 567', NgaySinh:'2002-05-14', GioiTinh:'Nam', DiaChi:'12 Lê Lợi, Q1, TP.HCM',   NgayGiaNhap:'10/01/2026', CapDai:'Đai Trắng',      CapDaiKey:'white',  TrangThai:1 },
-    2: { MaHV:2, HoTen:'Trần Thị Bình',   Email:'binh.tran@email.com',   SDT:'0912 345 678', NgaySinh:'2000-08-22', GioiTinh:'Nu',  DiaChi:'34 Nguyễn Huệ, Q1, TP.HCM', NgayGiaNhap:'05/03/2025', CapDai:'Đai Vàng',       CapDaiKey:'yellow', TrangThai:1 },
-    3: { MaHV:3, HoTen:'Lê Văn Hùng',     Email:'hung.le@email.com',     SDT:'0933 456 789', NgaySinh:'2001-11-03', GioiTinh:'Nam', DiaChi:'78 Trần Hưng Đạo, Q5',       NgayGiaNhap:'15/06/2024', CapDai:'Đai Xanh lá',    CapDaiKey:'green',  TrangThai:1 },
-    4: { MaHV:4, HoTen:'Phạm Thị Cúc',    Email:'cuc.pham@email.com',    SDT:'0944 567 890', NgaySinh:'1999-03-17', GioiTinh:'Nu',  DiaChi:'56 Đinh Tiên Hoàng, Q.BT',   NgayGiaNhap:'20/01/2024', CapDai:'Đai Xanh dương', CapDaiKey:'blue',   TrangThai:0 },
-    5: { MaHV:5, HoTen:'Hoàng Minh Đức',  Email:'duc.hoang@email.com',   SDT:'0955 678 901', NgaySinh:'1998-07-09', GioiTinh:'Nam', DiaChi:'90 Cách Mạng Tháng 8, Q3',   NgayGiaNhap:'10/09/2023', CapDai:'Đai Đỏ',         CapDaiKey:'red',    TrangThai:1 },
-    6: { MaHV:6, HoTen:'Võ Thị Lan',      Email:'lan.vo@email.com',      SDT:'0966 789 012', NgaySinh:'1995-12-25', GioiTinh:'Nu',  DiaChi:'23 Pasteur, Q3, TP.HCM',     NgayGiaNhap:'03/03/2022', CapDai:'Đai Đen',        CapDaiKey:'black',  TrangThai:1 },
-  };
-
+  /* ── API CONFIGURATION ── */
+  const API_BASE = '/api/admin';
+  let danhSachHV = {};
   let _currentViewId = null;
+
+  /* ── LOAD DATA FROM API ── */
+  async function loadDashboardData() {
+    console.log('Loading dashboard data...');
+    try {
+      // Load statistics
+      console.log('Fetching stats from:', `${API_BASE}/dashboard/stats`);
+      const statsRes = await fetch(`${API_BASE}/dashboard/stats`);
+      console.log('Stats response status:', statsRes.status);
+      const statsData = await statsRes.json();
+      console.log('Stats data:', statsData);
+      if (statsData.success) {
+        updateStats(statsData.data);
+      } else {
+        console.error('Stats API returned success=false:', statsData.message);
+      }
+
+      // Load belt distribution
+      console.log('Fetching belt distribution from:', `${API_BASE}/dashboard/phanbo-capdai`);
+      const beltRes = await fetch(`${API_BASE}/dashboard/phanbo-capdai`);
+      console.log('Belt response status:', beltRes.status);
+      const beltData = await beltRes.json();
+      console.log('Belt data:', beltData);
+      if (beltData.success) {
+        updateBeltDistribution(beltData.data);
+      } else {
+        console.error('Belt API returned success=false:', beltData.message);
+      }
+
+      // Load students
+      await loadStudents();
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      toast('Lỗi tải dữ liệu! ' + error.message, 'error');
+    }
+  }
+
+  async function loadStudents() {
+    console.log('Loading students...');
+    try {
+      console.log('Fetching students from:', `${API_BASE}/hocvien`);
+      const res = await fetch(`${API_BASE}/hocvien`);
+      console.log('Students response status:', res.status);
+      const data = await res.json();
+      console.log('Students data:', data);
+      if (data.success) {
+        danhSachHV = {};
+        data.data.forEach(hv => {
+          danhSachHV[hv.maHocVien] = {
+            MaHV: hv.maHocVien,
+            HoTen: hv.tenHocVien,
+            Email: hv.email,
+            SDT: hv.soDienThoai,
+            NgaySinh: hv.ngaySinh ? hv.ngaySinh.split('T')[0] : null,
+            GioiTinh: hv.gioiTinh,
+            DiaChi: hv.diaChi,
+            NgayGiaNhap: hv.ngayGiaNhap ? hv.ngayGiaNhap.split('T')[0] : null,
+            CapDai: hv.tenCapDai || 'Chưa xếp đai',
+            CapDaiId: hv.maCapDaiHienTai,
+            TrangThai: 1 // Default to active
+          };
+        });
+        console.log('Processed students:', danhSachHV);
+        renderStudentTable();
+      } else {
+        console.error('Students API returned success=false:', data.message);
+        toast('Lỗi tải học viên: ' + data.message, 'error');
+      }
+    } catch (error) {
+      console.error('Error loading students:', error);
+      toast('Lỗi tải học viên! ' + error.message, 'error');
+    }
+  }
+
+  function updateStats(stats) {
+    // Update stat cards with real data
+    const statCards = document.querySelectorAll('.stat-card');
+    if (statCards[0]) statCards[0].querySelector('.stat-num').textContent = stats.tongHocVien || 0;
+    if (statCards[1]) statCards[1].querySelector('.stat-num').textContent = stats.tongHuanLuyenVien || 0;
+    if (statCards[2]) statCards[2].querySelector('.stat-num').textContent = stats.tongLopHoc || 0;
+    if (statCards[3]) {
+      const revenue = stats.doanhThuThangNay || 0;
+      statCards[3].querySelector('.stat-num').textContent = formatCurrency(revenue);
+    }
+  }
+
+  function updateBeltDistribution(belts) {
+    const beltMap = { 1: 'white', 2: 'yellow', 3: 'orange', 4: 'green', 5: 'blue', 6: 'red', 7: 'black' };
+    const total = belts.reduce((sum, b) => sum + b.soLuongHocVien, 0) || 1;
+    
+    const progContainer = document.querySelector('.card-box:has(.prog-row)');
+    if (!progContainer) return;
+
+    let html = '';
+    belts.forEach(belt => {
+      const percentage = ((belt.soLuongHocVien / total) * 100).toFixed(0);
+      const colorClass = beltMap[belt.maCapDai] || '';
+      html += `
+        <div class="prog-row">
+          <div class="prog-label"><span><span class="belt belt-${colorClass}" style="padding:1px 6px;font-size:.6rem;">${belt.tenCapDai}</span></span><span>${belt.soLuongHocVien}</span></div>
+          <div class="prog-track"><div class="prog-fill ${colorClass}" style="width:${percentage}%;"></div></div>
+        </div>
+      `;
+    });
+    
+    const progSection = progContainer.querySelector('.prog-row')?.parentElement;
+    if (progSection) progSection.innerHTML = html;
+  }
+
+  function renderStudentTable() {
+    const tbody = document.getElementById('tbodyHocVien');
+    if (!tbody) return;
+
+    const beltColors = {
+      'Đai Trắng': 'white', 'Đai Vàng': 'yellow', 'Đai Cam': 'orange',
+      'Đai Xanh lá': 'green', 'Đai Xanh dương': 'blue', 'Đai Đỏ': 'red', 'Đai Đen': 'black'
+    };
+
+    tbody.innerHTML = Object.values(danhSachHV).slice(0, 6).map(hv => {
+      const beltKey = beltColors[hv.CapDai] || '';
+      const ngaySinh = hv.NgaySinh ? hv.NgaySinh.split('-').reverse().join('/') : '—';
+      const ngayGiaNhap = hv.NgayGiaNhap ? hv.NgayGiaNhap.split('-').reverse().join('/') : '—';
+      
+      return `
+        <tr data-dai="${hv.CapDai}" data-status="${hv.TrangThai ? 'active' : 'inactive'}">
+          <td style="color:var(--text-muted);">${hv.MaHV}</td>
+          <td><div class="td-main">${hv.HoTen}</div><div class="td-sub">${hv.Email}</div></td>
+          <td><div class="td-sub">${hv.SDT || '—'}</div></td>
+          <td><span class="belt belt-${beltKey}">${hv.CapDai}</span></td>
+          <td><div class="td-sub">${ngayGiaNhap}</div></td>
+          <td><span class="status status-${hv.TrangThai ? 'active' : 'inactive'}"><span class="status-dot"></span>${hv.TrangThai ? 'Đang học' : 'Nghỉ học'}</span></td>
+          <td style="text-align:center;white-space:nowrap;vertical-align:middle;"><div style="display:flex;gap:5px;justify-content:center;align-items:center;">
+            <button class="action-btn btn-view" title="Xem" onclick="openViewHocVien(${hv.MaHV})"><i class="fas fa-eye"></i></button>
+            <button class="action-btn btn-edit" title="Sửa" onclick="openEditHocVien(${hv.MaHV})"><i class="fas fa-pen"></i></button>
+            <button class="action-btn btn-delete" title="Xóa" onclick="openDeleteModal('${hv.HoTen}', function(){ xoaHocVien(${hv.MaHV}); })"><i class="fas fa-trash"></i></button>
+          </div></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function formatCurrency(amount) {
+    if (amount >= 1000000) {
+      return (amount / 1000000).toFixed(1) + 'M';
+    }
+    return amount.toLocaleString('vi-VN');
+  }
 
   /* ── SEARCH + FILTER TABLE ── */
   document.addEventListener('DOMContentLoaded', () => {
+    loadDashboardData();
+
     const search  = document.getElementById('searchHV');
     const filterDai = document.getElementById('filterDai');
     const filterTS  = document.getElementById('filterTrangThai');
@@ -1885,46 +2027,64 @@
   });
 
   /* ── MỞ MODAL XEM ── */
-  function openViewHocVien(id) {
-    const hv = danhSachHV[id];
-    if (!hv) return;
-    _currentViewId = id;
-    const initials = hv.HoTen.split(' ').map(w=>w[0]).slice(-2).join('').toUpperCase();
-    document.getElementById('xem_Avatar').textContent = initials;
-    document.getElementById('xem_TenHV').textContent  = hv.HoTen;
-    document.getElementById('xem_Email').textContent   = hv.Email;
-    document.getElementById('xem_SDT').textContent     = hv.SDT || '—';
-    document.getElementById('xem_NgaySinh').textContent = hv.NgaySinh ? hv.NgaySinh.split('-').reverse().join('/') : '—';
-    document.getElementById('xem_GioiTinh').textContent = hv.GioiTinh === 'Nu' ? 'Nữ' : hv.GioiTinh || '—';
-    document.getElementById('xem_DiaChi').textContent   = hv.DiaChi || '—';
-    document.getElementById('xem_NgayGiaNhap').textContent = hv.NgayGiaNhap;
-    document.getElementById('xem_TrangThai').innerHTML  = hv.TrangThai
-      ? '<span class="status status-active"><span class="status-dot"></span>Đang học</span>'
-      : '<span class="status status-inactive"><span class="status-dot"></span>Nghỉ học</span>';
-    document.getElementById('xem_BeltBadge').innerHTML  = `<span class="belt belt-${hv.CapDaiKey}">${hv.CapDai}</span>`;
-    showModal('modalXemHocVien');
+  async function openViewHocVien(id) {
+    try {
+      const res = await fetch(`${API_BASE}/hocvien/${id}`);
+      const data = await res.json();
+      if (data.success && data.data) {
+        const hv = data.data;
+        _currentViewId = id;
+        const initials = hv.tenHocVien ? hv.tenHocVien.split(' ').map(w=>w[0]).slice(-2).join('').toUpperCase() : 'HV';
+        document.getElementById('xem_Avatar').textContent = initials;
+        document.getElementById('xem_TenHV').textContent  = hv.tenHocVien || '—';
+        document.getElementById('xem_Email').textContent   = hv.email || '—';
+        document.getElementById('xem_SDT').textContent     = hv.soDienThoai || '—';
+        document.getElementById('xem_NgaySinh').textContent = hv.ngaySinh ? hv.ngaySinh.split('T')[0].split('-').reverse().join('/') : '—';
+        document.getElementById('xem_GioiTinh').textContent = hv.gioiTinh === 'Nu' ? 'Nữ' : hv.gioiTinh || '—';
+        document.getElementById('xem_DiaChi').textContent   = hv.diaChi || '—';
+        document.getElementById('xem_NgayGiaNhap').textContent = hv.ngayGiaNhap ? hv.ngayGiaNhap.split('T')[0].split('-').reverse().join('/') : '—';
+        document.getElementById('xem_TrangThai').innerHTML  = '<span class="status status-active"><span class="status-dot"></span>Đang học</span>';
+        
+        const beltColors = {
+          'Đai Trắng': 'white', 'Đai Vàng': 'yellow', 'Đai Cam': 'orange',
+          'Đai Xanh lá': 'green', 'Đai Xanh dương': 'blue', 'Đai Đỏ': 'red', 'Đai Đen': 'black'
+        };
+        const beltKey = beltColors[hv.tenCapDai] || '';
+        document.getElementById('xem_BeltBadge').innerHTML  = `<span class="belt belt-${beltKey}">${hv.tenCapDai || 'Chưa xếp đai'}</span>`;
+        showModal('modalXemHocVien');
+      }
+    } catch (error) {
+      console.error('Error loading student details:', error);
+      toast('Lỗi tải chi tiết học viên!', 'error');
+    }
   }
 
   /* ── MỞ MODAL SỬA ── */
-  function openEditHocVien(id) {
-    const hv = danhSachHV[id];
-    if (!hv) return;
-    document.getElementById('sua_MaHV').value     = id;
-    document.getElementById('sua_HoTen').value    = hv.HoTen;
-    document.getElementById('sua_Email').value    = hv.Email;
-    document.getElementById('sua_SDT').value      = hv.SDT || '';
-    document.getElementById('sua_NgaySinh').value = hv.NgaySinh || '';
-    document.getElementById('sua_GioiTinh').value = hv.GioiTinh || '';
-    document.getElementById('sua_DiaChi').value   = hv.DiaChi || '';
-    // map belt name → value
-    const beltMap = {'Đai Trắng':'1','Đai Vàng':'2','Đai Cam':'3','Đai Xanh lá':'4','Đai Xanh dương':'5','Đai Đỏ':'6','Đai Đen':'7'};
-    document.getElementById('sua_CapDai').value   = beltMap[hv.CapDai] || '';
-    document.getElementById('sua_TrangThai').value = String(hv.TrangThai);
-    showModal('modalSuaHocVien');
+  async function openEditHocVien(id) {
+    try {
+      const res = await fetch(`${API_BASE}/hocvien/${id}`);
+      const data = await res.json();
+      if (data.success && data.data) {
+        const hv = data.data;
+        document.getElementById('sua_MaHV').value     = id;
+        document.getElementById('sua_HoTen').value    = hv.tenHocVien || '';
+        document.getElementById('sua_Email').value    = hv.email || '';
+        document.getElementById('sua_SDT').value      = hv.soDienThoai || '';
+        document.getElementById('sua_NgaySinh').value = hv.ngaySinh ? hv.ngaySinh.split('T')[0] : '';
+        document.getElementById('sua_GioiTinh').value = hv.gioiTinh || '';
+        document.getElementById('sua_DiaChi').value   = hv.diaChi || '';
+        document.getElementById('sua_CapDai').value   = hv.maCapDaiHienTai || '';
+        document.getElementById('sua_TrangThai').value = '1';
+        showModal('modalSuaHocVien');
+      }
+    } catch (error) {
+      console.error('Error loading student for edit:', error);
+      toast('Lỗi tải thông tin học viên!', 'error');
+    }
   }
 
   /* ── LƯU THÊM MỚI ── */
-  function luuThemHocVien() {
+  async function luuThemHocVien() {
     const hoTen = document.getElementById('them_HoTen').value.trim();
     const email = document.getElementById('them_Email').value.trim();
     const mk    = document.getElementById('them_MatKhau').value;
@@ -1932,30 +2092,112 @@
     if (!hoTen || !email) { toast('Vui lòng nhập đầy đủ họ tên và email!', 'error'); return; }
     if (!mk) { toast('Vui lòng nhập mật khẩu!', 'error'); return; }
     if (mk !== xn) { toast('Mật khẩu xác nhận không khớp!', 'error'); return; }
-    // → Gọi API insert tại đây
-    toast('Thêm học viên <strong>' + hoTen + '</strong> thành công!', 'success');
-    hideModal('modalThemHocVien');
-    // Reset form
-    ['them_HoTen','them_Email','them_MatKhau','them_XacNhan','them_SDT','them_DiaChi'].forEach(id => {
-      document.getElementById(id).value = '';
-    });
+
+    try {
+      // First create account
+      const accountRes = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hoTen: hoTen,
+          email: email,
+          matKhau: mk,
+          vaiTro: 'HocVien'
+        })
+      });
+      const accountData = await accountRes.json();
+      
+      if (!accountData.success) {
+        toast(accountData.message || 'Lỗi tạo tài khoản!', 'error');
+        return;
+      }
+
+      // Then create student record
+      const studentRes = await fetch(`${API_BASE}/hocvien`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          maTaiKhoan: accountData.data,
+          soDienThoai: document.getElementById('them_SDT').value.trim() || null,
+          diaChi: document.getElementById('them_DiaChi').value.trim() || null,
+          ngaySinh: document.getElementById('them_NgaySinh').value || null,
+          gioiTinh: document.getElementById('them_GioiTinh').value || null,
+          ngayGiaNhap: new Date().toISOString().split('T')[0],
+          maCapDaiHienTai: parseInt(document.getElementById('them_CapDai').value) || null
+        })
+      });
+      const studentData = await studentRes.json();
+
+      if (studentData.success) {
+        toast('Thêm học viên <strong>' + hoTen + '</strong> thành công!', 'success');
+        hideModal('modalThemHocVien');
+        loadStudents();
+        // Reset form
+        ['them_HoTen','them_Email','them_MatKhau','them_XacNhan','them_SDT','them_DiaChi'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('them_GioiTinh').value = '';
+        document.getElementById('them_CapDai').value = '';
+      } else {
+        toast(studentData.message || 'Lỗi thêm học viên!', 'error');
+      }
+    } catch (error) {
+      console.error('Error adding student:', error);
+      toast('Lỗi thêm học viên!', 'error');
+    }
   }
 
   /* ── LƯU SỬA ── */
-  function luuSuaHocVien() {
+  async function luuSuaHocVien() {
     const id    = document.getElementById('sua_MaHV').value;
     const hoTen = document.getElementById('sua_HoTen').value.trim();
     if (!hoTen) { toast('Họ tên không được để trống!', 'error'); return; }
-    // → Gọi API update tại đây
-    if (danhSachHV[id]) danhSachHV[id].HoTen = hoTen;
-    toast('Cập nhật học viên thành công!', 'success');
-    hideModal('modalSuaHocVien');
+
+    try {
+      const res = await fetch(`${API_BASE}/hocvien/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          soDienThoai: document.getElementById('sua_SDT').value.trim() || null,
+          diaChi: document.getElementById('sua_DiaChi').value.trim() || null,
+          ngaySinh: document.getElementById('sua_NgaySinh').value || null,
+          gioiTinh: document.getElementById('sua_GioiTinh').value || null,
+          maCapDaiHienTai: parseInt(document.getElementById('sua_CapDai').value) || null
+        })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        toast('Cập nhật học viên thành công!', 'success');
+        hideModal('modalSuaHocVien');
+        loadStudents();
+      } else {
+        toast(data.message || 'Lỗi cập nhật học viên!', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating student:', error);
+      toast('Lỗi cập nhật học viên!', 'error');
+    }
   }
 
   /* ── XÓA (callback từ openDeleteModal) ── */
-  function xoaHocVien(id) {
-    // → Gọi API delete tại đây
-    toast('Đã xóa học viên khỏi hệ thống!', 'success');
+  async function xoaHocVien(id) {
+    try {
+      const res = await fetch(`${API_BASE}/hocvien/${id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        toast('Đã xóa học viên khỏi hệ thống!', 'success');
+        loadStudents();
+      } else {
+        toast(data.message || 'Lỗi xóa học viên!', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      toast('Lỗi xóa học viên!', 'error');
+    }
   }
 
   /* ── THÊM SỰ KIỆN ── */
@@ -1967,10 +2209,12 @@
     hideModal('modalThemSuKien');
     ['sk_Ten','sk_Ngay','sk_Gio','sk_GhiChu'].forEach(id => { document.getElementById(id).value = ''; });
   }
+
+  /* ── INIT ── */
+  document.addEventListener('DOMContentLoaded', () => {
+    loadDashboardData();
+  });
 </script>
 
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/admin.js"></script>
 </body>
 </html>
