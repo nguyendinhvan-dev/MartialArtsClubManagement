@@ -33,10 +33,12 @@ async function handleLogin() {
             const payload = result.data.data;
             const token = payload?.token || payload?.Token;
             const role = payload?.role || payload?.Role;
+            const maTaiKhoan = payload?.maTaiKhoan || payload?.MaTaiKhoan;
 
             if (token) {
                 localStorage.setItem('token', token);
                 if (role) localStorage.setItem('role', role);
+                if (maTaiKhoan) localStorage.setItem('maTaiKhoan', maTaiKhoan);
 
                 const roleLower = role ? role.toLowerCase() : '';
 
@@ -62,6 +64,7 @@ async function handleLogin() {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('maTaiKhoan');
     window.location.href = '/login.html';
 }
 

@@ -200,8 +200,7 @@ async function initExams() {
                 exRes.data.data.forEach(item => {
                     let badgeClass = item.daDat ? 'badge bg-success' : 'badge bg-danger';
                     html += `<tr>
-                        <td>${item.tenKyThi}</td>
-                        <td>${item.ngayThi}</td>
+                        <td>Kỳ thi ngày ${item.ngayThi}</td>
                         <td>${item.diemSo}</td>
                         <td><span class="${badgeClass}">${item.daDat ? 'Đạt' : 'Không đạt'}</span></td>
                     </tr>`;

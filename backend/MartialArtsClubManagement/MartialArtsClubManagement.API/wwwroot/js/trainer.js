@@ -306,7 +306,7 @@ function renderClassSelects() {
     
     const examSelect = document.getElementById("examSelect");
     if (examSelect) {
-        examSelect.innerHTML = "<option value=''>Chọn kỳ thi</option>" + exams.map(e => `<option value="${e.maKyThi}">${e.tenKyThi} (${e.ngayThi})</option>`).join("");
+        examSelect.innerHTML = "<option value=''>Chọn kỳ thi</option>" + exams.map(e => `<option value="${e.maKyThi}">${e.tenKhoaHoc || 'Kỳ thi'} (${e.ngayThi})</option>`).join("");
     }
 }
 
@@ -354,7 +354,7 @@ function renderExamList() {
     let html = "";
     exams.forEach(ex => {
         html += `<tr>
-            <td>${ex.tenKyThi}</td>
+            <td>${ex.tenKhoaHoc || 'Kỳ thi'}</td>
             <td>${ex.ngayThi}</td>
             <td>Khoá học: ${ex.maKhoaHoc}</td>
             <td>
@@ -373,7 +373,6 @@ function openExamModal(id = null) {
     let courseOptions = [...new Set(classes.map(c => c.maKhoaHoc))].map(k => `<option value="${k}" ${ex && ex.maKhoaHoc == k ? "selected":""}>Khoá học ${k}</option>`).join("");
     
     let html = `
-        <input id="examName" class="form-control mb-2" placeholder="Tên kỳ thi" value="${ex ? ex.tenKyThi : ''}">
         <input id="examDate" type="date" class="form-control mb-2" value="${ex ? ex.ngayThi : ''}">
         <select id="examCourse" class="form-select mb-2">
             ${courseOptions}
@@ -383,7 +382,6 @@ function openExamModal(id = null) {
     
     openModal(isEdit ? "Sửa kỳ thi" : "Thêm kỳ thi", html, async () => {
         let payload = {
-            tenKyThi: document.getElementById("examName").value,
             ngayThi: document.getElementById("examDate").value,
             maKhoaHoc: parseInt(document.getElementById("examCourse").value),
             moTa: document.getElementById("examDesc").value,

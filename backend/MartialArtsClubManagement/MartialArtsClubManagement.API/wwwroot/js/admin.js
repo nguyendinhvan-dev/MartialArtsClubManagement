@@ -526,7 +526,7 @@ function renderThangDaiTable(thangDais) {
     
     thangDais.forEach((td, index) => {
         const maKyThi = td.MaKyThi ?? td.maKyThi;
-        const tenKyThi = td.TenKhoaHoc ?? td.tenKhoaHoc ?? td.tenKyThi ?? '';
+        const tenKyThi = td.TenKhoaHoc ?? td.tenKhoaHoc ?? 'Kỳ thi';
         const ngayThi = td.NgayThi ?? td.ngayThi ?? '';
         const trangThai = td.TrangThai ?? td.trangThai ?? '';
         const isDone = trangThai.includes('Kết thúc') || trangThai.includes('KetThuc') || trangThai === 'DaKetThuc';
@@ -1081,20 +1081,18 @@ async function xoaHocPhi(maHocPhi) {
 }
 
 async function luuThemThangDai() {
-    const tenKyThi = document.getElementById('them_TenKyThi').value;
     const maKhoaHoc = document.getElementById('them_KhoaHocTD').value;
     const ngayThi = document.getElementById('them_NgayThi').value;
     const moTa = document.getElementById('them_MoTa').value;
     const trangThai = document.getElementById('them_TrangThaiTD').value;
 
-    if (!tenKyThi || !maKhoaHoc || !ngayThi) {
+    if (!maKhoaHoc || !ngayThi) {
         toast('Vui lòng nhập các trường bắt buộc', 'error');
         return;
     }
 
     try {
         const data = {
-            tenKyThi: tenKyThi,
             maKhoaHoc: parseInt(maKhoaHoc),
             ngayThi: ngayThi,
             moTa: moTa,
@@ -1123,7 +1121,6 @@ async function openEditThangDai(maKyThi) {
         if (result && result.success && result.data) {
             const td = result.data;
             document.getElementById('sua_MaKyThi').value = td.maKyThi;
-            document.getElementById('sua_TenKyThi').value = td.tenKyThi;
             document.getElementById('sua_KhoaHocTD').value = td.maKhoaHoc;
             document.getElementById('sua_NgayThi').value = td.ngayThi;
             document.getElementById('sua_MoTa').value = td.moTa;
@@ -1140,7 +1137,6 @@ async function openEditThangDai(maKyThi) {
 
 async function luuSuaThangDai() {
     const maKyThi = document.getElementById('sua_MaKyThi').value;
-    const tenKyThi = document.getElementById('sua_TenKyThi').value;
     const maKhoaHoc = document.getElementById('sua_KhoaHocTD').value;
     const ngayThi = document.getElementById('sua_NgayThi').value;
     const moTa = document.getElementById('sua_MoTa').value;
@@ -1149,7 +1145,6 @@ async function luuSuaThangDai() {
     try {
         const data = {
             maKyThi: parseInt(maKyThi),
-            tenKyThi: tenKyThi,
             maKhoaHoc: parseInt(maKhoaHoc),
             ngayThi: ngayThi,
             moTa: moTa,
@@ -1193,7 +1188,7 @@ async function openViewThangDai(maKyThi) {
         
         if (result && result.success && result.data) {
             const td = result.data;
-            document.getElementById('xem_TenKyThi').textContent = td.tenKyThi;
+            document.getElementById('xem_TenKyThi').textContent = td.tenKhoaHoc || 'Kỳ thi';
             document.getElementById('xem_NgayThi').textContent = formatDate(td.ngayThi);
             document.getElementById('xem_MoTa').textContent = td.moTa || '—';
             document.getElementById('xem_TrangThai').textContent = td.trangThai;
