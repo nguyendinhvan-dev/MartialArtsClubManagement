@@ -144,6 +144,13 @@ namespace MartialArtsClubManagement.API.Controllers
                 return NotFound(new ApiResponse<object> { Success = false, Message = "Không tìm thấy khóa học" });
             }
 
+            // Check if there are related classes
+            var hasRelatedClasses = await _context.LopHocs.AnyAsync(l => l.MaKhoaHoc == id);
+            if (hasRelatedClasses)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Không thể xóa khóa học này vì có lớp học liên kết. Vui lòng xóa các lớp học trước." });
+            }
+
             _context.KhoaHocs.Remove(khoaHoc);
             await _context.SaveChangesAsync();
 
