@@ -1,0 +1,16 @@
+using FluentValidation;
+using MartialArtsClubManagement.API.Models.DTOs;
+
+namespace MartialArtsClubManagement.API.Validators
+{
+    public class DiemDanhDtoValidator : AbstractValidator<DiemDanhDto>
+    {
+        public DiemDanhDtoValidator()
+        {
+            RuleFor(x => x.MaLop).GreaterThan(0);
+            RuleFor(x => x.MaHocVien).GreaterThan(0);
+            RuleFor(x => x.NgayDiemDanh).LessThanOrEqualTo(DateTime.UtcNow);
+            // Additional business rules can be added here
+        }
+    }
+}
