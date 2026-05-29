@@ -25,6 +25,7 @@ namespace MartialArtsClubManagement.API.Models.DTOs
 
     public class UpdateAdminHuanLuyenVienDto
     {
+        public string? HoTen { get; set; }
         public string? SoDienThoai { get; set; }
         public string? ChuyenMon { get; set; }
         public DateOnly NgayVaoClb { get; set; }
