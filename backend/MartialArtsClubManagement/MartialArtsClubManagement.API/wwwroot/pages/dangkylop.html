@@ -69,26 +69,6 @@
 
         <div class="container mt-4">
             <div class="row" id="classes-container">
-                <div class="col-md-6 mb-4">
-                    <div class="card p-4 shadow-sm border-0" style="border-radius: 12px;">
-                        <h4 class="mb-3">Lớp Cơ Bản Khóa 20</h4>
-                        <p><strong>Lịch học:</strong> Thứ 2 - 4 - 6 (18:00 - 19:30)</p>
-                        <p><strong>HLV:</strong> Nguyễn Văn A</p>
-                        <p><strong>Học phí:</strong> 500,000 VNĐ / tháng</p>
-                        <p><strong>Trạng thái:</strong> Còn 5 chỗ</p>
-                        <button class="btn btn-primary mt-2">Đăng ký ngay</button>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-4">
-                    <div class="card p-4 shadow-sm border-0" style="border-radius: 12px;">
-                        <h4 class="mb-3">Lớp Đối Kháng Nâng Cao</h4>
-                        <p><strong>Lịch học:</strong> Thứ 3 - 5 - 7 (19:30 - 21:00)</p>
-                        <p><strong>HLV:</strong> Trần Thị B</p>
-                        <p><strong>Học phí:</strong> 700,000 VNĐ / tháng</p>
-                        <p><strong>Trạng thái:</strong> Còn 2 chỗ</p>
-                        <button class="btn btn-primary mt-2">Đăng ký ngay</button>
-                    </div>
-                </div>
             </div>
             
             <h3 class="mt-4 mb-3">Đăng ký kèm riêng</h3>
@@ -99,16 +79,13 @@
                             <div class="mb-3">
                                 <label class="form-label">Chọn gói huấn luyện</label>
                                 <select class="form-select" id="package-select">
-                                    <option>Gói 10 buổi (1 HLV kèm 1 HV) - 2,000,000 VNĐ</option>
-                                    <option>Gói 20 buổi (1 HLV kèm 1 HV) - 3,500,000 VNĐ</option>
+                                    <option value="">-- Chọn gói --</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Chọn HLV (Không bắt buộc)</label>
                                 <select class="form-select" id="trainer-select">
                                     <option value="">-- Để trung tâm phân công --</option>
-                                    <option>Nguyễn Văn A</option>
-                                    <option>Trần Thị B</option>
                                 </select>
                             </div>
                             <button type="button" class="btn btn-success" onclick="bookPrivateTraining()">Đăng ký gói kèm riêng</button>
@@ -120,7 +97,7 @@
     </div>
 
     <script src="../js/api.js"></script>
-    <script src="../js/api.js"></script><script src="../js/auth.js"></script><script src="../js/student.js"></script>
-    <script src="../js/hocvien.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/student.js"></script>
 </body>
 </html>
