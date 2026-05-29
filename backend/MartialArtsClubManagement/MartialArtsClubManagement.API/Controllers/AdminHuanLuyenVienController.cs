@@ -123,16 +123,24 @@ namespace MartialArtsClubManagement.API.Controllers
                 return BadRequest(new ApiResponse<object> { Success = false, Message = "Dữ liệu không hợp lệ" });
             }
 
-            var hlv = await _context.HuanLuyenViens.FindAsync(id);
+            var hlv = await _context.HuanLuyenViens.Include(h => h.MaTaiKhoanNavigation).FirstOrDefaultAsync(h => h.MaHlv == id);
             if (hlv == null)
             {
                 return NotFound(new ApiResponse<object> { Success = false, Message = "Không tìm thấy Huấn luyện viên" });
             }
 
+            // Update HuanLuyenVien fields
             hlv.SoDienThoai = dto.SoDienThoai;
             hlv.ChuyenMon = dto.ChuyenMon;
             hlv.NgayVaoClb = dto.NgayVaoClb;
             hlv.DangHoatDong = dto.DangHoatDong;
+
+            // Update TaiKhoan.HoTen if provided
+            if (!string.IsNullOrEmpty(dto.HoTen) && hlv.MaTaiKhoanNavigation != null)
+            {
+                hlv.MaTaiKhoanNavigation.HoTen = dto.HoTen;
+                _context.TaiKhoans.Update(hlv.MaTaiKhoanNavigation);
+            }
 
             _context.HuanLuyenViens.Update(hlv);
             await _context.SaveChangesAsync();
