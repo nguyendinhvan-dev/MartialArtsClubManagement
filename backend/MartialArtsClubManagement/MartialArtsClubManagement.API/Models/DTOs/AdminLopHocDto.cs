@@ -11,7 +11,9 @@ namespace MartialArtsClubManagement.API.Models.DTOs
         public string? TenCapDai { get; set; } // From CapDai.TenCapDai
         public int MaHlv { get; set; }
         public string? TenHuanLuyenVien { get; set; } // From HuanLuyenVien.MaTaiKhoanNavigation.HoTen
+        public string TenLop { get; set; } = null!;
         public string LichHoc { get; set; } = null!;
+        public decimal HocPhi { get; set; }
         public int SoLuongToiDa { get; set; }
         public string? PhongTap { get; set; }
     }
@@ -21,7 +23,9 @@ namespace MartialArtsClubManagement.API.Models.DTOs
         public int MaKhoaHoc { get; set; }
         public int MaCapDai { get; set; }
         public int MaHlv { get; set; }
+        public string TenLop { get; set; } = null!;
         public string LichHoc { get; set; } = null!;
+        public decimal HocPhi { get; set; }
         public int SoLuongToiDa { get; set; }
         public string? PhongTap { get; set; }
     }
@@ -31,7 +35,9 @@ namespace MartialArtsClubManagement.API.Models.DTOs
         public int MaKhoaHoc { get; set; }
         public int MaCapDai { get; set; }
         public int MaHlv { get; set; }
+        public string TenLop { get; set; } = null!;
         public string LichHoc { get; set; } = null!;
+        public decimal HocPhi { get; set; }
         public int SoLuongToiDa { get; set; }
         public string? PhongTap { get; set; }
     }
