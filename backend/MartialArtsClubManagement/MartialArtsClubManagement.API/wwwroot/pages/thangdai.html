@@ -127,143 +127,28 @@
 
     </div>
 
-    <div class="belt-exam-card">
+    <div class="table-card">
 
-        <div class="belt-header">
+        <h2>Kết quả kỳ thi</h2>
 
-            <div>
+        <table class="table table-dark">
 
-                <h2>Kỳ thi thăng đai</h2>
+            <thead>
 
-                <p class="exam-date">
-                    <i class="fa-solid fa-calendar"></i>
-                    Ngày thi: 20/06/2026
-                </p>
+                <tr>
+                    <th>Ngày thi</th>
+                    <th>Điểm</th>
+                    <th>Kết quả</th>
+                    <th>Cấp đai mới</th>
+                </tr>
 
-            </div>
+            </thead>
 
-            <div class="belt-icon">
+            <tbody id="examTableBody">
 
-                <i class="fa-solid fa-medal"></i>
+            </tbody>
 
-            </div>
-
-        </div>
-
-        <div class="belt-info-grid">
-
-            <div class="belt-info-box">
-
-                <span>Cấp đai hiện tại</span>
-
-                <h4>Đai Trắng</h4>
-
-            </div>
-
-            <div class="belt-info-box">
-
-                <span>Cấp thi tiếp theo</span>
-
-                <h4>Đai Xanh</h4>
-
-            </div>
-
-            <div class="belt-info-box">
-
-                <span>Trạng thái</span>
-
-                <h4 class="waiting-status">
-                    Chờ thi
-                </h4>
-
-            </div>
-
-        </div>
-
-        <button
-        class="btn btn-danger belt-btn"
-        onclick="showResult()">
-
-            Xem kết quả
-
-        </button>
-
-    </div>
-
-    <div
-    class="result-modal"
-    id="resultModal">
-
-        <div class="result-content">
-
-            <div class="result-top">
-
-                <h2>Kết quả thăng đai</h2>
-
-                <button
-                class="close-result"
-                onclick="closeResult()">
-
-                    <i class="fa-solid fa-xmark"></i>
-
-                </button>
-
-            </div>
-
-            <div id="passedResult">
-
-                <div class="result-success">
-
-                    <i class="fa-solid fa-trophy"></i>
-
-                    <h1>ĐẬU</h1>
-
-                    <p>
-                        Chúc mừng bạn đã vượt qua kỳ thi thăng đai.
-                    </p>
-
-                </div>
-
-                <div class="result-detail">
-
-                    <p>
-                        <strong>Cấp đai mới:</strong>
-                        Đai Nâu
-                    </p>
-
-                    <p>
-                        <strong>Điểm:</strong>
-                        9.2 / 10
-                    </p>
-
-                    <p>
-                        <strong>Ngày cập nhật:</strong>
-                        22/06/2026
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div
-            id="noResult"
-            style="display:none;">
-
-                <div class="result-empty">
-
-                    <i class="fa-solid fa-circle-exclamation"></i>
-
-                    <h3>Chưa có dữ liệu</h3>
-
-                    <p>
-                        Bạn chưa tham gia kỳ thi hoặc chưa có kết quả.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
+        </table>
 
     </div>
 
