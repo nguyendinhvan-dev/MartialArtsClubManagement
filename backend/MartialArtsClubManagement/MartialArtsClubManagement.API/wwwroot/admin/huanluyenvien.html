@@ -430,7 +430,15 @@
         </div>
         <div>
           <label class="form-label">Chuyên môn</label>
-          <input type="text" class="form-control" id="them_ChuyenMon" placeholder="VD: Quyền pháp, Vũ khí...">
+          <input list="chuyenMonList" class="form-control" id="them_ChuyenMon" placeholder="VD: Quyền pháp, Vũ khí...">
+          <datalist id="chuyenMonList">
+            <option value="Quyền pháp">
+            <option value="Vũ khí">
+            <option value="Kata">
+            <option value="Kumite">
+            <option value="Grappling">
+            <option value="Tự vệ">
+          </datalist>
         </div>
         <div>
           <label class="form-label">Ngày vào CLB</label>
@@ -478,7 +486,15 @@
         </div>
         <div>
           <label class="form-label">Chuyên môn</label>
-          <input type="text" class="form-control" id="sua_ChuyenMon">
+          <input list="chuyenMonList" class="form-control" id="sua_ChuyenMon">
+          <datalist id="chuyenMonList">
+            <option value="Quyền pháp">
+            <option value="Vũ khí">
+            <option value="Kata">
+            <option value="Kumite">
+            <option value="Grappling">
+            <option value="Tự vệ">
+          </datalist>
         </div>
         <div>
           <label class="form-label">Ngày vào CLB</label>
@@ -569,17 +585,47 @@
      SCRIPTS
 ================================================================= -->
 <script>
-/* ── DỮ LIỆU MẪU (giả lập backend — bám cột SQL: HuanLuyenVien JOIN TaiKhoan) ── */
-const danhSachHLV = {
-  1: { MaHLV:1, HoTen:'Trần Minh Tuấn',  Email:'hlv1@clb.vn', SoDienThoai:'0901234567', ChuyenMon:'Quyền pháp', NgayVaoCLB:'2022-01-15', DangHoatDong:1 },
-  2: { MaHLV:2, HoTen:'Lê Thị Hoa',      Email:'hlv2@clb.vn', SoDienThoai:'0912345678', ChuyenMon:'Vũ khí',     NgayVaoCLB:'2022-06-01', DangHoatDong:1 },
-  3: { MaHLV:3, HoTen:'Nguyễn Duy Khang', Email:'hlv3@clb.vn', SoDienThoai:'0923456789', ChuyenMon:'Thể lực',    NgayVaoCLB:'2023-03-10', DangHoatDong:1 },
-  4: { MaHLV:4, HoTen:'Phạm Thị Mai',    Email:'hlv4@clb.vn', SoDienThoai:'0934567890', ChuyenMon:'Kỹ thuật',   NgayVaoCLB:'2021-09-01', DangHoatDong:0 },
-};
+/* ── API CONFIGURATION ── */
+const API_BASE = '/api/admin';
 
+/* ── DỮ LIỆU HLV từ API ── */
+let danhSachHLV = {};
 let _currentViewId = null;
 let _currentDeleteId = null;
-let _nextId = 5;
+
+/* ── LOAD DATA FROM API ── */
+async function loadHuanLuyenVien() {
+  console.log('Loading trainers data...');
+  try {
+    console.log('Fetching from:', `${API_BASE}/huanluyenvien`);
+    const res = await fetch(`${API_BASE}/huanluyenvien`);
+    console.log('Response status:', res.status);
+    const result = await res.json();
+    console.log('Response data:', result);
+    if (result.success) {
+      danhSachHLV = {};
+      result.data.forEach(h => {
+        danhSachHLV[h.maHlv] = {
+          MaHLV: h.maHlv,
+          HoTen: h.tenHuanLuyenVien,
+          Email: h.email,
+          SoDienThoai: h.soDienThoai,
+          ChuyenMon: h.chuyenMon,
+          NgayVaoCLB: h.ngayVaoClb ? h.ngayVaoClb.split('T')[0] : null,
+          DangHoatDong: h.dangHoatDong
+        };
+      });
+      console.log('Processed trainers:', danhSachHLV);
+      renderTable();
+    } else {
+      console.error('API returned success=false:', result.message);
+      toast('Lỗi: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error loading trainers:', error);
+    toast('Lỗi tải dữ liệu huấn luyện viên! ' + error.message, 'error');
+  }
+}
 
 /* ── FORMAT DATE ── */
 function fmtDate(d) {
@@ -597,7 +643,7 @@ function renderTable() {
   const rows = Object.values(danhSachHLV).filter(h => {
     const text = (h.HoTen+h.Email+h.SoDienThoai).toLowerCase();
     const matchQ  = !q  || text.includes(q);
-    const matchTS = !ts || String(h.DangHoatDong)===ts;
+    const matchTS = !ts || (ts === '1' ? h.DangHoatDong === true : h.DangHoatDong === false);
     const matchCM = !cm || (h.ChuyenMon||'').toLowerCase().includes(cm);
     return matchQ && matchTS && matchCM;
   });
@@ -647,35 +693,53 @@ function renderTable() {
 }
 
 /* ── MỞ MODAL XEM ── */
-function openViewHLV(id) {
-  const h = danhSachHLV[id]; if (!h) return;
-  _currentViewId = id;
-  const initials = h.HoTen.split(' ').map(w=>w[0]).slice(-2).join('').toUpperCase();
-  document.getElementById('xem_Avatar').textContent    = initials;
-  document.getElementById('xem_HoTen').textContent     = h.HoTen;
-  document.getElementById('xem_Email').textContent     = h.Email;
-  document.getElementById('xem_MaHLV').textContent     = 'HLV' + String(h.MaHLV).padStart(3,'0');
-  document.getElementById('xem_SDT').textContent       = h.SoDienThoai||'—';
-  document.getElementById('xem_ChuyenMon').textContent = h.ChuyenMon||'—';
-  document.getElementById('xem_NgayVaoCLB').textContent= fmtDate(h.NgayVaoCLB);
-  document.getElementById('xem_TrangThai').innerHTML   = h.DangHoatDong
-    ? '<span class="status status-active"><span class="status-dot"></span>Đang hoạt động</span>'
-    : '<span class="status status-inactive"><span class="status-dot"></span>Ngừng hoạt động</span>';
-  showModal('modalXemHLV');
+async function openViewHLV(id) {
+  try {
+    const res = await fetch(`${API_BASE}/huanluyenvien/${id}`);
+    const result = await res.json();
+    if (result.success && result.data) {
+      const h = result.data;
+      _currentViewId = id;
+      const initials = h.tenHuanLuyenVien ? h.tenHuanLuyenVien.split(' ').map(w=>w[0]).slice(-2).join('').toUpperCase() : 'HLV';
+      document.getElementById('xem_Avatar').textContent    = initials;
+      document.getElementById('xem_HoTen').textContent     = h.tenHuanLuyenVien || '—';
+      document.getElementById('xem_Email').textContent     = h.email || '—';
+      document.getElementById('xem_MaHLV').textContent     = 'HLV' + String(h.maHlv).padStart(3,'0');
+      document.getElementById('xem_SDT').textContent       = h.soDienThoai||'—';
+      document.getElementById('xem_ChuyenMon').textContent = h.chuyenMon||'—';
+      document.getElementById('xem_NgayVaoCLB').textContent= fmtDate(h.ngayVaoClb ? h.ngayVaoClb.split('T')[0] : null);
+      document.getElementById('xem_TrangThai').innerHTML   = h.dangHoatDong
+        ? '<span class="status status-active"><span class="status-dot"></span>Đang hoạt động</span>'
+        : '<span class="status status-inactive"><span class="status-dot"></span>Ngừng hoạt động</span>';
+      showModal('modalXemHLV');
+    }
+  } catch (error) {
+    console.error('Error loading trainer details:', error);
+    toast('Lỗi tải chi tiết huấn luyện viên!', 'error');
+  }
 }
 
 /* ── MỞ MODAL SỬA ── */
-function openEditHLV(id) {
-  const h = danhSachHLV[id]; if (!h) return;
-  document.getElementById('sua_MaHLV').value         = id;
-  document.getElementById('sua_MaHLV_show').value    = 'HLV' + String(h.MaHLV).padStart(3,'0');
-  document.getElementById('sua_HoTen').value         = h.HoTen;
-  document.getElementById('sua_Email').value         = h.Email;
-  document.getElementById('sua_SDT').value           = h.SoDienThoai||'';
-  document.getElementById('sua_ChuyenMon').value     = h.ChuyenMon||'';
-  document.getElementById('sua_NgayVaoCLB').value    = h.NgayVaoCLB||'';
-  document.getElementById('sua_DangHoatDong').value  = String(h.DangHoatDong);
-  showModal('modalSuaHLV');
+async function openEditHLV(id) {
+  try {
+    const res = await fetch(`${API_BASE}/huanluyenvien/${id}`);
+    const result = await res.json();
+    if (result.success && result.data) {
+      const h = result.data;
+      document.getElementById('sua_MaHLV').value         = id;
+      document.getElementById('sua_MaHLV_show').value    = 'HLV' + String(h.maHlv).padStart(3,'0');
+      document.getElementById('sua_HoTen').value         = h.tenHuanLuyenVien || '';
+      document.getElementById('sua_Email').value         = h.email || '';
+      document.getElementById('sua_SDT').value           = h.soDienThoai||'';
+      document.getElementById('sua_ChuyenMon').value     = h.chuyenMon||'';
+      document.getElementById('sua_NgayVaoCLB').value    = h.ngayVaoClb ? h.ngayVaoClb.split('T')[0] : '';
+      document.getElementById('sua_DangHoatDong').value  = String(h.dangHoatDong);
+      showModal('modalSuaHLV');
+    }
+  } catch (error) {
+    console.error('Error loading trainer for edit:', error);
+    toast('Lỗi tải thông tin huấn luyện viên!', 'error');
+  }
 }
 
 /* ── MỞ MODAL XÓA ── */
@@ -687,7 +751,7 @@ function openDeleteHLV(id) {
 }
 
 /* ── LƯU THÊM ── */
-function luuThemHLV() {
+async function luuThemHLV() {
   const hoTen = document.getElementById('them_HoTen').value.trim();
   const email = document.getElementById('them_Email').value.trim();
   const mk    = document.getElementById('them_MatKhau').value;
@@ -696,48 +760,109 @@ function luuThemHLV() {
   if (!mk)              { toast('Vui lòng nhập mật khẩu!','error'); return; }
   if (mk !== xn)        { toast('Mật khẩu xác nhận không khớp!','error'); return; }
 
-  danhSachHLV[_nextId] = {
-    MaHLV: _nextId,
-    HoTen: hoTen,
-    Email: email,
-    SoDienThoai: document.getElementById('them_SDT').value.trim(),
-    ChuyenMon:   document.getElementById('them_ChuyenMon').value.trim(),
-    NgayVaoCLB:  document.getElementById('them_NgayVaoCLB').value || new Date().toISOString().slice(0,10),
-    DangHoatDong: 1,
-  };
-  _nextId++;
-  toast('Thêm HLV <strong>' + hoTen + '</strong> thành công!','success');
-  hideModal('modalThemHLV');
-  ['them_HoTen','them_Email','them_MatKhau','them_XacNhan','them_SDT','them_ChuyenMon','them_NgayVaoCLB'].forEach(id=>{ document.getElementById(id).value=''; });
-  renderTable();
+  try {
+    // First create account
+    const accountRes = await fetch(`${API_BASE}/taikhoan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        hoTen: hoTen,
+        email: email,
+        matKhau: mk,
+        vaiTro: 'HuanLuyenVien',
+        dangHoatDong: true
+      })
+    });
+    const accountData = await accountRes.json();
+
+    if (!accountData.success) {
+      toast(accountData.message || 'Lỗi tạo tài khoản!', 'error');
+      return;
+    }
+
+    // Then create trainer record
+    const hlvRes = await fetch(`${API_BASE}/huanluyenvien`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        maTaiKhoan: accountData.data,
+        soDienThoai: document.getElementById('them_SDT').value.trim() || null,
+        chuyenMon: document.getElementById('them_ChuyenMon').value.trim() || null,
+        ngayVaoClb: document.getElementById('them_NgayVaoCLB').value || new Date().toISOString().split('T')[0],
+        dangHoatDong: true
+      })
+    });
+    const hlvData = await hlvRes.json();
+
+    if (hlvData.success) {
+      toast('Thêm HLV <strong>' + hoTen + '</strong> thành công!','success');
+      hideModal('modalThemHLV');
+      ['them_HoTen','them_Email','them_MatKhau','them_XacNhan','them_SDT','them_ChuyenMon','them_NgayVaoCLB'].forEach(id=>{ document.getElementById(id).value=''; });
+      await loadHuanLuyenVien();
+    } else {
+      toast(hlvData.message || 'Lỗi thêm huấn luyện viên!', 'error');
+    }
+  } catch (error) {
+    console.error('Error adding trainer:', error);
+    toast('Lỗi thêm huấn luyện viên!', 'error');
+  }
 }
 
 /* ── LƯU SỬA ── */
-function luuSuaHLV() {
+async function luuSuaHLV() {
   const id    = document.getElementById('sua_MaHLV').value;
   const hoTen = document.getElementById('sua_HoTen').value.trim();
   if (!hoTen) { toast('Họ tên không được để trống!','error'); return; }
-  if (danhSachHLV[id]) {
-    danhSachHLV[id].HoTen        = hoTen;
-    danhSachHLV[id].SoDienThoai  = document.getElementById('sua_SDT').value.trim();
-    danhSachHLV[id].ChuyenMon    = document.getElementById('sua_ChuyenMon').value.trim();
-    danhSachHLV[id].NgayVaoCLB   = document.getElementById('sua_NgayVaoCLB').value;
-    danhSachHLV[id].DangHoatDong = parseInt(document.getElementById('sua_DangHoatDong').value);
+
+  try {
+    const res = await fetch(`${API_BASE}/huanluyenvien/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        hoTen: hoTen,
+        soDienThoai: document.getElementById('sua_SDT').value.trim() || null,
+        chuyenMon: document.getElementById('sua_ChuyenMon').value.trim() || null,
+        ngayVaoClb: document.getElementById('sua_NgayVaoCLB').value || null,
+        dangHoatDong: document.getElementById('sua_DangHoatDong').value === '1'
+      })
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      toast('Cập nhật huấn luyện viên thành công!','success');
+      hideModal('modalSuaHLV');
+      await loadHuanLuyenVien();
+    } else {
+      toast(result.message || 'Lỗi cập nhật huấn luyện viên!', 'error');
+    }
+  } catch (error) {
+    console.error('Error updating trainer:', error);
+    toast('Lỗi cập nhật huấn luyện viên!', 'error');
   }
-  toast('Cập nhật huấn luyện viên thành công!','success');
-  hideModal('modalSuaHLV');
-  renderTable();
 }
 
 /* ── XÓA ── */
-function xacNhanXoaHLV() {
-  if (_currentDeleteId && danhSachHLV[_currentDeleteId]) {
-    const ten = danhSachHLV[_currentDeleteId].HoTen;
-    delete danhSachHLV[_currentDeleteId];
-    toast('Đã xóa HLV <strong>' + ten + '</strong> khỏi hệ thống!','success');
+async function xacNhanXoaHLV() {
+  if (!_currentDeleteId) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/huanluyenvien/${_currentDeleteId}`, {
+      method: 'DELETE'
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      const ten = danhSachHLV[_currentDeleteId]?.HoTen || 'HLV';
+      toast('Đã xóa HLV <strong>' + ten + '</strong> khỏi hệ thống!','success');
+      await loadHuanLuyenVien();
+    } else {
+      toast(result.message || 'Lỗi xóa huấn luyện viên!', 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting trainer:', error);
+    toast('Lỗi xóa huấn luyện viên!', 'error');
   }
   hideModal('modalXoaHLV');
-  renderTable();
 }
 
 /* ── MODAL HELPERS ── */
@@ -770,7 +895,7 @@ function closeSidebar()   { document.getElementById('sidebar').classList.remove(
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
-  renderTable();
+  loadHuanLuyenVien();
   document.getElementById('searchHLV').addEventListener('input', renderTable);
   document.getElementById('filterTrangThai').addEventListener('change', renderTable);
   document.getElementById('filterChuyenMon').addEventListener('change', renderTable);
