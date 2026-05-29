@@ -153,12 +153,12 @@
 
         </div>
 
-        <h2 id="profile-name">
+        <h2 id="hoTen">
 
         </h2>
 
         <span class="belt"
-        id="profile-belt">
+        id="capDai">
 
         </span>
 
@@ -168,7 +168,7 @@
 
                 <strong>Mã học viên:</strong>
 
-                HV01
+                <span id="maHocVien"></span>
 
             </p>
 
@@ -176,7 +176,7 @@
 
                 <strong>Email:</strong>
 
-                <span id="profile-email"></span>
+                <span id="email"></span>
 
             </p>
 
@@ -184,27 +184,69 @@
 
                 <strong>SĐT:</strong>
 
-                <span id="profile-phone"></span>
+                <span id="sdt"></span>
 
             </p>
 
             <p>
 
-                <strong>Lớp:</strong>
+                <strong>Địa chỉ:</strong>
 
-                <span id="profile-class"></span>
+                <span id="diaChi"></span>
+
+            </p>
+
+            <p>
+
+                <strong>Ngày sinh:</strong>
+
+                <span id="ngaySinh"></span>
+
+            </p>
+
+            <p>
+
+                <strong>Giới tính:</strong>
+
+                <span id="gioiTinh"></span>
+
+            </p>
+
+            <p>
+
+                <strong>Ngày gia nhập:</strong>
+
+                <span id="ngayGiaNhap"></span>
 
             </p>
 
         </div>
+
+        <div class="form-group mt-4">
+
+            <label>SĐT:</label>
+
+            <input type="text" id="sdtInput" class="form-control">
+
+        </div>
+
+        <div class="form-group mt-2">
+
+            <label>Địa chỉ:</label>
+
+            <input type="text" id="diaChiInput" class="form-control">
+
+        </div>
+
+        <button id="btnSaveProfile" class="btn btn-danger mt-3">Cập nhật hồ sơ</button>
 
     </div>
 
 </div>
 
 <script src="../js/api.js"></script>
-<script src="../js/api.js"></script><script src="../js/auth.js"></script><script src="../js/student.js"></script>
-<script src="../js/hocvien.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/student.js"></script>
 
 </body>
 </html>
